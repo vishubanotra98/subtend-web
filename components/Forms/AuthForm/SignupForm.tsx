@@ -5,7 +5,7 @@ import { signUpAction } from "@/actions/auth.actions";
 import { useState } from "react";
 import { Spinner } from "../../ui/Spinner/spinner";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,28 +15,45 @@ import {
 } from "@/lib/schema";
 
 export function SignupForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(registerUserWithConfirmSchema),
-  });
   const router = useRouter();
+  const params = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false,
   });
 
+  const token = params.get("utok");
+  const inivitedEmail = params.get("email");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(registerUserWithConfirmSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: inivitedEmail ? inivitedEmail : "",
+      password: "",
+    },
+  });
+
   const handleSignup = async (formData: RegisterUserWithConfirmSchema) => {
     setLoading(true);
-    const res = await signUpAction(formData);
+
+    const res = await signUpAction(formData, token);
 
     if (res?.success) {
+      const workspaceId = res?.data?.workspaceId;
       const email = res.data?.email;
-      router.push(`/account-verification?email=${email}`);
-      toast.success(res.message);
+
+      if (email && workspaceId) {
+        router.push(`/sign-in`);
+      } else {
+        router.push(`/account-verification?email=${email}`);
+        toast.success(res.message);
+      }
     } else {
       toast.error(res.message);
     }
@@ -84,6 +101,7 @@ export function SignupForm() {
           placeholder="Email address"
           className={`primary-input ${errors.email ? "error" : ""}`}
           required
+          disabled={inivitedEmail ? true : false}
         />
         {errors.email && (
           <p className="mt-0.5 ml-0.5 text-sm text-destructive">

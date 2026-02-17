@@ -6,6 +6,9 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { v4 as uuid } from "uuid";
+import UserInvitation from "@/VerificationEmail/UserInvitation";
+import { resend } from "@/helpers/verificationEmail";
 
 export const createWorkspaceAction = async (
   data: WorkspaceNameType,
@@ -114,6 +117,62 @@ export const createProjectAction = async (
       revalidatePath(`/${workspaceId}/dashboard`);
 
       return project;
+    },
+  });
+};
+
+export const inviteUserAction = async ({
+  email,
+  workspaceId,
+}: {
+  email: string;
+  workspaceId: string;
+}) => {
+  return executeAction({
+    successMessage: "User Invited",
+    actionFn: async () => {
+      const isUserExists = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (isUserExists) {
+        throw new Error("User is already registered.");
+      }
+
+      const token = uuid();
+      const tokenExpiryDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      await prisma.invitation.upsert({
+        where: {
+          email_workspaceId: {
+            email,
+            workspaceId,
+          },
+        },
+        update: {
+          token,
+          expires: tokenExpiryDate,
+          status: "PENDING",
+        },
+        create: {
+          email,
+          token,
+          workspaceId,
+          expires: tokenExpiryDate,
+          status: "PENDING",
+        },
+      });
+
+      await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: ["banotravishu89@gmail.com"],
+        subject: "TaskFlow Verification OTP",
+        react: UserInvitation({
+          email,
+          token,
+          workspaceId,
+        }),
+      });
     },
   });
 };

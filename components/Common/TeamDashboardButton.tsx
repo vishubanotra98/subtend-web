@@ -4,8 +4,13 @@ import { Modal } from "@/components/Common/Modal";
 import { UserPlus, Users } from "lucide-react";
 import { useState } from "react";
 import { AddTeamForm } from "../Forms/TeamForm/AddTeamForm";
+import { InviteMemberForm } from "../Forms/InviteMemberForm/InviteMember";
 
-export default function DashboardButton() {
+export default function DashboardButton({
+  workspaceId,
+}: {
+  workspaceId: string;
+}) {
   const [teamModal, setTeamModal] = useState(false);
   const [userModal, setUserModal] = useState(false);
   return (
@@ -23,7 +28,7 @@ export default function DashboardButton() {
         title="Add New Team"
         body={
           <>
-            <AddTeamForm />
+            <AddTeamForm setModal={setTeamModal} />
           </>
         }
       />
@@ -38,10 +43,13 @@ export default function DashboardButton() {
         }
         open={userModal}
         setOpen={() => setUserModal((prev) => !prev)}
-        title="Add New Team"
+        title="Invite New Member"
         body={
           <>
-            <h1>THis is Body</h1>
+            <InviteMemberForm
+              setModal={setUserModal}
+              workspaceId={workspaceId}
+            />
           </>
         }
       />

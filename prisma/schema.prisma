@@ -67,12 +67,13 @@ model User {
 }
 
 model Workspace {
-  id        String             @id @default(cuid())
-  name      String
-  members   WorkspaceMembers[]
-  teams     Team[]
-  statuses  Status[]
-  createdAt DateTime           @default(now())
+  id          String             @id @default(cuid())
+  name        String
+  members     WorkspaceMembers[]
+  teams       Team[]
+  statuses    Status[]
+  createdAt   DateTime           @default(now())
+  invitations Invitation[]
 }
 
 model WorkspaceMembers {
@@ -141,6 +142,19 @@ model Status {
 
   workspace   Workspace? @relation(fields: [workspaceId], references: [id])
   workspaceId String?
+}
+
+model Invitation {
+  id          String   @id @default(cuid())
+  email       String
+  token       String   @unique
+  workspaceId String
+  status      String   @default("PENDING")
+  expires     DateTime
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([email, workspaceId])
 }
 
 enum Role {
