@@ -43,7 +43,7 @@ export default async function Dashboard({ params }: any) {
     <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
       <header className="flex justify-between items-center mb-12">
         <h3 className="text-2xl font-semibold">{selectedWorkspace?.name}</h3>
-        <DashboardButton />
+        <DashboardButton workspaceId={wsParams?.workspaceId} />
       </header>
 
       <main className="space-y-10">

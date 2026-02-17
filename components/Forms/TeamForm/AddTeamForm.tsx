@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -11,7 +11,11 @@ import { teamNameSchema, TeamNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 
-export const AddTeamForm = () => {
+export const AddTeamForm = ({
+  setModal,
+}: {
+  setModal: (value: boolean) => void;
+}) => {
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -24,12 +28,16 @@ export const AddTeamForm = () => {
 
   const onSubmit = async ({ teamName }: TeamNameType) => {
     setLoading(true);
-    const workspaceId = params?.workspaceId;
-    if (typeof workspaceId === "string") {
-      const res: any = await createTeamAction(teamName, workspaceId);
-      console.log("Team Space:", res);
+    const workspaceId = params?.workspaceId as string;
+    const res: any = await createTeamAction(teamName, workspaceId);
+
+    if (res?.success) {
+      toast.success(res?.message);
+    } else {
+      toast.error(res?.message);
     }
     setLoading(false);
+    setModal(false);
   };
 
   return (

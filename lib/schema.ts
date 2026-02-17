@@ -64,6 +64,12 @@ export const projectNameSchema = z.object({
     .max(50, "Project name must not exceed 50 characters."),
 });
 
+export const emailSchema = z.object({
+  email: z.string().email("E-mail must be a valid mail."),
+});
+
+export type EmailType = z.infer<typeof emailSchema>;
+
 export type RegisterUserWithConfirmSchema = z.infer<
   typeof registerUserWithConfirmSchema
 >;
