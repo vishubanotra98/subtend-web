@@ -32,8 +32,9 @@ export default async function MainLayout({
 
   const teams = await prisma.team.findMany({
     where: {
-      workspaceId: wsParams?.workspaceID,
+      workspaceId: wsParams?.workspaceId,
     },
+    include: { projects: true },
 
     orderBy: {
       createdAt: "desc",

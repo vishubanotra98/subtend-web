@@ -1,5 +1,4 @@
 import TaskBarChart from "@/components/Chart/BarChart";
-import { Modal } from "@/components/Common/Modal";
 import DashboardButton from "@/components/Common/TeamDashboardButton";
 import Card from "@/components/ui/Card/Card";
 import { auth } from "@/lib/auth";
