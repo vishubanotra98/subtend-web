@@ -28,10 +28,12 @@ import { useRouter, useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 import { CreateProjectModal } from "@/components/Forms/ProjectForm/ProjectForm";
+import { AddTeamForm } from "@/components/Forms/TeamForm/AddTeamForm";
 
 export function AppSidebar({ workspaceData, teams }: any) {
-  const [teamsOpen, setTeamsOpen] = useState(true); // Default to open for better UX
+  const [teamsOpen, setTeamsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [teamModal, setTeamModal] = useState(false);
 
   const router = useRouter();
   const params = useParams();
@@ -65,7 +67,7 @@ export function AppSidebar({ workspaceData, teams }: any) {
             className="mt-2"
           >
             <CollapsibleTrigger asChild>
-              <SidebarMenuButton className="w-full justify-between py-6 px-4 hover:bg-[#1f2937] transition-colors group">
+              <SidebarMenuButton className="w-full justify-between py-6 px-3 hover:bg-[#1f2937] transition-colors group">
                 <div className="flex items-center">
                   <Users size={18} className="mr-2 text-[#6b7280]" />
                   <span className="text-sm font-medium text-[#e5e7eb]">
@@ -83,9 +85,34 @@ export function AppSidebar({ workspaceData, teams }: any) {
 
             <CollapsibleContent>
               <ul className="flex flex-col gap-1 mt-1 px-2">
-                {teams?.map((team: any) => (
-                  <TeamItem key={team.id} team={team} params={params} />
-                ))}
+                {teams?.length > 0 ? (
+                  teams?.map((team: any) => (
+                    <TeamItem key={team.id} team={team} params={params} />
+                  ))
+                ) : (
+                  <div className="px-2 py-2 flex flex-col gap-1">
+                    <span className="text-[11px] text-zinc-500 font-medium opacity-60 px-1">
+                      No teams created
+                    </span>
+
+                    <Modal
+                      buttonClassName="w-full"
+                      buttonInnerText={
+                        <>
+                          <Users
+                            size={14}
+                            className="group-hover:text-zinc-400 transition-colors"
+                          />
+                          Create Team
+                        </>
+                      }
+                      open={teamModal}
+                      setOpen={() => setTeamModal((prev) => !prev)}
+                      title="Add New Team"
+                      body={<AddTeamForm setModal={setTeamModal} />}
+                    />
+                  </div>
+                )}
               </ul>
             </CollapsibleContent>
           </Collapsible>
@@ -158,14 +185,26 @@ function TeamItem({ team, params }: any) {
 
           <ul className="space-y-0.5 border-l border-[#1f2937] ml-1 pl-3">
             {/* Project List */}
-            <li>
-              <Link
-                href={`/${params?.workspaceId}/project/example-id`}
-                className="block text-sm text-[#6b7280] hover:text-[#e5e7eb] py-1.5 transition-colors"
-              >
-                Website Redesign
-              </Link>
-            </li>
+            {team?.projects?.length > 0 ? (
+              team?.projects.map((project: any, idx: number) => {
+                return (
+                  <li key={`project-idx-${idx + 1}`}>
+                    <Link
+                      href={`/${params?.workspaceId}/team/${team?.id}/project/${project?.id}`}
+                      className="block text-sm text-[#6b7280] hover:text-[#e5e7eb] py-1.5 transition-colors"
+                    >
+                      - {project?.name}
+                    </Link>
+                  </li>
+                );
+              })
+            ) : (
+              <div>
+                <li className="text-xs italic text-[#6b7280] py-1.5">
+                  No projects found
+                </li>
+              </div>
+            )}
 
             <li className="pt-1">
               <Modal
@@ -188,5 +227,3 @@ function TeamItem({ team, params }: any) {
     </li>
   );
 }
-
-
