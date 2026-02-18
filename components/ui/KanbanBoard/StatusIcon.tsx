@@ -1,23 +1,22 @@
 "use client";
 
 import React from "react";
-import { Status, statusConfig } from "@/utils/constants";
+import { DEFAULT_STATUSES } from "@/utils/constants";
+import { Circle } from "lucide-react";
 
-export default function Icon({ status }: { status: Status }) {
-  const config = statusConfig[status];
-  const LucideIcon = config.icon;
+export default function Icon({ status }: { status: any }) {
+  const config = DEFAULT_STATUSES.find((st) => st.name === status);
+  const LucideIcon = config ? config.icon : Circle;
 
   return (
     <div className="flex items-center gap-1.5">
       <LucideIcon
         size={14}
-        color={config.color}
-        className={status === "inProgress" ? "animate-spin" : ""}
+        color={config ? config.color : "#6b7280"}
+        className={status === "In Progress" ? "animate-spin" : ""}
       />
 
-      <span className="text-xs font-medium text-neutral-200">
-        {config.name}
-      </span>
+      <span className="text-xs font-medium text-neutral-200">{status}</span>
     </div>
   );
 }

@@ -7,21 +7,29 @@ import { useDroppable } from "@dnd-kit/react";
 interface KanbanDroppableInterface {
   id: string;
   children: React.ReactNode;
+  status: any;
 }
 
-const KanbanDroppable = ({ id, children }: KanbanDroppableInterface) => {
+const KanbanDroppable = ({
+  id,
+  children,
+  status,
+}: KanbanDroppableInterface) => {
   const { ref } = useDroppable({
     id,
   });
+
+  const issueCount = status?._count?.issues;
+
   return (
     <div ref={ref} className="bg-[#111827] min-h-[80vh] mt-8">
       <div className=" w-[350px] h-fit rounded-lg bg-[#0B0F19] border border-[#1F2937]/50 flex flex-col">
         <div className="px-4 py-3 border-b border-[#1F2937]/50 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Icon status="todo" />
+            <Icon status={status?.name} />
           </div>
           <span className="text-xs text-gray-600 bg-[#111827] px-2 py-0.5 rounded">
-            3
+            {issueCount}
           </span>
         </div>
 

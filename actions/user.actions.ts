@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
 import { v4 as uuid } from "uuid";
 import UserInvitation from "@/VerificationEmail/UserInvitation";
 import { resend } from "@/helpers/verificationEmail";
+import { DEFAULT_STATUSES } from "@/utils/constants";
 
 export const createWorkspaceAction = async (
   data: WorkspaceNameType,
@@ -25,7 +26,16 @@ export const createWorkspaceAction = async (
               role: "ADMIN",
             },
           },
+          statuses: {
+            create: DEFAULT_STATUSES.map((status) => ({
+              name: status.name,
+              color: status.color,
+              order: status.order,
+              isDefault: status.isDefault,
+            })),
+          },
         },
+        include: { statuses: true },
       });
 
       revalidatePath("/");

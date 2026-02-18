@@ -11,6 +11,7 @@ import { signIn, signOut } from "@/lib/auth";
 import bcrypt from "bcrypt";
 import { resend } from "@/helpers/verificationEmail";
 import Email from "@/VerificationEmail/VerificationEmail";
+import { passwordHash } from "@/helpers/paswordHashing";
 
 export const google_signin = async () => {
   await signIn("google");
@@ -39,11 +40,7 @@ export const signUpAction = async (
     actionFn: async () => {
       const validatedData = userSchema.parse(formData);
 
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(
-        validatedData.password,
-        saltRounds,
-      );
+      const hashedPassword = await passwordHash(validatedData?.password);
 
       const verificationToken = Math.floor(
         100000 + Math.random() * 999999,
