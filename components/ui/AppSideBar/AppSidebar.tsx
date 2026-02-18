@@ -47,7 +47,6 @@ export function AppSidebar({ workspaceData, teams }: any) {
 
       <SidebarContent className="gap-0">
         <SidebarGroup>
-          {/* 1. Dashboard Link (Moved outside of Teams Collapsible) */}
           <SidebarMenuButton
             onClick={() => router.push(`/${params?.workspaceId}/dashboard`)}
             className={`w-full justify-start py-6 px-4 hover:bg-[#1f2937] transition-colors mb-1 ${
@@ -60,7 +59,6 @@ export function AppSidebar({ workspaceData, teams }: any) {
             </span>
           </SidebarMenuButton>
 
-          {/* 2. Teams Group */}
           <Collapsible
             open={teamsOpen}
             onOpenChange={setTeamsOpen}
@@ -157,6 +155,9 @@ export function AppSidebar({ workspaceData, teams }: any) {
 function TeamItem({ team, params }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isProjectActive = (projectId: string) => {
+    return projectId === params?.projectId;
+  };
 
   return (
     <li>
@@ -175,7 +176,6 @@ function TeamItem({ team, params }: any) {
         </CollapsibleTrigger>
 
         <CollapsibleContent className="pl-4 pr-1 pb-2 pt-1">
-          {/* Projects Divider - MOVED INSIDE THE TEAM */}
           <div className="flex items-center my-2 opacity-60">
             <span className="text-[10px] uppercase font-bold tracking-wider text-[#6b7280]">
               Projects
@@ -191,7 +191,7 @@ function TeamItem({ team, params }: any) {
                   <li key={`project-idx-${idx + 1}`}>
                     <Link
                       href={`/${params?.workspaceId}/team/${team?.id}/project/${project?.id}`}
-                      className="block text-sm text-[#6b7280] hover:text-[#e5e7eb] py-1.5 transition-colors"
+                      className={`block text-sm text-[#6b7280] ${isProjectActive(project?.id) ? "text-[#e5e7eb]" : "text-[#6b7280]"}  hover:text-[#e5e7eb] py-1.5 transition-colors`}
                     >
                       - {project?.name}
                     </Link>
