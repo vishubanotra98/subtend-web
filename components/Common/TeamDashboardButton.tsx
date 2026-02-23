@@ -3,8 +3,8 @@
 import { Modal } from "@/components/Common/Modal";
 import { UserPlus, Users } from "lucide-react";
 import { useState } from "react";
-import { AddTeamForm } from "../Forms/TeamForm/AddTeamForm";
-import { InviteMemberForm } from "../Forms/InviteMemberForm/InviteMember";
+import { AddTeamForm } from "../Forms/AddTeamForm";
+import { InviteMemberForm } from "../Forms/InviteMember";
 
 export default function DashboardButton({
   workspaceId,

@@ -1,11 +1,12 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
+
 import { useEffect, useState, useRef } from "react";
 import { verifyInviteMember } from "@/actions/auth.actions";
 import { CheckCircle2, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import { Spinner } from "../Spinner/spinner";
+import { Spinner } from "../ui/Spinner/spinner";
 
 const ClientVerification = () => {
   const searchParams = useSearchParams();
