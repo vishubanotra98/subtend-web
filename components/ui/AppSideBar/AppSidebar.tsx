@@ -27,8 +27,8 @@ import { signOut } from "next-auth/react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
-import { CreateProjectModal } from "@/components/Forms/ProjectForm/ProjectForm";
-import { AddTeamForm } from "@/components/Forms/TeamForm/AddTeamForm";
+import { CreateProjectModal } from "@/components/Forms/ProjectForm";
+import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 
 export function AppSidebar({ workspaceData, teams }: any) {
   const [teamsOpen, setTeamsOpen] = useState(true);

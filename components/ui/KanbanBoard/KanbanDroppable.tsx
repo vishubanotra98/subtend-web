@@ -3,6 +3,9 @@
 import { Plus } from "lucide-react";
 import Icon from "./StatusIcon";
 import { useDroppable } from "@dnd-kit/react";
+import { useState } from "react";
+import { IssueModal } from "@/components/Common/CommonModal";
+import { IssueForm } from "@/components/Forms/IssueForm";
 
 interface KanbanDroppableInterface {
   id: string;
@@ -37,12 +40,7 @@ const KanbanDroppable = ({
         {children}
 
         <div className="p-3 pt-0">
-          <button className="w-full flex items-center gap-2 p-2 rounded text-xs font-medium text-gray-500 hover:text-gray-200 hover:bg-[#1F2937] transition-all duration-200 group cursor-pointer">
-            <div className="p-0.5 rounded bg-transparent group-hover:bg-[#374151] transition-colors">
-              <Plus size={14} />
-            </div>
-            <span>Add Issue</span>
-          </button>
+          <IssueModal title="Add Issue" body={<IssueForm />} />
         </div>
       </div>
     </div>

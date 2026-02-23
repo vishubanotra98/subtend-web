@@ -16,7 +16,7 @@ import {
 
 import { FolderKanban } from "lucide-react";
 import { useParams } from "next/navigation";
-import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm/OnboardingForm";
+import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 
