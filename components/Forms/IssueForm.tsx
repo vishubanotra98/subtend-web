@@ -1,133 +1,234 @@
 "use client";
 
+import { commonSelectStyles } from "@/utils/styles";
 import Tiptap from "../Common/TextEditor";
-import { CircleUser, MoreHorizontal, Flag } from "lucide-react";
-
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
+  CircleUser,
+  Flag,
+  SignalHigh,
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  AlertCircle,
+} from "lucide-react";
+import Select, { ControlProps, components } from "react-select";
+import { DEFAULT_STATUSES } from "@/utils/constants";
+import { addIssueAction } from "@/actions/workspace.actions";
+import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
 
-// --- DUMMY DATA ---
-const priorities = ["Urgent", "High", "Medium", "Low"] as const;
-const assignees = ["Unassigned", "Frontend Dev", "Backend Dev"] as const;
+const priorityList = [
+  { value: "LOW", label: "Low", icon: ArrowDown, color: "#3b82f6" },
+  { value: "MEDIUM", label: "Medium", icon: ArrowRight, color: "#f59e0b" },
+  { value: "HIGH", label: "High", icon: ArrowUp, color: "#ef4444" },
+  { value: "URGENT", label: "Urgent", icon: AlertCircle, color: "#dc2626" },
+];
 
-// 1. Assignee Combobox Component
-export function AssigneeCombobox() {
+const createCustomControl = (Icon: any) => {
+  return function CustomSelectControl({
+    children,
+    ...props
+  }: ControlProps<any>) {
+    return (
+      <components.Control {...props}>
+        <div className="pl-2.5 flex items-center text-gray-400 shrink-0">
+          <Icon size={14} />
+        </div>
+        {children}
+      </components.Control>
+    );
+  };
+};
+const AssigneeControl = createCustomControl(CircleUser);
+
+const CustomOption = (props: any) => {
+  const Icon =
+    props.data.icon ||
+    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
+  const color =
+    props.data.color ||
+    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
+
   return (
-    <Combobox items={assignees}>
-      {/* Wrapper styled exactly like your previous button */}
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-400 bg-transparent hover:bg-[#374151] hover:text-gray-200 border border-transparent hover:border-[#4B5563] transition-all duration-200 cursor-pointer focus-within:bg-[#374151] focus-within:text-gray-200">
-        <CircleUser size={15} className="shrink-0" />
-        <ComboboxInput
-          placeholder="Assignee"
-          className="bg-transparent border-none outline-none placeholder:text-gray-400 w-16 cursor-pointer text-xs"
-        />
+    <components.Option {...props}>
+      <div className="flex items-center gap-2">
+        {Icon && <Icon size={14} style={{ color: color }} />}
+        <span>{props.label || props.data.name}</span>
       </div>
-
-      {/* Dropdown styling (Adjust bg/border if your UI library handles it differently) */}
-      <ComboboxContent className="bg-[#1f2937] border border-[#374151] text-gray-200 rounded-md shadow-xl mt-1 z-50">
-        <ComboboxEmpty className="p-2 text-xs text-gray-500">
-          No users found.
-        </ComboboxEmpty>
-        <ComboboxList className="p-1">
-          {(item) => (
-            <ComboboxItem
-              key={item}
-              value={item}
-              className="px-2 py-1.5 text-xs rounded-sm hover:bg-[#374151] cursor-pointer outline-none data-[active]:bg-[#374151]"
-            >
-              {item}
-            </ComboboxItem>
-          )}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
+    </components.Option>
   );
-}
+};
 
-// 2. Priority Combobox Component
-export function PriorityCombobox() {
+const CustomSingleValue = (props: any) => {
+  const Icon =
+    props.data.icon ||
+    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
+  const color =
+    props.data.color ||
+    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
+
   return (
-    <Combobox items={priorities}>
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-400 bg-transparent hover:bg-[#374151] hover:text-gray-200 border border-transparent hover:border-[#4B5563] transition-all duration-200 cursor-pointer focus-within:bg-[#374151] focus-within:text-gray-200">
-        <Flag size={14} className="shrink-0" />
-        <ComboboxInput
-          placeholder="Priority"
-          className="bg-transparent border-none outline-none placeholder:text-gray-400 w-14 cursor-pointer text-xs"
-        />
+    <components.SingleValue {...props}>
+      <div className="flex items-center gap-2">
+        {Icon && <Icon size={14} style={{ color: color }} />}
+        <span>{props.children}</span>
       </div>
-
-      <ComboboxContent className="bg-[#1f2937] border border-[#374151] text-gray-200 rounded-md shadow-xl mt-1 z-50">
-        <ComboboxEmpty className="p-2 text-xs text-gray-500">
-          No priority found.
-        </ComboboxEmpty>
-        <ComboboxList className="p-1">
-          {(item) => (
-            <ComboboxItem
-              key={item}
-              value={item}
-              className="px-2 py-1.5 text-xs rounded-sm hover:bg-[#374151] cursor-pointer outline-none data-[active]:bg-[#374151]"
-            >
-              {item}
-            </ComboboxItem>
-          )}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
+    </components.SingleValue>
   );
-}
+};
 
-// 3. Main Form Component
-export const IssueForm = () => {
+const createCustomPlaceholder = (PlaceholderIcon: any) => {
+  return function CustomPlaceholder(props: any) {
+    return (
+      <components.Placeholder {...props}>
+        <div className="flex items-center gap-2 text-gray-400">
+          <PlaceholderIcon size={14} />
+          <span>{props.children}</span>
+        </div>
+      </components.Placeholder>
+    );
+  };
+};
+const StatusPlaceholder = createCustomPlaceholder(Flag);
+const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
+
+export const IssueForm = ({ issueFormProp }: any) => {
+  const params = useParams();
+  const {
+    workspaceMembers,
+    statusList,
+    issueState,
+    setIssueState,
+    handleClose,
+  } = issueFormProp;
+
+  const { projectId } = params;
+
+  const { title, description, userId, priority, status } = issueState;
+
+  const members = workspaceMembers?.map((mem: any) => {
+    const name = !mem?.name
+      ? mem?.user?.firstName + " " + mem?.user?.lastName
+      : mem?.name;
+    return {
+      userId: mem.userId,
+      role: mem?.role,
+      name,
+      email: mem.user?.email,
+    };
+  });
+
+  const submitHandler = async (e: any) => {
+    e.preventDefault();
+    const payload = {
+      title,
+      description,
+      userId,
+      priority,
+      status,
+      projectId,
+    };
+    const res = await addIssueAction(payload);
+    if (res?.success) {
+      toast.success(res?.message);
+    } else {
+      toast.error(res?.message);
+    }
+  };
+
   return (
-    <form className="flex flex-col h-full gap-4 mt-2">
+    <form onSubmit={submitHandler} className="flex flex-col h-full gap-4 mt-2">
       <div>
         <textarea
-          className="w-full bg-transparent text-2xl font-semibold text-gray-100 placeholder:text-gray-500 resize-none outline-none overflow-hidden leading-tight"
+          className="w-full bg-transparent text-2xl font-semibold text-gray-100 placeholder:text-gray-500  outline-none overflow-hidden resize-none"
           placeholder="Issue Title"
           rows={1}
           autoFocus
+          onChange={(e) => {
+            setIssueState((prev: any) => ({
+              ...prev,
+              title: e.target.value,
+            }));
+          }}
         />
       </div>
 
       <div className="min-h-[20vh] text-gray-300 text-sm [&_.ProseMirror]:outline-none [&_.ProseMirror.is-editor-empty:before]:text-gray-600">
-        <Tiptap />
+        <Tiptap state={issueState} setState={setIssueState} />
       </div>
 
       <div className="h-px w-full bg-[#374151]/50 my-2" />
 
       <div className="flex items-center justify-between">
-        {/* Left: Quick Actions (Now using Comboboxes) */}
         <div className="flex items-center gap-2">
-          <AssigneeCombobox />
+          <Select
+            options={members}
+            onChange={(val: any) =>
+              setIssueState((prev: any) => ({ ...prev, userId: val?.userId }))
+            }
+            value={
+              members?.find((mem: any) => mem.userId === issueState.userId) ||
+              null
+            }
+            getOptionValue={(val: any) => val.userId}
+            getOptionLabel={(val: any) => val.name}
+            placeholder="Assignee"
+            styles={commonSelectStyles}
+            components={{ Control: AssigneeControl }}
+          />
 
-          <PriorityCombobox />
+          <Select
+            options={statusList}
+            defaultValue={statusList.find((item: any) => item?.isDefault)}
+            onChange={(val: any) =>
+              setIssueState((prev: any) => ({ ...prev, status: val?.id }))
+            }
+            value={
+              statusList?.find((st: any) => st.id === issueState.status) || null
+            }
+            getOptionValue={(val: any) => val.id}
+            getOptionLabel={(val: any) => val.name}
+            placeholder="Status"
+            styles={commonSelectStyles}
+            components={{
+              Option: CustomOption,
+              SingleValue: CustomSingleValue,
+              Placeholder: StatusPlaceholder,
+            }}
+          />
 
-          {/* More Actions Button (Kept as a button for now) */}
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-2 p-1.5 rounded-md text-gray-400 bg-transparent hover:bg-[#374151] hover:text-gray-200 border border-transparent hover:border-[#4B5563] transition-all duration-200"
-          >
-            <MoreHorizontal size={16} />
-          </button>
+          <Select
+            options={priorityList}
+            onChange={(val: any) =>
+              setIssueState((prev: any) => ({ ...prev, priority: val?.value }))
+            }
+            value={
+              priorityList.find((p: any) => p.value === issueState.priority) ||
+              null
+            }
+            getOptionValue={(val: any) => val.value}
+            getOptionLabel={(val: any) => val.label}
+            placeholder="Priority"
+            styles={commonSelectStyles}
+            components={{
+              Option: CustomOption,
+              SingleValue: CustomSingleValue,
+              Placeholder: PriorityPlaceholder,
+            }}
+          />
         </div>
 
-        {/* Right: Submit Action */}
         <div className="flex items-center gap-3">
           <button
+            onClick={handleClose}
             type="button"
-            className="text-xs font-medium text-gray-400 hover:text-gray-200 transition-colors"
+            className="text-xs font-medium text-gray-400 hover:text-gray-200 transition-colors cursor-pointer mr-3"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors"
+            className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors cursor-pointer"
           >
             Create Issue
           </button>

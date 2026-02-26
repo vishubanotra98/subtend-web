@@ -4,7 +4,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 
-const DescriptionEditor = () => {
+const DescriptionEditor = ({ state, setState }: any) => {
+  const { description } = state;
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -12,7 +13,7 @@ const DescriptionEditor = () => {
         placeholder: "Add description...",
       }),
     ],
-    content: "",
+    content: description || "",
     editorProps: {
       attributes: {
         class:
@@ -20,6 +21,13 @@ const DescriptionEditor = () => {
       },
     },
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      const des = JSON.stringify(editor.getJSON());
+      setState((prev: any) => ({
+        ...prev,
+        description: des,
+      }));
+    },
   });
 
   return (
