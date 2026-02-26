@@ -1,28 +1,62 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import Icon from "./StatusIcon";
 import { useDroppable } from "@dnd-kit/react";
-import { useState } from "react";
 import { IssueModal } from "@/components/Common/CommonModal";
 import { IssueForm } from "@/components/Forms/IssueForm";
+import { useState } from "react";
 
 interface KanbanDroppableInterface {
   id: string;
   children: React.ReactNode;
   status: any;
+  workspaceMembers: any;
+  statusList: any;
+  projectId: string;
 }
 
 const KanbanDroppable = ({
   id,
   children,
   status,
+  workspaceMembers,
+  statusList,
 }: KanbanDroppableInterface) => {
+  const [open, setOpen] = useState(false);
+  const [issueState, setIssueState] = useState({
+    title: "",
+    description: "",
+    userId: "",
+    priority: "",
+    status: "",
+  });
+
   const { ref } = useDroppable({
     id,
   });
 
   const issueCount = status?._count?.issues;
+
+  const handleClose = () => {
+    setIssueState({
+      title: "",
+      description: "",
+      userId: "",
+      priority: "",
+      status: "",
+    });
+    setOpen(false);
+  };
+
+  const issueFormPropObj = {
+    issueState,
+    setIssueState,
+    open,
+    setOpen,
+    workspaceMembers,
+    statusList,
+    handleClose,
+  };
 
   return (
     <div ref={ref} className="bg-[#111827] min-h-[80vh] mt-8">
@@ -36,11 +70,16 @@ const KanbanDroppable = ({
           </span>
         </div>
 
-        {/* Draggable Card */}
         {children}
 
         <div className="p-3 pt-0">
-          <IssueModal title="Add Issue" body={<IssueForm />} />
+          <IssueModal
+            title="Add Issue"
+            open={open}
+            setOpen={setOpen}
+            handleClose={handleClose}
+            body={<IssueForm issueFormProp={issueFormPropObj} />}
+          />
         </div>
       </div>
     </div>

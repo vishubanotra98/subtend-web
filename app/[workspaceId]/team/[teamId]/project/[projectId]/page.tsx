@@ -13,9 +13,23 @@ export default async function ProjectIssue({ params }: any) {
     },
   });
 
+  const issueList = await prisma.issue.findMany({
+    where: { projectId },
+  });
+
+  const workspaceMembers = await prisma.workspaceMembers.findMany({
+    where: { workspaceId },
+    include: { user: true },
+  });
+
   return (
     <main>
-      <KanbanClient statusList={statusList} />
+      <KanbanClient
+        workspaceMembers={workspaceMembers}
+        statusList={statusList}
+        projectId={projectId}
+        issueList={issueList}
+      />
     </main>
   );
 }

@@ -2,9 +2,9 @@
 
 import { useDraggable } from "@dnd-kit/react";
 
-const DraggableCard = () => {
+const DraggableCard = ({ issueData }: any) => {
   const { ref } = useDraggable({
-    id: "draggable",
+    id: issueData?.id,
   });
   return (
     <div ref={ref} className="p-3 flex flex-col gap-3">
