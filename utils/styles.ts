@@ -2,6 +2,7 @@ export const commonSelectStyles = {
   control: (baseStyles: any, state: any) => ({
     ...baseStyles,
     minHeight: "auto",
+    width:"180px",
     backgroundColor:
       state.isFocused || state.menuIsOpen ? "#374151" : "transparent",
     borderColor: "#4B5563",

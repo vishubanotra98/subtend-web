@@ -1,4 +1,8 @@
 import {
+  AlertCircle,
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
   CheckCircle2,
   Circle,
   Inbox,
@@ -41,4 +45,11 @@ export const DEFAULT_STATUSES = [
     isDefault: false,
     icon: XCircle,
   },
+];
+
+export const priorityList = [
+  { value: "LOW", label: "Low", icon: ArrowDown, color: "#3b82f6" },
+  { value: "MEDIUM", label: "Medium", icon: ArrowRight, color: "#f59e0b" },
+  { value: "HIGH", label: "High", icon: ArrowUp, color: "#ef4444" },
+  { value: "URGENT", label: "Urgent", icon: AlertCircle, color: "#dc2626" },
 ];

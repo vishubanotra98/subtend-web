@@ -12,17 +12,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Select, { ControlProps, components } from "react-select";
-import { DEFAULT_STATUSES } from "@/utils/constants";
+import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
 import { addIssueAction } from "@/actions/workspace.actions";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
-
-const priorityList = [
-  { value: "LOW", label: "Low", icon: ArrowDown, color: "#3b82f6" },
-  { value: "MEDIUM", label: "Medium", icon: ArrowRight, color: "#f59e0b" },
-  { value: "HIGH", label: "High", icon: ArrowUp, color: "#ef4444" },
-  { value: "URGENT", label: "Urgent", icon: AlertCircle, color: "#dc2626" },
-];
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
