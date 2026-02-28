@@ -1,3 +1,4 @@
+import { PrismaClientValidationError } from "@/app/generated/prisma/internal/prismaNamespace";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { ZodError } from "zod";
 
@@ -26,6 +27,13 @@ export const executeAction = async <T>({
   } catch (error: any) {
     if (isRedirectError(error)) {
       throw error;
+    }
+
+    if (error instanceof PrismaClientValidationError) {
+      const lines = error.message.split("\n");
+      const exactError = lines.pop()?.trim() || "Invalid database input";
+
+      return { success: false, message: exactError };
     }
 
     if (error instanceof ZodError) {

@@ -22,6 +22,12 @@ export default async function ProjectIssue({ params }: any) {
     include: { user: true },
   });
 
+  const team = await prisma.team.findFirst({
+    where: {
+      id: teamId,
+    },
+  });
+
   return (
     <main>
       <KanbanClient
@@ -29,6 +35,7 @@ export default async function ProjectIssue({ params }: any) {
         statusList={statusList}
         projectId={projectId}
         issueList={issueList}
+        team={team}
       />
     </main>
   );
