@@ -29,9 +29,7 @@ export const addIssueAction = async (payload: any) => {
           projectId: projectId,
         },
       });
-      revalidatePath(
-        `workspace/${workspaceId}/team/${teamId}/project/${projectId}`,
-      );
+      revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return createIssue;
     },
   });
@@ -54,9 +52,7 @@ export const moveCardAction = async (payload: any) => {
         },
       });
       const projectId = card.projectId;
-      revalidatePath(
-        `workspace/${workspaceId}/team/${teamId}/project/${projectId}`,
-      );
+      revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return card;
     },
   });

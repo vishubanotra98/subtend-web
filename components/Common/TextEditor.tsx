@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 
-const DescriptionEditor = ({ state, setState }: any) => {
+const DescriptionEditor = ({ state, setState, isEditing = false }: any) => {
   const { description } = state;
   const editor = useEditor({
     extensions: [
@@ -13,7 +13,7 @@ const DescriptionEditor = ({ state, setState }: any) => {
         placeholder: "Add description...",
       }),
     ],
-    content: description || "",
+    content: isEditing ? JSON.parse(description) : description || "",
     editorProps: {
       attributes: {
         class:

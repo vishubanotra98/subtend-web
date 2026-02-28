@@ -5,7 +5,7 @@ import KanbanDroppable from "@/components/ui/KanbanBoard/KanbanDroppable";
 import { useEffect, useState } from "react";
 import DraggableCard from "@/components/ui/KanbanBoard/DraggableCard";
 import { moveCardAction } from "@/actions/workspace.actions";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const KanbanClient = ({
   statusList,
@@ -18,6 +18,7 @@ const KanbanClient = ({
   const params = useParams();
   const workspaceId = params.workspaceId;
   const teamId = params?.teamId;
+  const router = useRouter();
 
   useEffect(() => {
     setIssues(issueList);
@@ -79,7 +80,19 @@ const KanbanClient = ({
                   };
                   return (
                     status?.id === issue?.statusId && (
-                      <DraggableCard key={issue.id} issueData={issueDataProp} />
+                      <span
+                        key={issue?.id}
+                        onClick={() =>
+                          router.push(
+                            `/${workspaceId}/team/${teamId}/project/${projectId}/issue/${issue?.id}`,
+                          )
+                        }
+                      >
+                        <DraggableCard
+                          key={issue.id}
+                          issueData={issueDataProp}
+                        />
+                      </span>
                     )
                   );
                 })}
