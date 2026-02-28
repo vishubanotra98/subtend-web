@@ -5,7 +5,16 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export const addIssueAction = async (payload: any) => {
-  const { title, description, userId, priority, status, projectId } = payload;
+  const {
+    title,
+    description,
+    userId,
+    priority,
+    status,
+    projectId,
+    workspaceId,
+    teamId,
+  } = payload;
 
   return executeAction({
     successMessage: "Issue Added",
@@ -20,7 +29,9 @@ export const addIssueAction = async (payload: any) => {
           projectId: projectId,
         },
       });
-
+      revalidatePath(
+        `workspace/${workspaceId}/team/${teamId}/project/${projectId}`,
+      );
       return createIssue;
     },
   });

@@ -102,7 +102,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
     handleClose,
   } = issueFormProp;
 
-  const { projectId } = params;
+  const { projectId, workspaceId, teamId } = params;
 
   const { title, description, userId, priority, status } = issueState;
 
@@ -127,6 +127,8 @@ export const IssueForm = ({ issueFormProp }: any) => {
       priority,
       status,
       projectId,
+      workspaceId,
+      teamId,
     };
     const res = await addIssueAction(payload);
     if (res?.success) {

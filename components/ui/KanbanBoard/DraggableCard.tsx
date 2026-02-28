@@ -3,9 +3,18 @@
 import { useDraggable } from "@dnd-kit/react";
 
 const DraggableCard = ({ issueData }: any) => {
+  const issue = issueData?.issue;
   const { ref } = useDraggable({
-    id: issueData?.id,
+    id: issue?.id,
   });
+
+  const nameInitials = issueData?.name
+    ?.split(" ")
+    ?.map((name: string) => name[0])
+    .join("");
+
+  const team = issueData?.team;
+
   return (
     <div ref={ref} className="p-3 flex flex-col gap-3">
       <div
@@ -21,18 +30,20 @@ const DraggableCard = ({ issueData }: any) => {
               className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center ring-2 ring-[#1F2937]"
               title="Assignee: Vishu Banotra"
             >
-              <span className="text-[8px] font-bold text-white">VB</span>
+              <span className="text-[8px] font-bold text-white">
+                {nameInitials}
+              </span>
             </div>
           </div>
         </div>
 
         <h4 className="text-[13px] font-medium text-gray-100 leading-snug">
-          Fix the card contrast issue
+          {issue?.title}
         </h4>
 
         <div className="mt-3 flex gap-2">
           <span className="px-1.5 py-0.5 bg-[#111827] border border-[#374151] rounded text-[10px] text-gray-400">
-            Design
+            {team?.name}
           </span>
         </div>
       </div>

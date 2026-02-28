@@ -2,7 +2,7 @@
 
 import { DragDropProvider } from "@dnd-kit/react";
 import KanbanDroppable from "@/components/ui/KanbanBoard/KanbanDroppable";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DraggableCard from "@/components/ui/KanbanBoard/DraggableCard";
 import { moveCardAction } from "@/actions/workspace.actions";
 import { useParams } from "next/navigation";
@@ -11,12 +11,17 @@ const KanbanClient = ({
   statusList,
   workspaceMembers,
   projectId,
-  issueList: initialIssues,
+  issueList,
+  team,
 }: any) => {
-  const [issues, setIssues] = useState(initialIssues);
+  const [issues, setIssues] = useState<any>([]);
   const params = useParams();
   const workspaceId = params.workspaceId;
   const teamId = params?.teamId;
+
+  useEffect(() => {
+    setIssues(issueList);
+  }, [issueList]);
 
   const handleDragOver = async (event: any) => {
     const sourceId = event.operation.source?.id as string;
@@ -40,12 +45,7 @@ const KanbanClient = ({
       teamId,
     };
 
-    try {
-      await moveCardAction(payload);
-    } catch (error) {
-      console.error("Failed to move card", error);
-      setIssues(initialIssues);
-    }
+    await moveCardAction(payload);
   };
 
   return (
@@ -63,9 +63,26 @@ const KanbanClient = ({
             >
               {issues
                 .filter((issue: any) => issue.statusId === status.id)
-                .map((issue: any) => (
-                  <DraggableCard key={issue.id} issueData={issue} />
-                ))}
+                .map((issue: any) => {
+                  const findUser = workspaceMembers?.find(
+                    (mem: any) => issue?.assigneeId === mem?.user?.id,
+                  );
+                  const user = findUser?.user;
+                  const userName = !user?.name
+                    ? user?.firstName + " " + user?.lastName
+                    : user?.name;
+
+                  const issueDataProp = {
+                    name: userName,
+                    issue,
+                    team,
+                  };
+                  return (
+                    status?.id === issue?.statusId && (
+                      <DraggableCard key={issue.id} issueData={issueDataProp} />
+                    )
+                  );
+                })}
             </KanbanDroppable>
           );
         })}
