@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -29,17 +29,43 @@ import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
+import toast from "react-hot-toast";
 
 export function AppSidebar({ workspaceData, teams }: any) {
   const [teamsOpen, setTeamsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
+  const [online, setIsOnline] = useState(false);
 
   const router = useRouter();
   const params = useParams();
   const pathName = usePathname();
 
   const isActiveItem = (key: string) => pathName.includes(key);
+
+  useEffect(() => {
+    if (!navigator.onLine) {
+      toast.error("You are currently offline");
+    }
+
+    const handleOnline = () => {
+      toast.success("Back online!");
+      setIsOnline(true);
+    };
+
+    const handleOffline = () => {
+      toast.error("Connection lost");
+      setIsOnline(false);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   return (
     <Sidebar>

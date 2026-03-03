@@ -31,7 +31,7 @@ const DescriptionEditor = ({ state, setState, isEditing = false }: any) => {
   });
 
   return (
-    <div className="w-full rounded-md p-3 bg-transparent border border-transparent hover:border-[#374151] focus-within:border-[#4B5563] focus-within:bg-[#111827]30 transition-all duration-200">
+    <div className="w-full rounded-md p-3 bg-transparent border border-[#374151] focus-within:border-[#4B5563] focus-within:bg-[#111827]30 transition-all duration-200">
       <EditorContent editor={editor} />
     </div>
   );

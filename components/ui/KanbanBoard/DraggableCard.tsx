@@ -1,9 +1,11 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/react";
+import { getTeamPrefix } from "@/utils/constants";
 
 const DraggableCard = ({ issueData }: any) => {
   const issue = issueData?.issue;
+
   const { ref } = useDraggable({
     id: issue?.id,
   });
@@ -14,7 +16,6 @@ const DraggableCard = ({ issueData }: any) => {
     .join("");
 
   const team = issueData?.team;
-
   return (
     <div ref={ref} className="p-3 flex flex-col gap-3">
       <div
@@ -23,7 +24,9 @@ const DraggableCard = ({ issueData }: any) => {
       "
       >
         <div className="flex justify-between items-start mb-2">
-          <span className="text-[10px] font-mono text-gray-400">TSK-12</span>
+          <span className="text-[10px] font-mono text-gray-400">
+            {getTeamPrefix(team, issueData?.issue)}
+          </span>
 
           <div className="flex -space-x-1.5">
             <div
