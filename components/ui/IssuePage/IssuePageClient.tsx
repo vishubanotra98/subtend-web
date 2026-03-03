@@ -1,11 +1,14 @@
 "use client";
 
+import { editIssueAction } from "@/actions/workspace.actions";
 import DescriptionEditor from "@/components/Common/TextEditor";
 import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
 import { commonSelectStyles } from "@/utils/styles";
-import { CircleUser, Flag, SignalHigh } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, CircleUser, Flag, SignalHigh } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import Select, { ControlProps, components } from "react-select";
+import { DeleteModal } from "./DeleteModal";
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
@@ -75,11 +78,16 @@ const createCustomPlaceholder = (PlaceholderIcon: any) => {
 const StatusPlaceholder = createCustomPlaceholder(Flag);
 const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
 
-// Component
 export const IssuePageClient = ({ issueData }: any) => {
   const { selectedIssue, statusList, workspaceMembers } = issueData;
-
+  const router = useRouter();
+  const { workspaceId, teamId, projectId, issueId } = useParams();
   const [issueState, setIssueState] = useState(selectedIssue);
+  const [open, setOpen] = useState(false);
+  const firstRdr = useRef(true);
+
+  const { title, description, priority, statusId, assigneeId } = issueState;
+
   const members = workspaceMembers?.map((mem: any) => {
     const name = !mem?.name
       ? mem?.user?.firstName + " " + mem?.user?.lastName
@@ -92,20 +100,56 @@ export const IssuePageClient = ({ issueData }: any) => {
     };
   });
 
+  useEffect(() => {
+    if (firstRdr.current) {
+      firstRdr.current = false;
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      const payload = {
+        workspaceId,
+        teamId,
+        projectId,
+        issueId,
+        title,
+        description,
+        assigneeId,
+        priority,
+        statusId,
+      };
+      await editIssueAction(payload);
+    }, 1000);
+
+    return () => clearTimeout(delayDebounce);
+  }, [title, description, priority, statusId, assigneeId]);
+
   return (
-    <div className="flex justify-center">
-      <div className="mt-10 w-[90%] h-screen rounded-md bg-[#1F2937] border border-[#374151] shadow-sm flex overflow-hidden">
+    <div className="w-[90%] mx-auto">
+      <div className="flex justify-end ">
+        <button
+          onClick={() =>
+            router.push(`/${workspaceId}/team/${teamId}/project/${projectId}`)
+          }
+          className="flex items-center gap-1 button-primary !px-6 !py-2"
+        >
+          <ArrowLeft size={14} />
+          Back
+        </button>
+      </div>
+      <div className="mt-5   h-screen rounded-md bg-[#1F2937] border border-[#374151] shadow-sm flex overflow-hidden">
         <div className="p-6 border-r border-[#374151] flex-1 flex flex-col">
           <textarea
-            className="w-full bg-transparent text-3xl font-bold text-gray-100 placeholder:text-gray-500 outline-none resize-none mb-2"
+            className="w-full bg-transparent text-3xl font-bold text-gray-100 placeholder:text-gray-500 outline-none overflow-hidden resize-none mb-2"
             placeholder="Issue Title"
             rows={1}
             autoFocus
             value={issueState?.title}
             onChange={(e) => {
+              const newVal = e.target.value;
               setIssueState((prev: any) => ({
                 ...prev,
-                title: e.target.value,
+                title: newVal,
               }));
             }}
           />
@@ -129,12 +173,12 @@ export const IssuePageClient = ({ issueData }: any) => {
               </label>
               <Select
                 options={members}
-                onChange={(val: any) =>
+                onChange={(val: any) => {
                   setIssueState((prev: any) => ({
                     ...prev,
                     assigneeId: val?.userId,
-                  }))
-                }
+                  }));
+                }}
                 value={
                   members?.find(
                     (mem: any) => mem?.userId === issueState?.assigneeId,
@@ -157,9 +201,12 @@ export const IssuePageClient = ({ issueData }: any) => {
                 defaultValue={statusList.find(
                   (item: any) => item?.id === issueState?.statusId,
                 )}
-                onChange={(val: any) =>
-                  setIssueState((prev: any) => ({ ...prev, statusId: val?.id }))
-                }
+                onChange={(val: any) => {
+                  setIssueState((prev: any) => ({
+                    ...prev,
+                    statusId: val?.id,
+                  }));
+                }}
                 value={
                   statusList?.find(
                     (st: any) => st.id === issueState.statusId,
@@ -183,12 +230,12 @@ export const IssuePageClient = ({ issueData }: any) => {
               </label>
               <Select
                 options={priorityList}
-                onChange={(val: any) =>
+                onChange={(val: any) => {
                   setIssueState((prev: any) => ({
                     ...prev,
                     priority: val?.value,
-                  }))
-                }
+                  }));
+                }}
                 value={
                   priorityList.find(
                     (p: any) => p.value === issueState.priority,
@@ -205,6 +252,8 @@ export const IssuePageClient = ({ issueData }: any) => {
                 }}
               />
             </div>
+
+            <DeleteModal open={open} setOpen={setOpen} />
           </div>
         </div>
       </div>

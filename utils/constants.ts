@@ -53,3 +53,10 @@ export const priorityList = [
   { value: "HIGH", label: "High", icon: ArrowUp, color: "#ef4444" },
   { value: "URGENT", label: "Urgent", icon: AlertCircle, color: "#dc2626" },
 ];
+
+export const getTeamPrefix = (team: any, issue: any) => {
+  const teamPrefix = team?.name?.split("")?.splice(0, 3)?.join("");
+  const ticketNumber = `${teamPrefix}-${issue?.ticket_num}`;
+
+  return ticketNumber;
+};

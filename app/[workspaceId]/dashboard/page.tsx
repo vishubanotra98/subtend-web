@@ -1,9 +1,8 @@
-import TaskBarChart from "@/components/ui/Chart/BarChart";
-import DashboardButton from "@/components/Common/TeamDashboardButton";
-import Card from "@/components/ui/Card/Card";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { CheckCircle2, PlusCircle } from "lucide-react";
+import MemberDashboard from "@/components/ui/Dshboard/Memberdashboard";
+import AdminDashboard from "@/components/ui/Dshboard/AdminDashboard";
 
 const activities = [
   {
@@ -25,94 +24,127 @@ const activities = [
 ];
 
 export default async function Dashboard({ params }: any) {
-  const wsParams = await params;
+  const { workspaceId } = await params;
   const session = await auth();
+  const currentUser = session?.user && session?.user.id;
 
-  const selectedWorkspace = await prisma.workspace.findUnique({
-    where: { id: wsParams.workspaceId },
+  const selectedWorkspace = await prisma.workspace.findFirst({
+    where: { id: workspaceId },
   });
 
   const totalTeamCount = await prisma.team.count({
     where: {
-      workspaceId: wsParams?.workspaceID,
+      workspaceId,
     },
+  });
+
+  const totalIssuesCount = await prisma.issue.count({
+    where: {
+      project: {
+        team: {
+          workspaceId,
+        },
+      },
+    },
+  });
+
+  const totalIssues = await prisma.issue.findMany({
+    where: {
+      project: {
+        team: {
+          workspaceId,
+        },
+      },
+    },
+  });
+
+  const totalMembers = await prisma.workspaceMembers.count({
+    where: { workspaceId },
+  });
+
+  const totalProjectsCount = await prisma.project.count({
+    where: {
+      team: {
+        workspaceId,
+      },
+    },
+  });
+
+  const totalProjects = await prisma.project.findMany({
+    where: { team: { workspaceId } },
+  });
+
+  const member = await prisma.workspaceMembers.findFirst({
+    where: { userId: currentUser },
+  });
+
+  const myIssuesCount = await prisma.issue.count({
+    where: {
+      assigneeId: currentUser,
+      project: { team: { workspaceId } },
+    },
+  });
+
+  const myIssues = await prisma.issue.findMany({
+    where: {
+      assigneeId: currentUser,
+      project: { team: { workspaceId } },
+    },
+  });
+
+  const urgentIssuesCount = await prisma.issue.count({
+    where: {
+      priority: "URGENT",
+      assigneeId: currentUser,
+      project: { team: { workspaceId } },
+    },
+  });
+
+  const urgentTasks = await prisma.issue.findMany({
+    where: {
+      priority: "URGENT",
+      assigneeId: currentUser,
+      project: { team: { workspaceId } },
+    },
+  });
+
+  const completedIssuesCount = await prisma.issue.count({
+    where: {
+      status: { name: "Done" },
+      project: { team: { workspaceId } },
+    },
+  });
+
+  const teamData = await prisma.team.findMany({
+    where: { workspaceId },
   });
 
   return (
     <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
-      <header className="flex justify-between items-center mb-12">
-        <h3 className="text-2xl font-semibold">{selectedWorkspace?.name}</h3>
-        <DashboardButton workspaceId={wsParams?.workspaceId} />
-      </header>
-
-      <main className="space-y-10">
-        <section>
-          <h4 className="font-semibold mb-4">Workspace Summary</h4>
-          <div className="flex flex-wrap gap-4">
-            <Card
-              title="Teams"
-              data={totalTeamCount}
-              className="bg-[#1f2937] border-white/5"
-            />
-            <Card
-              title="Issues"
-              data={100}
-              className="bg-[#1f2937] border-white/5"
-            />
-            <Card
-              title="Members"
-              data={5}
-              className="bg-[#1f2937] border-white/5"
-            />
-            <Card
-              title="Members"
-              data={5}
-              className="bg-[#1f2937] border-white/5"
-            />
-          </div>
-        </section>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <h4 className="font-semibold mb-4">Task Completion</h4>
-            <div className="bg-[#1f2937] p-6 rounded-xl border border-white/5 h-[300px]">
-              <TaskBarChart />
-            </div>
-          </div>
-
-          <div className="h-[300px]">
-            <div className="flex items-center gap-2 mb-4">
-              <h4 className="font-semibold">Recent Activity</h4>
-            </div>
-            <div className=" bg-[#1f2937] border border-white/5 rounded-xl p-5 h-full">
-              <ul className="relative space-y-6 before:absolute before:left-[9px]  before:w-[1px]">
-                {activities.map((item) => (
-                  <li
-                    key={item.id}
-                    className="relative pl-8 flex flex-col gap-1"
-                  >
-                    <div className="absolute left-0 top-1 w-[20px] h-[20px] bg-[#111827] border border-white/10 rounded-full flex items-center justify-center z-10">
-                      {item.icon}
-                    </div>
-                    <div className="text-sm">
-                      <span className="font-medium text-white">
-                        {item.user}
-                      </span>
-                      <span className="text-gray-400"> {item.action} </span>
-                      <span className="text-indigo-400 hover:underline cursor-pointer">
-                        {item.task}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest">
-                      {item.time}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </main>
+      {member?.role === "ADMIN" ? (
+        <AdminDashboard
+          totalTeamCount={totalTeamCount}
+          totalIssuesCount={totalIssuesCount}
+          totalMembers={totalMembers}
+          selectedWorkspace={selectedWorkspace}
+          workspaceId={workspaceId}
+          totalProjectsCount={totalProjectsCount}
+          activities={activities}
+        />
+      ) : (
+        <MemberDashboard
+          myIssues={myIssues}
+          myIssuesCount={myIssuesCount}
+          urgentIssuesCount={urgentIssuesCount}
+          urgentTasks={urgentTasks}
+          completedIssuesCount={completedIssuesCount}
+          totalIssues={totalIssues}
+          totalIssuesCount={totalIssuesCount}
+          totalProjects={totalProjects}
+          teamData={teamData}
+          workspaceId={workspaceId}
+        />
+      )}
     </div>
   );
 }

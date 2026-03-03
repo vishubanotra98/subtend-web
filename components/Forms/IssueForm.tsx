@@ -2,20 +2,14 @@
 
 import { commonSelectStyles } from "@/utils/styles";
 import Tiptap from "../Common/TextEditor";
-import {
-  CircleUser,
-  Flag,
-  SignalHigh,
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  AlertCircle,
-} from "lucide-react";
+import { CircleUser, Flag, SignalHigh } from "lucide-react";
 import Select, { ControlProps, components } from "react-select";
 import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
 import { addIssueAction } from "@/actions/workspace.actions";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
+import { Spinner } from "../ui/Spinner/spinner";
+import { useState } from "react";
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
@@ -95,8 +89,8 @@ export const IssueForm = ({ issueFormProp }: any) => {
     handleClose,
   } = issueFormProp;
 
+  const [loading, setLoading] = useState(false);
   const { projectId, workspaceId, teamId } = params;
-
   const { title, description, userId, priority, status } = issueState;
 
   const members = workspaceMembers?.map((mem: any) => {
@@ -113,6 +107,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
 
   const submitHandler = async (e: any) => {
     e.preventDefault();
+    setLoading(true);
     const payload = {
       title,
       description,
@@ -126,9 +121,11 @@ export const IssueForm = ({ issueFormProp }: any) => {
     const res = await addIssueAction(payload);
     if (res?.success) {
       toast.success(res?.message);
+      handleClose();
     } else {
       toast.error(res?.message);
     }
+    setLoading(false);
   };
 
   return (
@@ -223,8 +220,10 @@ export const IssueForm = ({ issueFormProp }: any) => {
           </button>
           <button
             type="submit"
-            className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors cursor-pointer"
+            disabled={loading}
+            className="flex items-center gap-1 px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold rounded-md shadow-sm transition-colors cursor-pointer"
           >
+            {loading && <Spinner color="#ffffff" />}
             Create Issue
           </button>
         </div>

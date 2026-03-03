@@ -35,6 +35,54 @@ export const addIssueAction = async (payload: any) => {
   });
 };
 
+export const editIssueAction = async (payload: any) => {
+  const {
+    workspaceId,
+    teamId,
+    projectId,
+    issueId,
+    title,
+    description,
+    assigneeId,
+    priority,
+    statusId,
+  } = payload;
+
+  console.log(issueId);
+
+  return executeAction({
+    successMessage: "Issue Added",
+    actionFn: async () => {
+      const editIssue = await prisma.issue.update({
+        where: { id: issueId },
+        data: {
+          title,
+          description,
+          priority,
+          statusId,
+          assigneeId,
+          projectId,
+        },
+      });
+      revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
+      return editIssue;
+    },
+  });
+};
+
+export const deleteIssue = async (payload: any) => {
+  const { workspaceId, issueId, projectId, teamId } = payload;
+  return executeAction({
+    successMessage: "Issue Deleted",
+    actionFn: async () => {
+      await prisma.issue.delete({
+        where: { id: issueId },
+      });
+      revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
+    },
+  });
+};
+
 export const moveCardAction = async (payload: any) => {
   const {
     sourceId: issueId,
