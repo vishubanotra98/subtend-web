@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import toast from "react-hot-toast";
+import { GetActivity } from "./ActivityTrackerActions";
 dayjs.extend(utc);
 
 export default function AdminDashboard({
@@ -32,7 +33,6 @@ export default function AdminDashboard({
   };
 
   const getName = (userData: any) => {
-    console.log(userData);
     const name = !userData?.name
       ? userData?.firstName
       : userData?.name?.split(" ")[0];
@@ -76,8 +76,6 @@ export default function AdminDashboard({
     };
   };
 
-  const getActionLabel = {};
-
   return (
     <div>
       <header className="flex justify-between items-center mb-12">
@@ -93,25 +91,26 @@ export default function AdminDashboard({
               title="Teams"
               data={totalTeamCount}
               className="bg-[#1f2937] border-white/5"
-              desc="This is the description for Teams"
+              desc="Active teams in your workspace"
             />
             <Card
               title="Issues"
               data={totalIssuesCount}
               className="bg-[#1f2937] border-white/5"
-              desc={totalIssuesCount < 1 ? "No Issues Found" : ""}
+              desc={totalIssuesCount === 0 ? "All caught up" : "Open Issues"}
             />
             <Card
               title="Members"
               data={totalMembersCount}
               className="bg-[#1f2937] border-white/5"
-              desc="desc for members"
+              desc="Total workspace users"
             />
 
             <Card
               title="Projects"
               data={totalProjectsCount}
               className="bg-[#1f2937] border-white/5"
+              desc="Ongoing and active initiatives"
             />
           </div>
         </section>
@@ -139,7 +138,6 @@ export default function AdminDashboard({
                     const iconColor = activityConfig[item?.action]?.color;
                     const actionLabel = activityConfig[item?.action]?.label;
                     const time = getTime(item?.created_at);
-
                     return (
                       <li
                         key={item.id}
@@ -148,35 +146,30 @@ export default function AdminDashboard({
                         <div className="absolute left-0 top-1 w-[20px] h-[20px] bg-[#111827] border border-white/10 rounded-full flex items-center justify-center z-10">
                           {Icon && <Icon size={12} className={iconColor} />}
                         </div>
-                        <div className="text-sm flex items-center gap-1">
-                          <span className="font-medium text-white">{name}</span>
-                          <span className="text-gray-400 font-semibold">
+
+                        <div className="text-sm flex flex-wrap items-center gap-x-1.5 gap-y-2">
+                          <span className="font-medium text-white whitespace-nowrap">
+                            {name}
+                          </span>
+                          <span className="text-gray-400 font-semibold whitespace-nowrap">
                             {actionLabel}
                           </span>
                           <span
                             onClick={() => handleRedirect(item)}
-                            className="text-indigo-400 hover:underline cursor-pointer"
+                            className="text-indigo-400 hover:underline cursor-pointer whitespace-nowrap"
                           >
                             {item.entityTitle}
                           </span>
-                          {item?.action === "STATUS_CHANGED" && (
-                            <div className="flex items-center gap-1">
-                              <span className="text-gray-400 font-semibold">
-                                from
-                              </span>
-                              <span className="text-gray-400 font-semibold">
-                                {getStatusName(item)?.oldStatusName}
-                              </span>
-                              <span className="text-gray-400 font-semibold">
-                                to
-                              </span>
-                              <span className="text-gray-400 font-semibold">
-                                {getStatusName(item)?.newStatusName}
-                              </span>
-                            </div>
-                          )}
+
+                          <GetActivity
+                            item={item}
+                            getStatusName={getStatusName}
+                            findMember={findMember}
+                            getName={getName}
+                          />
                         </div>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">
+
+                        <span className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">
                           {time}
                         </span>
                       </li>

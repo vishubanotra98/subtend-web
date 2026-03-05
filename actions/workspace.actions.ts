@@ -98,6 +98,71 @@ export const editIssueAction = async (payload: any) => {
         },
       });
 
+      const baseData = {
+        userId: currentUser,
+        workspaceId,
+        teamId,
+        projectId,
+        issueId,
+      };
+
+      if (
+        oldIssue?.title !== editIssue?.title ||
+        oldIssue?.description !== editIssue?.description
+      ) {
+        const loggerData = {
+          ...baseData,
+          action: "DETAILS_UPDATED",
+          entityTitle: title,
+        };
+        await activityLogger(loggerData);
+      }
+
+      if (oldIssue?.priority !== editIssue?.priority) {
+        const loggerData = {
+          ...baseData,
+          action: "PRIORITY_CHANGED",
+          entityTitle: editIssue?.title,
+          beforeState: {
+            prev_priority: oldIssue?.priority,
+          },
+          afterState: {
+            new_priority: priority,
+          },
+        };
+        await activityLogger(loggerData);
+      }
+
+      if (oldIssue?.assigneeId !== editIssue?.assigneeId) {
+        const loggerData = {
+          ...baseData,
+          action: "ASSIGNED",
+          entityTitle: editIssue?.title,
+          beforeState: {
+            prev_assignee: oldIssue?.assigneeId,
+          },
+          afterState: {
+            new_assignee: editIssue?.assigneeId,
+          },
+        };
+        await activityLogger(loggerData);
+      }
+
+      if (oldIssue?.statusId !== editIssue?.statusId) {
+        const loggerData = {
+          ...baseData,
+          action: "STATUS_CHANGED",
+          entityTitle: editIssue?.title,
+          beforeState: {
+            previousIssueId: oldIssue?.statusId,
+          },
+          afterState: {
+            newIssueId: editIssue?.statusId,
+          },
+        };
+        await activityLogger(loggerData);
+      }
+
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return editIssue;
     },
