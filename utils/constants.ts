@@ -9,6 +9,12 @@ import {
   Loader,
   PauseCircle,
   XCircle,
+  PlusCircle,
+  Trash2,
+  ArrowRightLeft,
+  Flag,
+  UserPlus,
+  Pencil,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -59,4 +65,37 @@ export const getTeamPrefix = (team: any, issue: any) => {
   const ticketNumber = `${teamPrefix}-${issue?.ticket_num}`;
 
   return ticketNumber;
+};
+
+export const activityConfig: any = {
+  CREATED: {
+    icon: PlusCircle,
+    label: "created",
+    color: "text-emerald-400",
+  },
+  DELETED: {
+    icon: Trash2,
+    label: "deleted",
+    color: "text-red-400",
+  },
+  STATUS_CHANGED: {
+    icon: ArrowRightLeft,
+    label: "changed the status of",
+    color: "text-blue-400",
+  },
+  PRIORITY_CHANGED: {
+    icon: Flag,
+    label: "updated the priority of",
+    color: "text-orange-400",
+  },
+  ASSIGNED: {
+    icon: UserPlus,
+    label: "assigned",
+    color: "text-indigo-400",
+  },
+  DETAILS_UPDATED: {
+    icon: Pencil,
+    label: "updated the details of",
+    color: "text-gray-400",
+  },
 };

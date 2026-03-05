@@ -4,6 +4,8 @@ import { AlertCircle, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import Card from "../Card/Card";
 import { useRouter } from "next/navigation";
 import { getTeamPrefix } from "@/utils/constants";
+import { editIssueAction } from "@/actions/workspace.actions";
+import toast from "react-hot-toast";
 
 export default function MemberDashboard({
   myIssues,
@@ -15,7 +17,10 @@ export default function MemberDashboard({
   teamData,
   totalProjects,
   workspaceId,
+  workspaceStatusList,
 }: any) {
+  const router = useRouter();
+
   const getTeamData = (projectId: string) => {
     const project = totalProjects?.find(
       (project: any) => project?.id === projectId,
@@ -25,7 +30,37 @@ export default function MemberDashboard({
     return team;
   };
 
-  const router = useRouter();
+  const doneTaskStatus = workspaceStatusList?.find(
+    (task: any) => task.name === "Done",
+  );
+
+  const incompleteTasksUrg = urgentTasks?.filter(
+    (task: any) => task?.statusId !== doneTaskStatus?.id,
+  );
+
+  const incompleteTasksNormal = myIssues.filter(
+    (task: any) => task?.statusId !== doneTaskStatus?.id,
+  );
+
+  const handleComplete = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    task: any,
+  ) => {
+    e.stopPropagation();
+    const payload = {
+      workspaceId,
+      teamId: teamData?.id,
+      projectId: task?.projectId,
+      issueId: task?.id,
+      statusId: doneTaskStatus?.id,
+    };
+    const res = await editIssueAction(payload);
+    if (res?.success) {
+      toast.success("Marked as completed.");
+    }
+  };
+
+  console.log("My issues", myIssues);
 
   return (
     <div>
@@ -48,10 +83,10 @@ export default function MemberDashboard({
 
           <Card
             title="Urgent Fires"
-            data={urgentIssuesCount}
+            data={incompleteTasksUrg?.length}
             className="bg-[#1f2937] border-red-500/20"
             desc={
-              urgentIssuesCount > 0 ? "Requires attention" : "No urgent issues"
+              incompleteTasksUrg > 0 ? "Requires attention" : "No urgent issues"
             }
           />
 
@@ -67,11 +102,13 @@ export default function MemberDashboard({
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-lg font-semibold text-white">My Work</h3>
           <span className="text-sm text-gray-400 font-medium bg-[#111827] px-3 py-1 rounded-full border border-white/5">
-            {myIssuesCount} Tasks Pending
+            {incompleteTasksNormal?.length === 0
+              ? "No Tasks Pending"
+              : `${incompleteTasksNormal?.length} Tasks Pending`}
           </span>
         </div>
 
-        {urgentTasks.length > 0 && (
+        {incompleteTasksUrg?.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center gap-2 px-1">
               <AlertCircle size={16} className="text-red-400" />
@@ -80,7 +117,7 @@ export default function MemberDashboard({
               </h4>
             </div>
             <ul className="grid gap-3">
-              {urgentTasks.map((task: any) => {
+              {incompleteTasksUrg?.map((task: any) => {
                 const teamData = getTeamData(task?.projectId);
                 const ticketNumber = getTeamPrefix(teamData, task);
                 return (
@@ -121,7 +158,7 @@ export default function MemberDashboard({
           </div>
 
           <ul className="grid gap-3">
-            {myIssues.map((task: any) => {
+            {incompleteTasksNormal?.map((task: any) => {
               const teamData = getTeamData(task?.projectId);
               const ticketNumber = getTeamPrefix(teamData, task);
               return (
@@ -155,6 +192,7 @@ export default function MemberDashboard({
                     </div>
                   </div>
                   <button
+                    onClick={(e) => handleComplete(e, task)}
                     className="text-gray-600 hover:text-green-400 transition-colors p-1"
                     title="Mark as complete"
                   >
@@ -164,7 +202,7 @@ export default function MemberDashboard({
               );
             })}
 
-            {myIssuesCount === 0 && (
+            {incompleteTasksNormal?.length === 0 && (
               <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-white/10 rounded-lg">
                 You're all caught up!
               </div>
