@@ -64,8 +64,8 @@ export default function AdminDashboard({
   };
 
   const getStatusName = (item: any) => {
-    const oldIssueId = item?.beforeState?.previousIssueId;
-    const newIssueId = item?.afterState?.newIssueId;
+    const oldIssueId = item?.beforeState?.previousStatusId;
+    const newIssueId = item?.afterState?.newStatusId;
 
     const oldStatusName = findStatus(oldIssueId);
     const newStatusName = findStatus(newIssueId);
@@ -75,6 +75,10 @@ export default function AdminDashboard({
       newStatusName,
     };
   };
+
+  const completedTaskId = workspaceStatusList?.find(
+    (status: any) => status?.name === "Done",
+  )?.id;
 
   return (
     <div>
@@ -115,11 +119,14 @@ export default function AdminDashboard({
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-col">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className=" flex flex-col">
             <h4 className="font-semibold mb-4">Task Completion</h4>
             <div className="bg-[#1f2937] p-6 rounded-xl border border-white/5 h-[300px]">
-              <TaskBarChart />
+              <TaskBarChart
+                completedTaskId={completedTaskId}
+                workspaceId={workspaceId}
+              />
             </div>
           </div>
 

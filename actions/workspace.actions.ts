@@ -6,6 +6,7 @@ import { executeAction } from "@/lib/executeAction";
 import prisma from "@/lib/prisma";
 import { ActivityInterface } from "@/types/types";
 import { revalidatePath } from "next/cache";
+import dayjs from "dayjs";
 
 export const addIssueAction = async (payload: any) => {
   const {
@@ -154,10 +155,10 @@ export const editIssueAction = async (payload: any) => {
           action: "STATUS_CHANGED",
           entityTitle: editIssue?.title,
           beforeState: {
-            previousIssueId: oldIssue?.statusId,
+            previousStatusId: oldIssue?.statusId,
           },
           afterState: {
-            newIssueId: editIssue?.statusId,
+            newStatusId: editIssue?.statusId,
           },
         };
         await activityLogger(loggerData);
@@ -249,10 +250,10 @@ export const moveCardAction = async (payload: any) => {
         projectId: projectId,
         issueId: card?.id,
         beforeState: {
-          previousIssueId: previousStatus,
+          previousStatusId: previousStatus,
         },
         afterState: {
-          newIssueId: card.statusId,
+          newStatusId: card.statusId,
         },
       };
 
@@ -260,6 +261,71 @@ export const moveCardAction = async (payload: any) => {
 
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return card;
+    },
+  });
+};
+
+export const getCompletedTasksCount = async (payload: any) => {
+  const statusId = payload.statusId;
+  const workspaceId = payload.workspaceId;
+
+  return executeAction({
+    successMessage: "Data Fetched",
+    actionFn: async () => {
+      const session = await auth();
+      const currentUser = session?.user?.id;
+
+      if (!currentUser) {
+        throw new Error(
+          "Unauthorized: You must be logged in to fetch this data.",
+        );
+      }
+
+      if (!statusId) {
+        throw new Error("Missing status ID. Cannot filter completed tasks.");
+      }
+      if (!workspaceId) {
+        throw new Error("Missing workspace ID.");
+      }
+
+      const startDate = dayjs().subtract(6, "day").startOf("day").toDate();
+
+      const statusChangeActivities = await prisma.activity.findMany({
+        where: {
+          workspaceId,
+          action: "STATUS_CHANGED",
+          afterState: {
+            path: ["newStatusId"],
+            equals: statusId,
+          },
+          created_at: {
+            gte: startDate,
+          },
+        },
+        select: {
+          created_at: true,
+        },
+      });
+
+      const last7Days = Array.from({ length: 7 }).map((_, i) => {
+        const date = dayjs().subtract(6 - i, "day");
+        return {
+          day: date.format("ddd"),
+          date: date.format("YYYY-MM-DD"),
+          count: 0,
+        };
+      });
+
+      statusChangeActivities.forEach((activity) => {
+        const activityDate = dayjs(activity.created_at).format("YYYY-MM-DD");
+        const dayIndex = last7Days.findIndex((d) => d.date === activityDate);
+
+        if (dayIndex !== -1) {
+          last7Days[dayIndex].count += 1;
+        }
+      });
+
+      return last7Days;
     },
   });
 };

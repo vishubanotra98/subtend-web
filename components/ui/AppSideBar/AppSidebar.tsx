@@ -14,7 +14,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -31,7 +30,7 @@ import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
 
-export function AppSidebar({ workspaceData, teams }: any) {
+export function AppSidebar({ workspaceData, teams, currentUser }: any) {
   const [teamsOpen, setTeamsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
@@ -66,6 +65,13 @@ export function AppSidebar({ workspaceData, teams }: any) {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
+  const nameInitials = currentUser?.name
+    ? currentUser?.name
+        ?.split(" ")
+        .map((item: any) => item[0])
+        .join("")
+    : currentUser?.firstName[0] + currentUser?.lastName[0];
 
   return (
     <Sidebar>
@@ -149,17 +155,20 @@ export function AppSidebar({ workspaceData, teams }: any) {
         <div className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-[#1f2937] transition-colors">
           <Avatar className="h-8 w-8 rounded-full border border-[#1f2937] bg-[#111827] shrink-0">
             <AvatarImage
-              src="https://github.com/shadcn.png"
+              src={currentUser?.image}
               className="object-cover rounded-full"
             />
-            <AvatarFallback className="rounded-full text-[#e5e7eb]">
-              CN
+            <AvatarFallback className="rounded-full flex items-center justify-center my-auto h-full  text-[#e5e7eb]">
+              {nameInitials}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-medium truncate text-[#e5e7eb]">
-              User Name
+            <p
+              className="text-sm font-medium truncate text-[#e5e7eb]"
+              title={currentUser?.email}
+            >
+              {currentUser?.email}
             </p>
             <button
               onClick={() => {
@@ -167,7 +176,7 @@ export function AppSidebar({ workspaceData, teams }: any) {
                 signOut();
               }}
               disabled={loading}
-              className="text-xs text-[#6b7280] hover:text-red-500 transition-colors text-left"
+              className="text-xs text-[#6b7280] hover:text-red-500 transition-colors text-left cursor-pointer"
             >
               {loading ? "Logging out..." : "Log out"}
             </button>
@@ -237,7 +246,12 @@ function TeamItem({ team, params }: any) {
                 open={isModalOpen}
                 setOpen={() => setIsModalOpen((prev) => !prev)}
                 title="Create Project"
-                body={<CreateProjectModal teamId={team?.id} />}
+                body={
+                  <CreateProjectModal
+                    setIsModalOpen={setIsModalOpen}
+                    teamId={team?.id}
+                  />
+                }
                 buttonClassName="w-full"
                 buttonInnerText={
                   <div className="flex items-center text-xs  transition-colors cursor-pointer py-1">
