@@ -12,11 +12,12 @@ export default async function MainLayout({
 }: Readonly<{ children: React.ReactNode; params: any }>) {
   const wsParams = await params;
   const session = await auth();
+  const currentUser = session?.user;
   if (!session) redirect("/sign-in");
 
-  if (session?.user?.id) {
+  if (currentUser?.id) {
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: currentUser.id },
       data: {
         lastActiveWorkspaceId: wsParams.workspaceId,
       },
@@ -25,7 +26,7 @@ export default async function MainLayout({
 
   const workspaces = await prisma.user.findUnique({
     where: {
-      id: session.user?.id,
+      id: currentUser?.id,
     },
     include: { workspaces: { include: { workspace: true } } },
   });
@@ -44,7 +45,11 @@ export default async function MainLayout({
   return (
     <div>
       <SidebarProvider>
-        <AppSidebar teams={teams} workspaceData={workspaces} />
+        <AppSidebar
+          teams={teams}
+          workspaceData={workspaces}
+          currentUser={currentUser}
+        />
         <main className="py-3 px-4 w-full bg-primary-2">
           <SidebarTrigger className=" cursor-pointer bg-transparent hover:bg-[#1f2937]" />
 

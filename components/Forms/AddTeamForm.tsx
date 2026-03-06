@@ -10,6 +10,7 @@ import { createTeamAction } from "@/actions/user.actions";
 import { teamNameSchema, TeamNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
+import { Spinner } from "../ui/Spinner/spinner";
 
 export const AddTeamForm = ({
   setModal,
@@ -62,7 +63,14 @@ export const AddTeamForm = ({
           className="w-full button-primary shadow-lg shadow-indigo-500/20"
           disabled={loading}
         >
-          {loading ? "Creating..." : "Create Team"}
+          {loading ? (
+            <span className="flex items-center gap-1">
+              <Spinner color="#ffffff" />
+              Creating...
+            </span>
+          ) : (
+            "Create Team"
+          )}
         </Button>
       </div>
     </form>

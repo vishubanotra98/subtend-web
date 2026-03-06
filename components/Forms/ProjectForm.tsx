@@ -9,8 +9,15 @@ import { Input } from "@/components/ui/input";
 import { createProjectAction } from "@/actions/user.actions";
 import { projectNameSchema, ProjectNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
+import { Spinner } from "../ui/Spinner/spinner";
 
-export function CreateProjectModal({ teamId }: { teamId: string }) {
+export function CreateProjectModal({
+  teamId,
+  setIsModalOpen,
+}: {
+  teamId: string;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [loading, setLoading] = useState(false);
 
   const {
@@ -23,7 +30,6 @@ export function CreateProjectModal({ teamId }: { teamId: string }) {
 
   const onSubmit = async ({ projectName }: ProjectNameType) => {
     setLoading(true);
-
     let res = await createProjectAction(projectName, teamId);
 
     if (res?.success) {
@@ -32,6 +38,7 @@ export function CreateProjectModal({ teamId }: { teamId: string }) {
       toast.error("Error creating project.");
     }
     setLoading(false);
+    setIsModalOpen(false);
   };
 
   return (
@@ -58,7 +65,14 @@ export function CreateProjectModal({ teamId }: { teamId: string }) {
           className="w-full button-primary shadow-lg shadow-indigo-500/20"
           disabled={loading}
         >
-          {loading ? "Creating..." : "Create Project"}
+          {loading ? (
+            <span className="flex items-center gap-1">
+              <Spinner color="#ffffff" />
+              Creating...
+            </span>
+          ) : (
+            "Create Project"
+          )}
         </Button>
       </div>
     </form>
