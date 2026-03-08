@@ -174,9 +174,9 @@ export const inviteUserAction = async ({
       });
 
       await resend.emails.send({
-        from: "onboarding@resend.dev",
-        to: ["banotravishu89@gmail.com"],
-        subject: "TaskFlow Verification OTP",
+        from: "TaskFlow <onboarding@taskflow.vishubanotra.xyz>",
+        to: [email],
+        subject: "Join your team on Taskflow",
         react: UserInvitation({
           email,
           token,
