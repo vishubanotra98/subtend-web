@@ -60,8 +60,6 @@ export default function MemberDashboard({
     }
   };
 
-  console.log("My issues", myIssues);
-
   return (
     <div>
       <section>

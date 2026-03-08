@@ -113,8 +113,8 @@ export const signUpAction = async (
         }
 
         await resend.emails.send({
-          from: "onboarding@resend.dev",
-          to: ["banotravishu89@gmail.com"],
+          from: "TaskFlow <verification@taskflow.vishubanotra.xyz>",
+          to: [validatedData.email],
           subject: "TaskFlow Verification OTP",
           react: Email({
             firstName: validatedData.firstName,
