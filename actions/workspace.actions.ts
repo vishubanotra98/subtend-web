@@ -7,6 +7,7 @@ import prisma from "@/lib/prisma";
 import { ActivityInterface } from "@/types/types";
 import { revalidatePath } from "next/cache";
 import dayjs from "dayjs";
+import socketService from "@/lib/socket-api-service";
 
 export const addIssueAction = async (payload: any) => {
   const {
@@ -54,6 +55,7 @@ export const addIssueAction = async (payload: any) => {
         afterState: null,
       };
       await activityLogger(loggerData);
+      await socketService("create_issue", createIssue);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return createIssue;
     },
@@ -163,7 +165,7 @@ export const editIssueAction = async (payload: any) => {
         };
         await activityLogger(loggerData);
       }
-
+      await socketService("edit_issue", editIssue);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return editIssue;
     },
@@ -180,7 +182,7 @@ export const deleteIssue = async (payload: any) => {
 
       if (!currentUser) {
         throw new Error(
-          "Unauthorized: You must be logged in to create an issue.",
+          "Unauthorized: You must be logged in to delete an issue.",
         );
       }
 
@@ -201,6 +203,7 @@ export const deleteIssue = async (payload: any) => {
       };
 
       await activityLogger(loggerData);
+      await socketService("delete_issue", issue?.id);
       revalidatePath(`/${workspaceId}/dashboard`);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
     },

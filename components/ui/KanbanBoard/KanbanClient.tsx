@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import DraggableCard from "@/components/ui/KanbanBoard/DraggableCard";
 import { moveCardAction } from "@/actions/workspace.actions";
 import { useParams, useRouter } from "next/navigation";
+import { socket } from "@/lib/socket";
 
 const KanbanClient = ({
   statusList,
@@ -23,6 +24,61 @@ const KanbanClient = ({
   useEffect(() => {
     setIssues(issueList);
   }, [issueList]);
+
+  useEffect(() => {
+    const handleCreateIssue = (payload: any) => {
+      setIssues((prev: any) => {
+        const safePrev = prev || [];
+
+        const issueExists = safePrev.some(
+          (iss: any) => iss?.id === payload?.data?.id,
+        );
+
+        if (issueExists) {
+          return safePrev;
+        }
+
+        return [...safePrev, payload?.data];
+      });
+    };
+
+    const handleDeleteIssue = (payload: any) => {
+      setIssues((prev: any) => {
+        const safePrev = prev || [];
+        return safePrev.filter((iss: any) => iss.id !== payload.data);
+      });
+    };
+
+    const editHandler = (payload: any) => {
+      setIssues((prev: any) => {
+        const safePrev = prev || [];
+
+        const issueExists = safePrev.some(
+          (iss: any) => iss?.id === payload?.data?.id,
+        );
+
+        if (issueExists) {
+          const filteredIsssues = safePrev.filter(
+            (iss: any) => iss.id !== payload.data?.id,
+          );
+
+          return [...filteredIsssues, payload?.data];
+        }
+
+        return safePrev;
+      });
+    };
+
+    socket.on("create_issue", handleCreateIssue);
+    socket.on("delete_issue", handleDeleteIssue);
+    socket.on("edit_issue", editHandler);
+
+    return () => {
+      socket.off("create_issue", handleCreateIssue);
+      socket.off("delete_issue", handleDeleteIssue);
+      socket.off("edit_issue", editHandler);
+    };
+  }, []);
 
   const handleDragOver = async (event: any) => {
     const sourceId = event.operation.source?.id as string;
@@ -63,8 +119,8 @@ const KanbanClient = ({
               projectId={projectId}
             >
               {issues
-                .filter((issue: any) => issue.statusId === status.id)
-                .map((issue: any) => {
+                ?.filter((issue: any) => issue?.statusId === status?.id)
+                ?.map((issue: any) => {
                   const findUser = workspaceMembers?.find(
                     (mem: any) => issue?.assigneeId === mem?.user?.id,
                   );
@@ -89,7 +145,7 @@ const KanbanClient = ({
                         }
                       >
                         <DraggableCard
-                          key={issue.id}
+                          key={issue?.id}
                           issueData={issueDataProp}
                         />
                       </span>
