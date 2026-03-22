@@ -6,3 +6,4 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const BASE_URL = process.env.BASE_URL;
+export const SOCKET_BASE_URL = process.env.SOCKET_BASE_URL;
