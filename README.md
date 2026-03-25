@@ -4,7 +4,7 @@
 
 ## Overview
 
-TaskFlow is a collaborative task management platform designed for high-performing engineering teams. It helps teams track issues, ship faster, and stay organized with a clean, intuitive interface.
+TaskFlow is a real-time collaborative task management platform designed for high-performing engineering teams. It helps teams track issues, ship faster, and stay organized with a clean, intuitive interface.
 
 ## Features
 
