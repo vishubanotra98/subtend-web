@@ -1,6 +1,6 @@
 # TaskFlow
 
-> A modern team task management application built with Next.js 15, TypeScript, and Prisma.
+> A modern team task management application built with Next.js 16, TypeScript, and Prisma.
 
 ## Overview
 
