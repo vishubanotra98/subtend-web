@@ -54,8 +54,9 @@ export const addIssueAction = async (payload: any) => {
         beforeState: null,
         afterState: null,
       };
-      await activityLogger(loggerData);
-      await socketService("create_issue", createIssue);
+      const activity = await activityLogger(loggerData);
+      const socketData = { issueData: createIssue, activity };
+      await socketService("create_issue", socketData);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return createIssue;
     },
@@ -109,6 +110,7 @@ export const editIssueAction = async (payload: any) => {
         issueId,
       };
 
+      const activityList = [];
       if (
         oldIssue?.title !== editIssue?.title ||
         oldIssue?.description !== editIssue?.description
@@ -118,7 +120,8 @@ export const editIssueAction = async (payload: any) => {
           action: "DETAILS_UPDATED",
           entityTitle: title,
         };
-        await activityLogger(loggerData);
+        const activity = await activityLogger(loggerData);
+        activityList.push(activity);
       }
 
       if (oldIssue?.priority !== editIssue?.priority) {
@@ -133,7 +136,8 @@ export const editIssueAction = async (payload: any) => {
             new_priority: priority,
           },
         };
-        await activityLogger(loggerData);
+        const activity = await activityLogger(loggerData);
+        activityList.push(activity);
       }
 
       if (oldIssue?.assigneeId !== editIssue?.assigneeId) {
@@ -148,7 +152,8 @@ export const editIssueAction = async (payload: any) => {
             new_assignee: editIssue?.assigneeId,
           },
         };
-        await activityLogger(loggerData);
+        const activity = await activityLogger(loggerData);
+        activityList.push(activity);
       }
 
       if (oldIssue?.statusId !== editIssue?.statusId) {
@@ -163,9 +168,14 @@ export const editIssueAction = async (payload: any) => {
             newStatusId: editIssue?.statusId,
           },
         };
-        await activityLogger(loggerData);
+        const activity = await activityLogger(loggerData);
+        activityList.push(activity);
       }
-      await socketService("edit_issue", editIssue);
+      const socketData = {
+        issueData: editIssue,
+        activityList,
+      };
+      await socketService("edit_issue", socketData);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return editIssue;
     },
@@ -186,13 +196,13 @@ export const deleteIssue = async (payload: any) => {
         );
       }
 
-      const issue = await prisma.issue.delete({
+      const issue = await prisma?.issue?.delete({
         where: { id: issueId },
       });
 
       const loggerData: ActivityInterface = {
         action: "DELETED",
-        entityTitle: issue.title,
+        entityTitle: issue?.title,
         userId: currentUser,
         workspaceId: workspaceId,
         teamId: teamId,
@@ -202,8 +212,12 @@ export const deleteIssue = async (payload: any) => {
         afterState: null,
       };
 
-      await activityLogger(loggerData);
-      await socketService("delete_issue", issue?.id);
+      const activity = await activityLogger(loggerData);
+      const socketData = {
+        deletedIssueId: issue?.id,
+        activity,
+      };
+      await socketService("delete_issue", socketData);
       revalidatePath(`/${workspaceId}/dashboard`);
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
     },
@@ -260,7 +274,12 @@ export const moveCardAction = async (payload: any) => {
         },
       };
 
-      await activityLogger(loggerData);
+      const activity = await activityLogger(loggerData);
+      const socketData = {
+        cardData: card,
+        activity,
+      };
+      await socketService("issue_moved", socketData);
 
       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
       return card;

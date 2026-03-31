@@ -5,5 +5,5 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const BASE_URL = process.env.BASE_URL;
-export const SOCKET_BASE_URL = process.env.SOCKET_BASE_URL;
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+export const SOCKET_BASE_URL = process.env.NEXT_PUBLIC_SOCKET_BASE_URL;
