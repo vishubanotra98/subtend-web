@@ -2,7 +2,7 @@ import prisma from "./prisma";
 
 export const activityLogger = async (data: any) => {
   try {
-    await prisma.activity.create({
+    const res = await prisma.activity.create({
       data: {
         action: data?.action,
         entityTitle: data?.entityTitle,
@@ -15,6 +15,7 @@ export const activityLogger = async (data: any) => {
         afterState: data?.afterState || null,
       },
     });
+    return res;
   } catch (error) {
     console.error("Failed to log activity: ", error);
   }

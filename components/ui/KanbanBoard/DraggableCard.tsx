@@ -1,7 +1,7 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/react";
-import { getTeamPrefix } from "@/utils/constants";
+import { getTeamPrefix, priorityList } from "@/utils/constants";
 
 const DraggableCard = ({ issueData }: any) => {
   const issue = issueData?.issue;
@@ -16,6 +16,13 @@ const DraggableCard = ({ issueData }: any) => {
     .join("");
 
   const team = issueData?.team;
+
+  const currentPriority = priorityList?.find(
+    (p) => p.value === issue?.priority?.toUpperCase(),
+  );
+
+  const PriorityIcon = currentPriority?.icon;
+
   return (
     <div ref={ref} className="p-3 flex flex-col gap-3">
       <div
@@ -29,10 +36,7 @@ const DraggableCard = ({ issueData }: any) => {
           </span>
 
           <div className="flex -space-x-1.5">
-            <div
-              className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center ring-2 ring-[#1F2937]"
-              title="Assignee: Vishu Banotra"
-            >
+            <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center ring-2 ring-[#1F2937]">
               <span className="text-[8px] font-bold text-white">
                 {nameInitials}
               </span>
@@ -44,7 +48,19 @@ const DraggableCard = ({ issueData }: any) => {
           {issue?.title}
         </h4>
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex items-center gap-2">
+          {PriorityIcon && (
+            <div
+              className="flex items-center gap-1 px-1.5 py-0.5 bg-[#111827] border border-[#374151] rounded"
+              title={`Priority: ${currentPriority?.label}`}
+            >
+              <PriorityIcon size={12} color={currentPriority?.color} />
+              <span className="text-[10px] text-gray-400 font-medium">
+                {currentPriority?.label}
+              </span>
+            </div>
+          )}
+
           <span className="px-1.5 py-0.5 bg-[#111827] border border-[#374151] rounded text-[10px] text-gray-400">
             {team?.name}
           </span>

@@ -27,11 +27,12 @@ const KanbanClient = ({
 
   useEffect(() => {
     const handleCreateIssue = (payload: any) => {
+      const { issueData } = payload?.data;
       setIssues((prev: any) => {
         const safePrev = prev || [];
 
-        const issueExists = safePrev.some(
-          (iss: any) => iss?.id === payload?.data?.id,
+        const issueExists = safePrev?.some(
+          (iss: any) => iss?.id === issueData?.id,
         );
 
         if (issueExists) {
@@ -43,40 +44,55 @@ const KanbanClient = ({
     };
 
     const handleDeleteIssue = (payload: any) => {
+      const { deletedIssueId } = payload?.data;
       setIssues((prev: any) => {
         const safePrev = prev || [];
-        return safePrev.filter((iss: any) => iss.id !== payload.data);
+        return safePrev?.filter((iss: any) => iss?.id !== deletedIssueId);
       });
     };
 
     const editHandler = (payload: any) => {
+      const { issueData } = payload?.data;
       setIssues((prev: any) => {
         const safePrev = prev || [];
 
-        const issueExists = safePrev.some(
-          (iss: any) => iss?.id === payload?.data?.id,
+        const issueExists = safePrev?.some(
+          (iss: any) => iss?.id === issueData?.id,
         );
 
         if (issueExists) {
           const filteredIsssues = safePrev.filter(
-            (iss: any) => iss.id !== payload.data?.id,
+            (iss: any) => iss?.id !== issueData?.id,
           );
 
-          return [...filteredIsssues, payload?.data];
+          return [...filteredIsssues, issueData];
         }
 
         return safePrev;
       });
     };
 
+    const handleIssueMove = (payload: any) => {
+      const { cardData } = payload?.data;
+      setIssues((prev: any) => {
+        const safePrev = prev || [];
+        const filteredIssues = safePrev?.filter(
+          (issue: any) => issue?.id !== cardData?.id,
+        );
+        return [...filteredIssues, cardData];
+      });
+    };
+
     socket.on("create_issue", handleCreateIssue);
     socket.on("delete_issue", handleDeleteIssue);
     socket.on("edit_issue", editHandler);
+    socket.on("issue_moved", handleIssueMove);
 
     return () => {
       socket.off("create_issue", handleCreateIssue);
       socket.off("delete_issue", handleDeleteIssue);
       socket.off("edit_issue", editHandler);
+      socket.off("issue_moved", handleIssueMove);
     };
   }, []);
 
