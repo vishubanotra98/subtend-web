@@ -14,6 +14,7 @@ const ClientVerification = () => {
 
   const token = searchParams.get("utok");
   const email = searchParams.get("email");
+  const role = searchParams.get("role");
 
   const [status, setStatus] = useState<"VERIFYING" | "SUCCESS" | "ERROR">(
     "VERIFYING",
@@ -39,7 +40,9 @@ const ClientVerification = () => {
         toast.success("Verified!");
 
         setTimeout(() => {
-          router.push(`/sign-up?email=${email}&utok=${token}&verified=true`);
+          router.push(
+            `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
+          );
         }, 2000);
       } else {
         setStatus("ERROR");

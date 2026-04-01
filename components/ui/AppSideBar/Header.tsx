@@ -20,7 +20,7 @@ import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 
-const Header = ({ userData }: any) => {
+const Header = ({ userData, isAdmin }: any) => {
   const [open, setOpen] = useState(false);
   const params = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,7 +42,7 @@ const Header = ({ userData }: any) => {
           <Collapsible open={open} onOpenChange={setOpen}>
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton className="sidebar-transition hover:bg-[#1f2937]">
+                <SidebarMenuButton className="menu-item-button hover:bg-[#1f2937]">
                   <span className="text-14-500-primary flex items-center gap-1.5">
                     <FolderKanban size={14} className="mb-0.5" />
                     Workspaces
@@ -78,25 +78,28 @@ const Header = ({ userData }: any) => {
                     );
                   })}
 
-                  <div className="h-px bg-[#1f2937] my-2" />
-
-                  <li className="">
-                    <Modal
-                      open={modalOpen}
-                      setOpen={() => setModalOpen((prev) => !prev)}
-                      buttonClassName="w-full"
-                      title="Create your workspace"
-                      buttonInnerText={
-                        <span className="flex gap-1.5 items-center">
-                          <CirclePlus color="#e5e7eb" size={15} />
-                          <span className="text-14-400-primary">
-                            Add New Workspace
-                          </span>
-                        </span>
-                      }
-                      body={<CreateWorkspaceModal userId={userData?.id} />}
-                    />
-                  </li>
+                  {isAdmin && (
+                    <div>
+                      <div className="h-px bg-[#1f2937] my-2" />
+                      <li className="">
+                        <Modal
+                          open={modalOpen}
+                          setOpen={() => setModalOpen((prev) => !prev)}
+                          buttonClassName="w-full"
+                          title="Create your workspace"
+                          buttonInnerText={
+                            <span className="flex gap-1.5 items-center">
+                              <CirclePlus color="#e5e7eb" size={15} />
+                              <span className="text-14-400-primary">
+                                Add New Workspace
+                              </span>
+                            </span>
+                          }
+                          body={<CreateWorkspaceModal userId={userData?.id} />}
+                        />
+                      </li>
+                    </div>
+                  )}
                 </ul>
               </CollapsibleContent>
             </SidebarMenuItem>

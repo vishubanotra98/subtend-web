@@ -30,7 +30,12 @@ import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
 
-export function AppSidebar({ workspaceData, teams, currentUser }: any) {
+export function AppSidebar({
+  workspaceData,
+  teams,
+  currentUser,
+  workspaceMemberData,
+}: any) {
   const [teamsOpen, setTeamsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
@@ -73,19 +78,21 @@ export function AppSidebar({ workspaceData, teams, currentUser }: any) {
         .join("")
     : currentUser?.firstName[0] + currentUser?.lastName[0];
 
+  const isAdmin = workspaceMemberData?.role === "ADMIN";
+
   return (
     <Sidebar>
-      <Header userData={workspaceData} />
+      <Header userData={workspaceData} isAdmin={isAdmin} />
 
       <SidebarContent className="gap-0">
         <SidebarGroup>
           <SidebarMenuButton
             onClick={() => router.push(`/${params?.workspaceId}/dashboard`)}
-            className={`w-full justify-start py-6 px-4 hover:bg-[#1f2937] transition-colors mb-1 ${
+            className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
               isActiveItem("dashboard") ? "bg-[#1f2937]" : ""
-            }`}
+            } cursor-pointer`}
           >
-            <LayoutDashboard size={18} className="mr-2 text-[#6b7280]" />
+            <LayoutDashboard size={18} className="text-[#e5e7eb]" />
             <span className="text-sm font-medium text-[#e5e7eb]">
               Dashboard
             </span>
@@ -97,9 +104,9 @@ export function AppSidebar({ workspaceData, teams, currentUser }: any) {
             className="mt-2"
           >
             <CollapsibleTrigger asChild>
-              <SidebarMenuButton className="w-full justify-between py-6 px-3 hover:bg-[#1f2937] transition-colors group">
+              <SidebarMenuButton className="menu-item-button w-full justify-between hover:bg-[#1f2937] transition-colors group cursor-pointer">
                 <div className="flex items-center">
-                  <Users size={18} className="mr-2 text-[#6b7280]" />
+                  <Users size={18} className="text-[#e5e7eb] mr-2" />
                   <span className="text-sm font-medium text-[#e5e7eb]">
                     Teams
                   </span>
@@ -117,33 +124,39 @@ export function AppSidebar({ workspaceData, teams, currentUser }: any) {
               <ul className="flex flex-col gap-1 mt-1 px-2">
                 {teams?.length > 0 ? (
                   teams?.map((team: any) => (
-                    <TeamItem key={team.id} team={team} params={params} />
+                    <TeamItem
+                      key={team.id}
+                      team={team}
+                      params={params}
+                      isAdmin={isAdmin}
+                    />
                   ))
                 ) : (
                   <div className="px-2 py-2 flex flex-col gap-1">
                     <span className="text-[11px] text-zinc-500 font-medium opacity-60 px-1">
                       No teams created
                     </span>
-
-                    <Modal
-                      buttonClassName="w-full"
-                      buttonInnerText={
-                        <>
-                          <Users
-                            size={14}
-                            className="group-hover:text-zinc-400 transition-colors"
-                          />
-                          Create Team
-                        </>
-                      }
-                      open={teamModal}
-                      setOpen={() => setTeamModal((prev) => !prev)}
-                      title="Add New Team"
-                      body={<AddTeamForm setModal={setTeamModal} />}
-                    />
                   </div>
                 )}
               </ul>
+
+              {isAdmin && (
+                <div className="mx-2 mt-2">
+                  <Modal
+                    buttonClassName="w-full"
+                    buttonInnerText={
+                      <>
+                        <Users size={14} />
+                        Create Team
+                      </>
+                    }
+                    open={teamModal}
+                    setOpen={() => setTeamModal((prev) => !prev)}
+                    title="Add New Team"
+                    body={<AddTeamForm setModal={setTeamModal} />}
+                  />
+                </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
         </SidebarGroup>
@@ -187,7 +200,7 @@ export function AppSidebar({ workspaceData, teams, currentUser }: any) {
   );
 }
 
-function TeamItem({ team, params }: any) {
+function TeamItem({ team, params, isAdmin }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isProjectActive = (projectId: string) => {
@@ -198,7 +211,7 @@ function TeamItem({ team, params }: any) {
     <li>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full p-2 rounded-md hover:bg-[#1f2937] transition-colors group">
+          <button className="flex items-center justify-between w-full p-2 rounded-md hover:bg-[#1f2937] transition-colors group cursor-pointer">
             <span className="flex items-center text-sm text-[#e5e7eb]">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-3" />
               {team?.name}
@@ -241,26 +254,28 @@ function TeamItem({ team, params }: any) {
               </div>
             )}
 
-            <li className="pt-1">
-              <Modal
-                open={isModalOpen}
-                setOpen={() => setIsModalOpen((prev) => !prev)}
-                title="Create Project"
-                body={
-                  <CreateProjectModal
-                    setIsModalOpen={setIsModalOpen}
-                    teamId={team?.id}
-                  />
-                }
-                buttonClassName="w-full"
-                buttonInnerText={
-                  <div className="flex items-center text-xs  transition-colors cursor-pointer py-1">
-                    <Plus size={12} className="mr-2" />
-                    Create Project
-                  </div>
-                }
-              />
-            </li>
+            {isAdmin && (
+              <li className="pt-1">
+                <Modal
+                  open={isModalOpen}
+                  setOpen={() => setIsModalOpen((prev) => !prev)}
+                  title="Create Project"
+                  body={
+                    <CreateProjectModal
+                      setIsModalOpen={setIsModalOpen}
+                      teamId={team?.id}
+                    />
+                  }
+                  buttonClassName="w-full"
+                  buttonInnerText={
+                    <div className="flex items-center text-xs  transition-colors cursor-pointer py-1">
+                      <Plus size={12} className="mr-2" />
+                      Create Project
+                    </div>
+                  }
+                />
+              </li>
+            )}
           </ul>
         </CollapsibleContent>
       </Collapsible>

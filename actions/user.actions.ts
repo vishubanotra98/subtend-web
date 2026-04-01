@@ -59,21 +59,29 @@ export const createTeamAction = async (
       }
 
       const membership = await prisma.workspaceMembers?.findFirst({
-        where: { userId: user?.id },
+        where: { userId: user?.id, workspaceId },
       });
 
       if (!membership) {
         throw new Error("You are not member of this workspace");
       }
 
+      const adminMembers = await prisma.workspaceMembers?.findMany({
+        where: { workspaceId, role: "ADMIN" },
+        select: { userId: true },
+      });
+
+      const adminIds = adminMembers?.map((admin) => admin?.userId);
+      const teamMemberIds = Array.from(new Set([user?.id, ...adminIds]));
+
       const team = await prisma.team.create({
         data: {
           name: teamName,
           workspaceId,
           members: {
-            create: {
-              userId: user?.id,
-            },
+            create: teamMemberIds?.map((id) => ({
+              userId: id,
+            })),
           },
         },
       });
@@ -102,7 +110,7 @@ export const createProjectAction = async (
       const membership = await prisma.teamMembers.findFirst({
         where: {
           teamId: teamId,
-          userId: user.id,
+          userId: user?.id,
         },
         include: {
           team: true,
@@ -115,7 +123,14 @@ export const createProjectAction = async (
         );
       }
 
-      const workspaceId = membership.team.workspaceId;
+      const workspaceId = membership?.team?.workspaceId;
+      const workspaceUser = await prisma.workspaceMembers.findFirst({
+        where: { workspaceId, userId: user?.id },
+      });
+
+      if (workspaceUser?.role !== "ADMIN") {
+        throw new Error("You must be an admin to create a project.");
+      }
 
       const project = await prisma.project.create({
         data: {
@@ -134,9 +149,11 @@ export const createProjectAction = async (
 export const inviteUserAction = async ({
   email,
   workspaceId,
+  role,
 }: {
   email: string;
   workspaceId: string;
+  role: string;
 }) => {
   return executeAction({
     successMessage: "User Invited",
@@ -181,6 +198,7 @@ export const inviteUserAction = async ({
           email,
           token,
           workspaceId,
+          role,
         }),
       });
     },
