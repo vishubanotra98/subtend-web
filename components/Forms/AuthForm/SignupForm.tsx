@@ -25,6 +25,7 @@ export function SignupForm() {
 
   const token = params.get("utok");
   const inivitedEmail = params.get("email");
+  const role = params.get("role");
   const {
     register,
     handleSubmit,
@@ -42,7 +43,8 @@ export function SignupForm() {
   const handleSignup = async (formData: RegisterUserWithConfirmSchema) => {
     setLoading(true);
 
-    const res = await signUpAction(formData, token);
+    const isAdmin = role === "ADMIN" ? true : false;
+    const res = await signUpAction(formData, token, isAdmin);
 
     if (res?.success) {
       const workspaceId = res?.data?.workspaceId;

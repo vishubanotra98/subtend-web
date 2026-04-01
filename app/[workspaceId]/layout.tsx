@@ -42,6 +42,10 @@ export default async function MainLayout({
     },
   });
 
+  const workspaceMember = await prisma?.workspaceMembers?.findFirst({
+    where: { userId: currentUser?.id, workspaceId: wsParams?.workspaceId },
+  });
+
   return (
     <div>
       <SidebarProvider>
@@ -49,6 +53,7 @@ export default async function MainLayout({
           teams={teams}
           workspaceData={workspaces}
           currentUser={currentUser}
+          workspaceMemberData={workspaceMember}
         />
         <main className="py-3 px-4 w-full bg-primary-2">
           <SidebarTrigger className=" cursor-pointer bg-transparent hover:bg-[#1f2937]" />

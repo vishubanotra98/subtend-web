@@ -34,6 +34,7 @@ export const logOutAction = async () => {
 export const signUpAction = async (
   formData: RegisterUserWithConfirmSchema,
   token: string | null,
+  isAdmin = false,
 ) => {
   return executeAction({
     successMessage: token ? "" : "Verification code sent to your email.",
@@ -67,7 +68,7 @@ export const signUpAction = async (
             workspaces: {
               create: {
                 workspaceId: ifUserExists?.workspaceId,
-                role: "MEMBER",
+                role: !isAdmin ? "MEMBER" : "ADMIN",
               },
             },
           },

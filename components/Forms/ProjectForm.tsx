@@ -33,9 +33,9 @@ export function CreateProjectModal({
     let res = await createProjectAction(projectName, teamId);
 
     if (res?.success) {
-      toast.success(res.message);
+      toast.success(res?.message);
     } else {
-      toast.error("Error creating project.");
+      toast.error(res?.message || "Error creating project.");
     }
     setLoading(false);
     setIsModalOpen(false);

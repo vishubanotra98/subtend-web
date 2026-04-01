@@ -296,6 +296,11 @@ body {
     transition: all 0.2s ease-in-out;
   }
 
+  .menu-item-button {
+    padding: 20px 10px;
+    transition: all 0.2s ease-in-out;
+  }
+
   .sidebar-item {
     transition:
       background-color 0.15s ease-in-out,
