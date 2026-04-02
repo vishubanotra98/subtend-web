@@ -29,6 +29,7 @@ import { Modal } from "@/components/Common/Modal";
 import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
+import { socket } from "@/lib/socket";
 
 export function AppSidebar({
   workspaceData,
@@ -40,12 +41,17 @@ export function AppSidebar({
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
   const [online, setIsOnline] = useState(false);
+  const [teamsList, setTeamsList] = useState(teams);
 
   const router = useRouter();
   const params = useParams();
   const pathName = usePathname();
 
   const isActiveItem = (key: string) => pathName.includes(key);
+
+  useEffect(() => {
+    setTeamsList(teams);
+  }, [teams]);
 
   useEffect(() => {
     if (!navigator.onLine) {
@@ -68,6 +74,17 @@ export function AppSidebar({
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const getTeamData = (data: any) => {
+      const newData = data.data;
+      setTeamsList((prev: any) => [...prev, newData]);
+    };
+    socket.on("create_team", getTeamData);
+    return () => {
+      socket.off("create_team", getTeamData);
     };
   }, []);
 
@@ -122,8 +139,8 @@ export function AppSidebar({
 
             <CollapsibleContent>
               <ul className="flex flex-col gap-1 mt-1 px-2">
-                {teams?.length > 0 ? (
-                  teams?.map((team: any) => (
+                {teamsList?.length > 0 ? (
+                  teamsList?.map((team: any) => (
                     <TeamItem
                       key={team.id}
                       team={team}
