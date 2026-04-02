@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid";
 import UserInvitation from "@/VerificationEmail/UserInvitation";
 import { resend } from "@/helpers/verificationEmail";
 import { DEFAULT_STATUSES } from "@/utils/constants";
+import socketService from "@/lib/socket-api-service";
 
 export const createWorkspaceAction = async (
   data: WorkspaceNameType,
@@ -86,6 +87,7 @@ export const createTeamAction = async (
         },
       });
 
+      await socketService("create_team", team);
       revalidatePath(`${workspaceId}/dashboard`);
       return team;
     },
