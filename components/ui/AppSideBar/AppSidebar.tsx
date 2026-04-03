@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   Plus,
+  Settings2,
 } from "lucide-react";
 import {
   Sidebar,
@@ -101,7 +102,7 @@ export function AppSidebar({
     <Sidebar>
       <Header userData={workspaceData} isAdmin={isAdmin} />
 
-      <SidebarContent className="gap-0">
+      <SidebarContent className="gap-0 flex flex-col justify-between">
         <SidebarGroup>
           <SidebarMenuButton
             onClick={() => router.push(`/${params?.workspaceId}/dashboard`)}
@@ -177,12 +178,26 @@ export function AppSidebar({
             </CollapsibleContent>
           </Collapsible>
         </SidebarGroup>
+
+        <SidebarGroup className="">
+          <SidebarMenuButton
+            onClick={() => router.push(`/${params?.workspaceId}/settings`)}
+            className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
+              isActiveItem("settings") ? "bg-[#1f2937]" : ""
+            } cursor-pointer`}
+          >
+            <Settings2 size={18} className="text-[#e5e7eb]" />
+            <span className="text-sm font-medium text-[#e5e7eb]">
+              Workspace Settings
+            </span>
+          </SidebarMenuButton>
+        </SidebarGroup>
       </SidebarContent>
 
-      <div className="h-px bg-[#1f2937] mx-4 my-2 opacity-50" />
+      <div className="h-px bg-[#1f2937] my-2 opacity-50" />
 
-      <SidebarFooter className="p-4">
-        <div className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-[#1f2937] transition-colors">
+      <SidebarFooter className="pb-3">
+        <div className="flex items-center gap-3 w-full rounded-lg hover:bg-[#1f2937] transition-colors">
           <Avatar className="h-8 w-8 rounded-full border border-[#1f2937] bg-[#111827] shrink-0">
             <AvatarImage
               src={currentUser?.image}
