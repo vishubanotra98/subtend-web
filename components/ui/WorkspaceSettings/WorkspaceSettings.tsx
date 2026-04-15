@@ -14,7 +14,7 @@ const options: { label: string; value: OptionTypes }[] = [
   { label: "Danger Zone", value: "danger" },
 ];
 
-const WorkspaceSettings = () => {
+const WorkspaceSettings = ({ workspaceMembers, currentUser }: any) => {
   const [option, setOption] = useState<OptionTypes>("general");
 
   return (
@@ -45,7 +45,12 @@ const WorkspaceSettings = () => {
 
         <div className="mt-6">
           {option === "general" && <div>General Settings Content</div>}
-          {option === "members" && <MembersTabContent />}
+          {option === "members" && (
+            <MembersTabContent
+              workspaceMembers={workspaceMembers}
+              currentUser={currentUser}
+            />
+          )}
           {option === "teamproject" && <TeamsProjectsTabContent />}
           {option === "danger" && <DangerContentTab />}
         </div>

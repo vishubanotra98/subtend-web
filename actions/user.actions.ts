@@ -11,6 +11,7 @@ import UserInvitation from "@/VerificationEmail/UserInvitation";
 import { resend } from "@/helpers/verificationEmail";
 import { DEFAULT_STATUSES } from "@/utils/constants";
 import socketService from "@/lib/socket-api-service";
+import { Role } from "@/app/generated/prisma/enums";
 
 export const createWorkspaceAction = async (
   data: WorkspaceNameType,
@@ -88,7 +89,7 @@ export const createTeamAction = async (
       });
 
       await socketService("create_team", team);
-      revalidatePath(`${workspaceId}/dashboard`);
+      revalidatePath(`/${workspaceId}/dashboard`);
       return team;
     },
     successMessage: "Team created successfully.",
@@ -203,6 +204,53 @@ export const inviteUserAction = async ({
           role,
         }),
       });
+    },
+  });
+};
+
+export const changRoleAction = async (
+  workspaceId: string,
+  userId: string,
+  role: Role,
+) => {
+  return executeAction({
+    successMessage: `Role Changed to ${role}`,
+    actionFn: async () => {
+      const session = await auth();
+      if (!session?.user?.id) throw new Error("Unauthorised");
+
+      const isAdmin = await prisma?.workspaceMembers?.findUnique({
+        where: {
+          userId_workspaceId: {
+            userId: session?.user?.id,
+            workspaceId,
+          },
+        },
+      });
+
+      if (!isAdmin || isAdmin?.role !== "ADMIN")
+        throw new Error(
+          "Only workspace administrators can change member roles.",
+        );
+
+      const correctRole = ["MEMBER", "ADMIN"].includes(role);
+      if (!correctRole) throw new Error("Invalid Role.");
+
+      const res = await prisma.workspaceMembers.update({
+        where: {
+          userId_workspaceId: {
+            userId,
+            workspaceId,
+          },
+        },
+        data: {
+          role,
+        },
+      });
+
+      revalidatePath(`/${workspaceId}/settings`);
+      revalidatePath(`/${workspaceId}/dashboard`);
+      return res;
     },
   });
 };

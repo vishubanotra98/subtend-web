@@ -1,69 +1,72 @@
 "use client";
 
-import { useState } from "react";
-import { UserMinus, Mail, ChevronDown, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { UserMinus, UserPlus } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { nameInitials } from "@/utils/constants";
+import { Modal } from "@/components/Common/Modal";
+import { InviteMemberForm } from "@/components/Forms/InviteMember";
+import Select from "react-select";
+import { commonSelectStyles } from "@/utils/styles";
+import { changRoleAction } from "@/actions/user.actions";
+import { WorkspaceMembers } from "@/app/generated/prisma/client";
+import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
 
-type MemberRole = "Admin" | "Member";
-
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  role: MemberRole;
-  avatarInitial: string;
-  avatarBgColor: string;
-  isCurrentUser: boolean;
-}
-
-const mockMembers: Member[] = [
+const options = [
   {
-    id: "user1",
-    name: "banotravishu89@gmail.com",
-    email: "banotravishu89@gmail.com",
-    role: "Admin",
-    avatarInitial: "V",
-    avatarBgColor: "bg-emerald-950 text-emerald-300 border border-emerald-800",
-    isCurrentUser: true,
+    label: "Admin",
+    value: "ADMIN",
   },
   {
-    id: "user2",
-    name: "Sarah Chen",
-    email: "sarah@taskflow.dev",
-    role: "Member",
-    avatarInitial: "SC",
-    avatarBgColor: "bg-purple-950 text-purple-300 border border-purple-800",
-    isCurrentUser: false,
-  },
-  {
-    id: "user3",
-    name: "Sarah Yiong",
-    email: "sarah@taskflow.dev",
-    role: "Member",
-    avatarInitial: "SC",
-    avatarBgColor: "bg-lime-950 text-lime-300 border border-lime-800",
-    isCurrentUser: false,
-  },
-  {
-    id: "user4",
-    name: "Sarah Štosilan",
-    email: "sarah@taskflow.dev",
-    role: "Member",
-    avatarInitial: "FR",
-    avatarBgColor: "bg-sky-950 text-sky-300 border border-sky-800",
-    isCurrentUser: false,
+    label: "Member",
+    value: "MEMBER",
   },
 ];
 
-const MembersTabContent = () => {
-  const [members, setMembers] = useState<Member[]>(mockMembers);
+const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
+  const [members, setMembers] = useState<WorkspaceMembers[]>([]);
+  const [userModal, setUserModal] = useState(false);
+  const { workspaceId } = useParams();
+
+  useEffect(() => {
+    setMembers(workspaceMembers);
+  }, workspaceMembers);
+
+  const handleRoleChange = async (
+    workspaceId: string,
+    userId: string,
+    role: any,
+  ) => {
+    const res = await changRoleAction(workspaceId, userId, role);
+    if (!res?.success) {
+      toast?.error("Something went wrong.");
+    }
+  };
 
   return (
     <div className="space-y-10">
       <div className="flex justify-end">
-        <button className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg text-sm flex items-center gap-2 transition-colors">
-          <Mail size={16} />
-          Invite Member
-        </button>
+        <Modal
+          buttonClassName=""
+          buttonInnerText={
+            <span className="flex items-center justify-center gap-1.5">
+              <UserPlus size={14} />
+              Invite Member
+            </span>
+          }
+          open={userModal}
+          setOpen={() => setUserModal((prev) => !prev)}
+          title="Invite New Member"
+          body={
+            <>
+              <InviteMemberForm
+                workspaceId={workspaceId}
+                setModal={setUserModal}
+              />
+            </>
+          }
+        />
       </div>
 
       <div className="bg-[#11131f] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
@@ -85,22 +88,27 @@ const MembersTabContent = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
-            {members.map((member) => (
+            {members?.map((member: any) => (
               <tr
                 key={member.id}
                 className="hover:bg-[#161826]/50 transition-colors"
               >
                 <td className="px-6 py-5 flex items-center gap-4">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg ${member.avatarBgColor}`}
-                  >
-                    {member.avatarInitial}
-                  </div>
+                  <Avatar className="h-8 w-8 rounded-full border border-[#1f2937] bg-[#111827] shrink-0">
+                    <AvatarImage
+                      src={member?.user?.image}
+                      className="object-cover rounded-full"
+                    />
+                    <AvatarFallback className="rounded-full flex items-center justify-center my-auto h-full  text-[#e5e7eb]">
+                      {nameInitials(member?.user)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex flex-col">
                     <span className="font-semibold text-gray-100">
-                      {member.name}
+                      {member?.user?.name ||
+                        member?.user?.firstName + " " + member?.user?.lastName}
                     </span>
-                    {member.isCurrentUser && (
+                    {member?.userId === currentUser && (
                       <span className="text-xs text-purple-400 font-medium">
                         (You)
                       </span>
@@ -109,27 +117,36 @@ const MembersTabContent = () => {
                 </td>
 
                 <td className="px-6 py-5 text-gray-300 font-mono">
-                  {member.email}
+                  {member?.user?.email}
                 </td>
 
                 <td className="px-6 py-5">
                   <div className="relative w-32">
-                    <select
-                      value={member.role}
-                      className="w-full appearance-none bg-[#0d0f17] border border-gray-700 text-gray-100 text-sm rounded-lg px-4 py-2 pr-9 outline-0  transition-colors"
-                    >
-                      <option value="Admin">Admin</option>
-                      <option value="Member">Member</option>
-                    </select>
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                    <Select
+                      options={options}
+                      onChange={(val) => {
+                        handleRoleChange(
+                          member?.workspaceId,
+                          member?.userId,
+                          val?.value,
+                        );
+                      }}
+                      value={options.find(
+                        (val: any) => val?.value === member?.role,
+                      )}
+                      getOptionValue={(val: any) => val.value}
+                      getOptionLabel={(val: any) => val.label}
+                      placeholder="Change Role"
+                      styles={commonSelectStyles}
+                      menuPortalTarget={document?.body}
+                      isDisabled={member?.userId === currentUser}
+                      isClearable={false}
                     />
                   </div>
                 </td>
 
                 <td className="px-6 py-5 relative">
-                  {member.isCurrentUser ? (
+                  {member?.userId === currentUser ? (
                     <button
                       disabled
                       className="px-4 py-2 bg-gray-800/60 text-gray-500 font-medium rounded-lg text-xs flex items-center gap-2 cursor-not-allowed border border-gray-700/50"

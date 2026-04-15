@@ -32,7 +32,7 @@ export const InviteMemberForm = ({
   workspaceId,
   setModal,
 }: {
-  workspaceId: string;
+  workspaceId: any;
   setModal: (value: boolean) => void;
 }) => {
   const [loading, setLoading] = useState(false);
