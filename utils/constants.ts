@@ -99,3 +99,12 @@ export const activityConfig: any = {
     color: "text-gray-400",
   },
 };
+
+export const nameInitials = (user: any) => {
+  return user?.name
+    ? user?.name
+        ?.split(" ")
+        .map((item: any) => item[0])
+        .join("")
+    : user?.firstName[0] + user?.lastName[0];
+};

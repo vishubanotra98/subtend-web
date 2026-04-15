@@ -31,6 +31,7 @@ import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
 import { socket } from "@/lib/socket";
+import { nameInitials } from "@/utils/constants";
 
 export function AppSidebar({
   workspaceData,
@@ -88,13 +89,6 @@ export function AppSidebar({
       socket.off("create_team", getTeamData);
     };
   }, []);
-
-  const nameInitials = currentUser?.name
-    ? currentUser?.name
-        ?.split(" ")
-        .map((item: any) => item[0])
-        .join("")
-    : currentUser?.firstName[0] + currentUser?.lastName[0];
 
   const isAdmin = workspaceMemberData?.role === "ADMIN";
 
@@ -204,7 +198,7 @@ export function AppSidebar({
               className="object-cover rounded-full"
             />
             <AvatarFallback className="rounded-full flex items-center justify-center my-auto h-full  text-[#e5e7eb]">
-              {nameInitials}
+              {nameInitials(currentUser)}
             </AvatarFallback>
           </Avatar>
 
