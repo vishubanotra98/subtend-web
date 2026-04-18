@@ -1,6 +1,4 @@
 import WorkspaceSettings from "@/components/ui/WorkspaceSettings/WorkspaceSettings";
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 
 export default async function ({ params }: any) {
   const { workspaceId } = await params;

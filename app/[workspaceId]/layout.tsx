@@ -1,4 +1,3 @@
-import { auth } from "@/lib/auth";
 import { NAV_ITEMS } from "@/utils/constants";
 import Link from "next/link";
 import { redirect } from "next/navigation";

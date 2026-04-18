@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "../../ui/Input/input";
-import { signUpAction } from "@/actions/auth.actions";
+import { signUpAction } from "@/Store/actions/auth.action";
 import { useState } from "react";
 import { Spinner } from "../../ui/Spinner/spinner";
 import toast from "react-hot-toast";
@@ -13,8 +13,10 @@ import {
   RegisterUserWithConfirmSchema,
   registerUserWithConfirmSchema,
 } from "@/lib/schema";
+import { useAppDispatch } from "@/Store/hooks";
 
 export function SignupForm() {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -41,26 +43,32 @@ export function SignupForm() {
   });
 
   const handleSignup = async (formData: RegisterUserWithConfirmSchema) => {
-    setLoading(true);
+    try {
+      setLoading(true);
+      const isAdmin = role === "ADMIN" ? true : false;
+      const payload = {
+        formData,
+        token,
+        isAdmin,
+      };
+      const res = await dispatch(signUpAction(payload)).unwrap();
 
-    const isAdmin = role === "ADMIN" ? true : false;
-    const res = await signUpAction(formData, token, isAdmin);
+      if (res?.success) {
+        const workspaceId = res?.workspaceId;
+        const email = res?.data?.email;
 
-    if (res?.success) {
-      const workspaceId = res?.data?.workspaceId;
-      const email = res.data?.email;
-
-      if (email && workspaceId) {
-        router.push(`/sign-in`);
-      } else {
-        router.push(`/account-verification?email=${email}`);
-        toast.success(res.message);
+        if (email && workspaceId) {
+          router.push(`/sign-in`);
+        } else {
+          router.push(`/account-verification?email=${email}`);
+          toast.success(res?.message);
+        }
       }
-    } else {
-      toast.error(res.message);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

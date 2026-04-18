@@ -1,9 +1,8 @@
-import { google_signin } from "@/actions/auth.actions";
 import Image from "next/image";
 
 export default async function GoogleAuthButton() {
   return (
-    <form action={google_signin}>
+    <form>
       <button type="submit" className="google-auth-btn cursor-pointer">
         <Image
           src="/assets/Google_Logo.png"

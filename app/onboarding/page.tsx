@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
-import { auth } from "@/lib/auth";
 import { LayoutGrid } from "lucide-react";
 
 export default async function OnboardingPage() {

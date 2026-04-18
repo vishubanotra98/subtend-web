@@ -1,7 +1,7 @@
 "use server";
 
 import { activityLogger } from "@/lib/activity-logger";
-import { auth } from "@/lib/auth";
+
 import { executeAction } from "@/lib/executeAction";
 import prisma from "@/lib/prisma";
 import { ActivityInterface } from "@/types/types";

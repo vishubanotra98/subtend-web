@@ -1,7 +1,7 @@
-import { SOCKET_BASE_URL } from "./utils";
+import { BASE_URL_API } from "@/apiConstant/apiConstant";
 
 const socketService = async (event: string, data: any) => {
-  await fetch(`${SOCKET_BASE_URL}/api/broadcast`, {
+  await fetch(`${BASE_URL_API}/api/broadcast`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

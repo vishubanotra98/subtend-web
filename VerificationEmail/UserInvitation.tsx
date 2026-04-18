@@ -13,7 +13,7 @@ import {
   Row,
   Column,
 } from "@react-email/components";
-import { BASE_URL } from "@/lib/utils";
+import { BASE_URL_CLIENT } from "@/apiConstant/apiConstant";
 
 interface InviteProps {
   email: string;
@@ -28,7 +28,7 @@ export function UserInvitation({
   workspaceId,
   role,
 }: InviteProps) {
-  const inviteUrl = `${BASE_URL}/user-invite?utok=${token}&email=${email}&wid=${workspaceId}&role=${role}`;
+  const inviteUrl = `${BASE_URL_CLIENT}/user-invite?utok=${token}&email=${email}&wid=${workspaceId}&role=${role}`;
   const roleLabel = role
     ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
     : "Member";

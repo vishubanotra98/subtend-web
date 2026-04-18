@@ -1,9 +1,10 @@
 "use client";
 
-import { credentials_signIn } from "@/actions/auth.actions";
 import { Input } from "@/components/ui/Input/input";
 import { Spinner } from "@/components/ui/Spinner/spinner";
 import { SignInSchema, signInSchema } from "@/lib/schema";
+import { signInAction } from "@/Store/actions/auth.action";
+import { useAppDispatch } from "@/Store/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +12,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 export function SignInForm() {
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
@@ -22,12 +24,16 @@ export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = async (data: SignInSchema) => {
-    setLoading(true);
-    const res = await credentials_signIn(data);
-    if (!res?.success) {
-      toast.error(res?.message);
+  const handleSignIn = async (payload: SignInSchema) => {
+    try {
+      setLoading(true);
+      await dispatch(signInAction(payload)).unwrap();
+    } catch (err: any) {
+      toast.error(err?.message);
+    } finally {
+      setLoading(false);
     }
+
     setLoading(false);
   };
 
