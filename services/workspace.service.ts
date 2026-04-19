@@ -17,3 +17,15 @@ export const fetchWorkspaceService = async () => {
     throw error;
   }
 };
+
+export const createWorkspaceService = async (payload: {
+  userId: string;
+  workspaceName: string;
+}) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.CREATE_WORKSPACE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

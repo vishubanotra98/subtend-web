@@ -9,6 +9,7 @@ export const API = {
   V1: {
     ME: "/api/v1/user",
     FETCH_WORKSPACES: "/api/v1/workspaces",
+    CREATE_WORKSPACE: "/api/v1/workspace",
   },
 };
 

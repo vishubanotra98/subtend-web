@@ -13,47 +13,13 @@ import { DEFAULT_STATUSES } from "@/utils/constants";
 import socketService from "@/lib/socket-api-service";
 import { Role } from "@/app/generated/prisma/enums";
 
-export const createWorkspaceAction = async (
-  data: WorkspaceNameType,
-  userId: string,
-) => {
-  return executeAction({
-    actionFn: async () => {
-      const workspace = await prisma.workspace.create({
-        data: {
-          name: data.name,
-          members: {
-            create: {
-              userId: userId,
-              role: "ADMIN",
-            },
-          },
-          statuses: {
-            create: DEFAULT_STATUSES.map((status) => ({
-              name: status.name,
-              color: status.color,
-              order: status.order,
-              isDefault: status.isDefault,
-            })),
-          },
-        },
-        include: { statuses: true },
-      });
-
-      revalidatePath("/");
-      redirect(`/${workspace.id}/dashboard`);
-    },
-    successMessage: "Workspace created successfully.",
-  });
-};
-
 export const createTeamAction = async (
   teamName: string,
   workspaceId: string,
 ) => {
   return executeAction({
     actionFn: async () => {
-      const session = {user: {id: "dasdadasdasdasdasd"}};
+      const session = { user: { id: "dasdadasdasdasdasd" } };
       const user = session?.user;
 
       if (!user?.id) {
@@ -103,7 +69,7 @@ export const createProjectAction = async (
   return executeAction({
     successMessage: "Project created successfully.",
     actionFn: async () => {
-      const session = {user: {id: "dasdadasdasdasdasd"}};
+      const session = { user: { id: "dasdadasdasdasdasd" } };
       const user = session?.user;
 
       if (!user?.id) {
@@ -216,7 +182,7 @@ export const changRoleAction = async (
   return executeAction({
     successMessage: `Role Changed to ${role}`,
     actionFn: async () => {
-      const session = {user: {id: "dasdadasdasdasdasd"}};
+      const session = { user: { id: "dasdadasdasdasdasd" } };
       if (!session?.user?.id) throw new Error("Unauthorised");
 
       const isAdmin = await prisma?.workspaceMembers?.findUnique({

@@ -5,10 +5,6 @@ import { notFound } from "next/navigation";
 
 export default async function Dashboard({ params }: any) {
   const { workspaceId } = await params;
-  const session = {user: {id: "dasdadasdasdasdasd"}};
-  const currentUser = session?.user?.id;
-
-  if (!currentUser) return notFound();
 
   const [selectedWorkspace, member] = await Promise.all([
     prisma.workspace.findFirst({ where: { id: workspaceId } }),

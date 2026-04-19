@@ -1,12 +1,30 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchUserAction } from "../actions/workspace.action";
 
-const initialState = {
+type UserInterface = {
+  id: string;
+  email: string;
+  name: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  image: string;
+  lastActiveWorkspaceId: string | null;
+};
+
+type UserActionType = {
+  user: UserInterface | null;
+  message: null | string;
+  loading: boolean;
+  error: null | string;
+  code: string;
+};
+
+const initialState: UserActionType = {
   user: null,
-  message: null,
+  message: "",
   loading: false,
-  error: null,
-  code: null,
+  error: "",
+  code: "",
 };
 
 export const userSlice = createSlice({

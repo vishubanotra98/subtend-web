@@ -3,13 +3,6 @@ import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import { LayoutGrid } from "lucide-react";
 
 export default async function OnboardingPage() {
-  const session = {user: {id: "dasdadasdasdasdasd"}};
-  if (!session?.user?.id) {
-    redirect("/signin");
-  }
-
-  const userId = session.user.id;
-
   return (
     <div className="bg-[#111827] w-full h-[100vh]">
       <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
@@ -28,7 +21,7 @@ export default async function OnboardingPage() {
           </p>
 
           <div className="w-full">
-            <CreateWorkspaceModal userId={userId} />
+            <CreateWorkspaceModal />
           </div>
 
           <p className="mt-8 text-xs text-gray-500">
