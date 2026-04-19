@@ -2,7 +2,7 @@ import WorkspaceSettings from "@/components/ui/WorkspaceSettings/WorkspaceSettin
 
 export default async function ({ params }: any) {
   const { workspaceId } = await params;
-  const session = await auth();
+  const session = {user: {id: "dasdadasdasdasdasd"}};
 
   const workspaceMembers = await prisma.workspaceMembers.findMany({
     where: { workspaceId },

@@ -1,37 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { PayloadAction } from "@reduxjs/toolkit";
-import { fetchWorkSpaceData } from "../actions/workspace.action";
+import { fetchWorkspaceAction } from "../actions/workspace.action";
 
 const initialState = {
-  workspaces: [],
+  workspaceData: null,
   loading: false,
+  message: null,
+  code: null,
   error: null,
 };
 
 export const workspaceSlice = createSlice({
   name: "workspaces",
   initialState,
-  reducers: {
-    setWorkspace: (state: any, action: PayloadAction) => {
-      state.workspaces = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchWorkSpaceData.pending, (state) => {
+      .addCase(fetchWorkspaceAction.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchWorkSpaceData.fulfilled, (state, action: any) => {
+      .addCase(fetchWorkspaceAction.fulfilled, (state, action: any) => {
         state.loading = false;
-        state.workspaces = action.payload;
+        state.workspaceData = action.payload?.data;
+        state.code = action.payload.code;
+        state.message = action.payload.message;
       })
-      .addCase(fetchWorkSpaceData.rejected, (state, action: any) => {
+      .addCase(fetchWorkspaceAction.rejected, (state, action: any) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload?.message;
+        state.code = action.payload.code;
       });
   },
 });
 
-export const { setWorkspace } = workspaceSlice.actions;
 export default workspaceSlice.reducer;

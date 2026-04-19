@@ -4,14 +4,20 @@ import { Input } from "@/components/ui/Input/input";
 import { Spinner } from "@/components/ui/Spinner/spinner";
 import { SignInSchema, signInSchema } from "@/lib/schema";
 import { signInAction } from "@/Store/actions/auth.action";
+import {
+  fetchUserAction,
+  fetchWorkspaceAction,
+} from "@/Store/actions/workspace.action";
 import { useAppDispatch } from "@/Store/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 export function SignInForm() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const {
     register,
@@ -27,7 +33,12 @@ export function SignInForm() {
   const handleSignIn = async (payload: SignInSchema) => {
     try {
       setLoading(true);
-      await dispatch(signInAction(payload)).unwrap();
+      const res = await dispatch(signInAction(payload)).unwrap();
+      await dispatch(fetchUserAction()).unwrap();
+      await dispatch(fetchWorkspaceAction()).unwrap();
+      if (res?.success) {
+        router.push("/");
+      }
     } catch (err: any) {
       toast.error(err?.message);
     } finally {

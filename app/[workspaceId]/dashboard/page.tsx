@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 
 export default async function Dashboard({ params }: any) {
   const { workspaceId } = await params;
-  const session = await auth();
+  const session = {user: {id: "dasdadasdasdasdasd"}};
   const currentUser = session?.user?.id;
 
   if (!currentUser) return notFound();

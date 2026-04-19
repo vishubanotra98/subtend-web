@@ -53,7 +53,7 @@ export const createTeamAction = async (
 ) => {
   return executeAction({
     actionFn: async () => {
-      const session = await auth();
+      const session = {user: {id: "dasdadasdasdasdasd"}};
       const user = session?.user;
 
       if (!user?.id) {
@@ -103,7 +103,7 @@ export const createProjectAction = async (
   return executeAction({
     successMessage: "Project created successfully.",
     actionFn: async () => {
-      const session = await auth();
+      const session = {user: {id: "dasdadasdasdasdasd"}};
       const user = session?.user;
 
       if (!user?.id) {
@@ -216,7 +216,7 @@ export const changRoleAction = async (
   return executeAction({
     successMessage: `Role Changed to ${role}`,
     actionFn: async () => {
-      const session = await auth();
+      const session = {user: {id: "dasdadasdasdasdasd"}};
       if (!session?.user?.id) throw new Error("Unauthorised");
 
       const isAdmin = await prisma?.workspaceMembers?.findUnique({

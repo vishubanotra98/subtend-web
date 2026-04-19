@@ -6,7 +6,10 @@ export const API = {
     SIGN_IN: "/auth/signin",
     OTP_VERIFICATION: "/auth/verification",
   },
-  V1: {},
+  V1: {
+    ME: "/api/v1/user",
+    FETCH_WORKSPACES: "/api/v1/workspaces",
+  },
 };
 
 export const BASE_URL_CLIENT = process.env.NEXT_PUBLIC_BASE_URL_CLIENT;

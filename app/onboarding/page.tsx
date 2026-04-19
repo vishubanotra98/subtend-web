@@ -3,7 +3,7 @@ import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import { LayoutGrid } from "lucide-react";
 
 export default async function OnboardingPage() {
-  const session = await auth();
+  const session = {user: {id: "dasdadasdasdasdasd"}};
   if (!session?.user?.id) {
     redirect("/signin");
   }
