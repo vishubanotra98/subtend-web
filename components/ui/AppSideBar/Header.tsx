@@ -20,7 +20,7 @@ import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 
-const Header = ({ userData, isAdmin }: any) => {
+const Header = ({ userData, isAdmin, workspaceData }: any) => {
   const [open, setOpen] = useState(false);
   const params = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -30,8 +30,6 @@ const Header = ({ userData, isAdmin }: any) => {
       setOpen(true);
     }
   }, [params?.workspaceId]);
-
-  const workspaceData = userData?.workspaces;
 
   return (
     <>
@@ -57,7 +55,7 @@ const Header = ({ userData, isAdmin }: any) => {
 
               <CollapsibleContent className="sidebar-transition">
                 <ul className="space-y-1 mt-2">
-                  {workspaceData?.map((wsData: any, idx: any) => {
+                  {workspaceData?.workspaces?.map((wsData: any, idx: any) => {
                     const activeWs =
                       wsData?.workspaceId === params?.workspaceId;
 
@@ -95,7 +93,7 @@ const Header = ({ userData, isAdmin }: any) => {
                               </span>
                             </span>
                           }
-                          body={<CreateWorkspaceModal userId={userData?.id} />}
+                          body={<CreateWorkspaceModal />}
                         />
                       </li>
                     </div>

@@ -6,10 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createProjectAction } from "@/actions/user.actions";
 import { projectNameSchema, ProjectNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
+import { useAppDispatch } from "@/Store/hooks";
+import { createProjectAction } from "@/Store/actions/workspace.action";
 
 export function CreateProjectModal({
   teamId,
@@ -18,8 +19,9 @@ export function CreateProjectModal({
   teamId: string;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -29,16 +31,24 @@ export function CreateProjectModal({
   });
 
   const onSubmit = async ({ projectName }: ProjectNameType) => {
-    setLoading(true);
-    let res = await createProjectAction(projectName, teamId);
+    try {
+      setLoading(true);
 
-    if (res?.success) {
-      toast.success(res?.message);
-    } else {
-      toast.error(res?.message || "Error creating project.");
+      const payload = {
+        teamId,
+        projectName,
+      };
+
+      let res = await dispatch(createProjectAction(payload)).unwrap();
+      if (res?.success) {
+        toast.success(res?.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message);
+    } finally {
+      setLoading(false);
+      setIsModalOpen(false);
     }
-    setLoading(false);
-    setIsModalOpen(false);
   };
 
   return (

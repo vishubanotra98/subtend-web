@@ -7,10 +7,11 @@ import Select from "react-select";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { inviteUserAction } from "@/actions/user.actions";
 import { emailSchema, EmailType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { commonSelectStyles2 } from "@/utils/styles";
+import { inviteMemberAction } from "@/Store/actions/user.action";
+import { useAppDispatch } from "@/Store/hooks";
 
 interface RoleInterface {
   label: string;
@@ -35,6 +36,7 @@ export const InviteMemberForm = ({
   workspaceId: any;
   setModal: (value: boolean) => void;
 }) => {
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<RoleInterface>({
     label: "Member",
@@ -50,21 +52,25 @@ export const InviteMemberForm = ({
   });
 
   const onSubmit = async (data: EmailType) => {
-    setLoading(true);
+    try {
+      setLoading(true);
+      let res = await dispatch(
+        inviteMemberAction({
+          email: data.email,
+          workspaceId,
+          role: role?.value,
+        }),
+      ).unwrap();
 
-    let res = await inviteUserAction({
-      email: data.email,
-      workspaceId,
-      role: role?.value,
-    });
-
-    if (res?.success) {
-      toast.success(res.message);
-    } else {
-      toast.error(res.message);
+      if (res?.success) {
+        toast.success(res.message);
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+      setModal(false);
     }
-    setLoading(false);
-    setModal(false);
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 pt-2">

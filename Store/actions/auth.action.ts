@@ -1,26 +1,14 @@
-import { RegisterUserWithConfirmSchema } from "@/lib/schema";
 import {
   otpVerificationService,
   signInService,
   signUpService,
 } from "@/services/auth.service";
+import {
+  OtpVerificationInterface,
+  SignInInterface,
+  SignupPayloadInterface,
+} from "@/types/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-
-interface SignupPayloadInterface {
-  formData: RegisterUserWithConfirmSchema;
-  token: string | null;
-  isAdmin: boolean;
-}
-
-interface SignInInterface {
-  email: string;
-  password: string;
-}
-
-interface OtpVerificationInterface {
-  email: string;
-  otp: string;
-}
 
 export const signUpAction = createAsyncThunk<any, SignupPayloadInterface>(
   "signUp",

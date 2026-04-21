@@ -1,4 +1,9 @@
 import { API, axiosClient } from "@/apiConstant/apiConstant";
+import {
+  ProjectPayloadType,
+  TeamPayloadType,
+  WorkspacePayloadType,
+} from "@/types/types";
 
 export const fetchUserService = async () => {
   try {
@@ -18,12 +23,47 @@ export const fetchWorkspaceService = async () => {
   }
 };
 
-export const createWorkspaceService = async (payload: {
-  userId: string;
-  workspaceName: string;
-}) => {
+export const createWorkspaceService = async (payload: WorkspacePayloadType) => {
   try {
     const res = await axiosClient.post(`${API.V1.CREATE_WORKSPACE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchTeamsDataService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.TEAM}/${workspaceId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createTeamService = async (payload: TeamPayloadType) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.TEAM}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createProjectService = async (payload: ProjectPayloadType) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.PROJECT}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const lastActiveWorkspaceService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.post(
+      `${API.V1.LAST_ACTIVE_WORKSPACE}/${workspaceId}`,
+    );
     return res?.data;
   } catch (error) {
     throw error;

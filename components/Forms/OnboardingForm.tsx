@@ -19,8 +19,6 @@ export function CreateWorkspaceModal() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  console.log("userData", userData);
-
   const {
     register,
     handleSubmit,

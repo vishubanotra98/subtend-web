@@ -8,7 +8,9 @@ export default async function Dashboard({ params }: any) {
 
   const [selectedWorkspace, member] = await Promise.all([
     prisma.workspace.findFirst({ where: { id: workspaceId } }),
-    prisma.workspaceMembers.findFirst({ where: { userId: currentUser } }),
+    prisma.workspaceMembers.findFirst({
+      where: { userId: "cmo4oanxc000297qg0ihqgzgz" },
+    }),
   ]);
 
   if (member?.role === "ADMIN") {
@@ -63,12 +65,15 @@ export default async function Dashboard({ params }: any) {
   ] = await Promise.all([
     prisma.issue.findMany({ where: { project: { team: { workspaceId } } } }),
     prisma.issue.findMany({
-      where: { assigneeId: currentUser, project: { team: { workspaceId } } },
+      where: {
+        assigneeId: "cmo4oanxc000297qg0ihqgzgz",
+        project: { team: { workspaceId } },
+      },
     }),
     prisma.issue.findMany({
       where: {
         priority: "URGENT",
-        assigneeId: currentUser,
+        assigneeId: "cmo4oanxc000297qg0ihqgzgz",
         project: { team: { workspaceId } },
       },
     }),

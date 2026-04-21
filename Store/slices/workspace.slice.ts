@@ -1,9 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { PayloadAction } from "@reduxjs/toolkit";
-import { fetchWorkspaceAction } from "../actions/workspace.action";
+import {
+  fetchTeamsDataAction,
+  fetchWorkspaceAction,
+} from "../actions/workspace.action";
 
 const initialState = {
   workspaceData: null,
+  teamsData: null,
   loading: false,
   message: null,
   code: null,
@@ -27,6 +30,23 @@ export const workspaceSlice = createSlice({
         state.message = action.payload.message;
       })
       .addCase(fetchWorkspaceAction.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload?.message;
+        state.code = action.payload.code;
+      });
+
+    builder
+      .addCase(fetchTeamsDataAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTeamsDataAction.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.teamsData = action.payload?.data;
+        state.code = action.payload.code;
+        state.message = action.payload.message;
+      })
+      .addCase(fetchTeamsDataAction.rejected, (state, action: any) => {
         state.loading = false;
         state.error = action.payload?.message;
         state.code = action.payload.code;

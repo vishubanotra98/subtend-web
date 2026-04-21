@@ -1,22 +1,24 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createTeamAction } from "@/actions/user.actions";
 import { teamNameSchema, TeamNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { Spinner } from "../ui/Spinner/spinner";
+import { createTeamAction } from "@/Store/actions/workspace.action";
+import { useAppDispatch } from "@/Store/hooks";
 
 export const AddTeamForm = ({
   setModal,
 }: {
   setModal: (value: boolean) => void;
 }) => {
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -28,17 +30,23 @@ export const AddTeamForm = ({
   const params = useParams();
 
   const onSubmit = async ({ teamName }: TeamNameType) => {
-    setLoading(true);
-    const workspaceId = params?.workspaceId as string;
-    const res: any = await createTeamAction(teamName, workspaceId);
-
-    if (res?.success) {
-      toast.success(res?.message);
-    } else {
-      toast.error(res?.message);
+    try {
+      setLoading(true);
+      const workspaceId = params?.workspaceId as string;
+      const payload = {
+        workspaceId,
+        teamName,
+      };
+      const res: any = await dispatch(createTeamAction(payload));
+      if (res?.success) {
+        toast.success(res?.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message);
+    } finally {
+      setLoading(false);
+      setModal(false);
     }
-    setLoading(false);
-    setModal(false);
   };
 
   return (
