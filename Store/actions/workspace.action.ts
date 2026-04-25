@@ -5,6 +5,7 @@ import {
   fetchTeamsDataService,
   fetchUserService,
   fetchWorkspaceService,
+  fetchWorkspaceStatusService,
   lastActiveWorkspaceService,
 } from "@/services/workspace.service";
 import {
@@ -91,6 +92,18 @@ export const lastActiveWorkspaceAction = createAsyncThunk<any, string>(
   async (workspaceId, { rejectWithValue }) => {
     try {
       const res = await lastActiveWorkspaceService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchWorkspaceStatusAction = createAsyncThunk<any, string>(
+  "workspaceStatus",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchWorkspaceStatusService(workspaceId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

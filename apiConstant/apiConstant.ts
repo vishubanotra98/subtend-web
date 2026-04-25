@@ -4,6 +4,7 @@ export const API = {
   AUTH: {
     SIGN_UP: "/auth/signup",
     SIGN_IN: "/auth/signin",
+    REFRESH: "/auth/refresh",
     OTP_VERIFICATION: "/auth/verification",
   },
   V1: {
@@ -11,9 +12,10 @@ export const API = {
     FETCH_WORKSPACES: "/api/v1/workspaces",
     CREATE_WORKSPACE: "/api/v1/workspace",
     TEAM: "/api/v1/team",
-    INVITE: "/member-invite",
+    INVITE: "/api/v1/member-invite",
     LAST_ACTIVE_WORKSPACE: "/api/v1/last-active-workspace",
     PROJECT: "/api/v1/project",
+    STATUS: "/api/v1/status",
   },
 };
 
@@ -37,7 +39,7 @@ axiosClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true;
       try {
-        await axios.post(`${BASE_URL_API}/auth/refresh`, null, {
+        await axios.post(`${BASE_URL_API}${API.AUTH.REFRESH}`, null, {
           withCredentials: true,
         });
         return axiosClient(originalRequest);

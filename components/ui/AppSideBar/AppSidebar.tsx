@@ -35,6 +35,7 @@ import { useAppDispatch, useAppSelector } from "@/Store/hooks";
 import type { RootState } from "@/Store/store";
 import {
   fetchTeamsDataAction,
+  fetchWorkspaceStatusAction,
   lastActiveWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { SidebarLoading } from "./SidebarLoading";
@@ -97,11 +98,11 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
     };
   }, []);
 
-  // Also call last active workspace id call
   useEffect(() => {
     const init = async () => {
-      dispatch(lastActiveWorkspaceAction(workspaceId));
-      dispatch(fetchTeamsDataAction(workspaceId));
+      await dispatch(lastActiveWorkspaceAction(workspaceId));
+      await dispatch(fetchTeamsDataAction(workspaceId));
+      await dispatch(fetchWorkspaceStatusAction(workspaceId));
     };
     init();
   }, [dispatch, workspaceId]);
@@ -118,13 +119,6 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   // }, []);
 
   const isAdmin = workspaceData?.adminList?.includes(workspaceId);
-
-  console.log("Teams Data from ", teamsData);
-
-  console.log("Workspace Id", workspaceId);
-  console.log("Teams Data", teamsData?.teamData);
-  console.log("Workspace Data:", workspaceData);
-  console.log("is Admin", isAdmin);
 
   const showSidebarLoading =
     workspaceLoading || !user || !workspaceData || !teamsData;

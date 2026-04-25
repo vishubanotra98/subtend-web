@@ -9,6 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Select, { ControlProps, components } from "react-select";
 import { DeleteModal } from "./DeleteModal";
+import { useAppSelector } from "@/Store/hooks";
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
@@ -79,10 +80,15 @@ const StatusPlaceholder = createCustomPlaceholder(Flag);
 const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
 
 export const IssuePageClient = ({ issueData }: any) => {
-  const { selectedIssue, statusList, workspaceMembers } = issueData;
+  const {
+    workspaceData: { workspaceStatus },
+  } = useAppSelector((store: any) => store);
+
+  const { selectedIssue, workspaceMembers } = issueData;
   const router = useRouter();
   const { workspaceId, teamId, projectId, issueId } = useParams();
   const [issueState, setIssueState] = useState(selectedIssue);
+  const [statusList, setStatusList] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const firstRdr = useRef(true);
 
@@ -99,6 +105,12 @@ export const IssuePageClient = ({ issueData }: any) => {
       email: mem.user?.email,
     };
   });
+
+  useEffect(() => {
+    setStatusList(workspaceStatus);
+  }, [workspaceStatus]);
+
+  console.log("Status List: ", statusList);
 
   useEffect(() => {
     if (firstRdr.current) {
