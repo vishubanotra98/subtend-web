@@ -9,59 +9,59 @@ import { revalidatePath } from "next/cache";
 import dayjs from "dayjs";
 import socketService from "@/lib/socket-api-service";
 
-export const addIssueAction = async (payload: any) => {
-  const {
-    title,
-    description,
-    userId: assigneeId,
-    priority,
-    status,
-    projectId,
-    workspaceId,
-    teamId,
-  } = payload;
+// export const addIssueAction = async (payload: any) => {
+//   const {
+//     title,
+//     description,
+//     userId: assigneeId,
+//     priority,
+//     status,
+//     projectId,
+//     workspaceId,
+//     teamId,
+//   } = payload;
 
-  return executeAction({
-    successMessage: "Issue Added",
-    actionFn: async () => {
-      const session = {user: {id: "dasdadasdasdasdasd"}};
-      const currentUser = session?.user?.id;
+//   return executeAction({
+//     successMessage: "Issue Added",
+//     actionFn: async () => {
+//       const session = {user: {id: "dasdadasdasdasdasd"}};
+//       const currentUser = session?.user?.id;
 
-      if (!currentUser) {
-        throw new Error(
-          "Unauthorized: You must be logged in to create an issue.",
-        );
-      }
+//       if (!currentUser) {
+//         throw new Error(
+//           "Unauthorized: You must be logged in to create an issue.",
+//         );
+//       }
 
-      const createIssue = await prisma.issue.create({
-        data: {
-          title,
-          description,
-          priority,
-          statusId: status,
-          assigneeId: assigneeId,
-          projectId: projectId,
-        },
-      });
-      const loggerData: ActivityInterface = {
-        action: "CREATED",
-        entityTitle: title,
-        userId: currentUser,
-        workspaceId: workspaceId,
-        teamId: teamId,
-        projectId: projectId,
-        issueId: createIssue?.id,
-        beforeState: null,
-        afterState: null,
-      };
-      const activity = await activityLogger(loggerData);
-      const socketData = { issueData: createIssue, activity };
-      await socketService("create_issue", socketData);
-      revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
-      return createIssue;
-    },
-  });
-};
+//       const createIssue = await prisma.issue.create({
+//         data: {
+//           title,
+//           description,
+//           priority,
+//           statusId: status,
+//           assigneeId: assigneeId,
+//           projectId: projectId,
+//         },
+//       });
+//       const loggerData: ActivityInterface = {
+//         action: "CREATED",
+//         entityTitle: title,
+//         userId: currentUser,
+//         workspaceId: workspaceId,
+//         teamId: teamId,
+//         projectId: projectId,
+//         issueId: createIssue?.id,
+//         beforeState: null,
+//         afterState: null,
+//       };
+//       const activity = await activityLogger(loggerData);
+//       const socketData = { issueData: createIssue, activity };
+//       await socketService("create_issue", socketData);
+//       revalidatePath(`/${workspaceId}/team/${teamId}/project/${projectId}`);
+//       return createIssue;
+//     },
+//   });
+// };
 
 export const editIssueAction = async (payload: any) => {
   const {

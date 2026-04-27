@@ -78,3 +78,32 @@ export const fetchWorkspaceStatusService = async (workspaceId: string) => {
     throw error;
   }
 };
+
+export const fetchWorkspaceMambersService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(
+      `${API.V1.FETCH_WORKSPACES}/${workspaceId}`,
+    );
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchActivitiesService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.ACTIVITIES}/${workspaceId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createIssueService = async (payload: any) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.ISSUE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

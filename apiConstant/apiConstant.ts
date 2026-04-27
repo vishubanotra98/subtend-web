@@ -16,6 +16,9 @@ export const API = {
     LAST_ACTIVE_WORKSPACE: "/api/v1/last-active-workspace",
     PROJECT: "/api/v1/project",
     STATUS: "/api/v1/status",
+    ISSUE: "/api/v1/issue",
+    MOVE_ISSE: "/api/v1/issue-move",
+    ACTIVITIES: "/api/v1/activities",
   },
 };
 

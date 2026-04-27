@@ -1,9 +1,12 @@
 import {
+  createIssueService,
   createProjectService,
   createTeamService,
   createWorkspaceService,
+  fetchActivitiesService,
   fetchTeamsDataService,
   fetchUserService,
+  fetchWorkspaceMambersService,
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
   lastActiveWorkspaceService,
@@ -104,6 +107,42 @@ export const fetchWorkspaceStatusAction = createAsyncThunk<any, string>(
   async (workspaceId, { rejectWithValue }) => {
     try {
       const res = await fetchWorkspaceStatusService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchWorkspaceMambersAction = createAsyncThunk<any, string>(
+  "workspaceMembers",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchWorkspaceMambersService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchActivitiesAction = createAsyncThunk<any, string>(
+  "fetchActivities",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchActivitiesService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const createIssueAction = createAsyncThunk<any, any>(
+  "createIssue",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await createIssueService(payload);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

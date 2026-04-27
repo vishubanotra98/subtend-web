@@ -1,14 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  fetchActivitiesAction,
   fetchTeamsDataAction,
   fetchWorkspaceAction,
+  fetchWorkspaceMambersAction,
   fetchWorkspaceStatusAction,
 } from "../actions/workspace.action";
 
 const initialState = {
   workspaceData: null,
-  teamsData: null,
+  workspaceMembers: null,
   workspaceStatus: null,
+  workspaceActivities: null,
+  teamsData: null,
   loading: false,
   message: null,
   code: null,
@@ -66,6 +70,40 @@ export const workspaceSlice = createSlice({
         state.message = action.payload.message;
       })
       .addCase(fetchWorkspaceStatusAction.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload?.message;
+        state.code = action.payload.code;
+      });
+
+    builder
+      .addCase(fetchWorkspaceMambersAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchWorkspaceMambersAction.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.workspaceMembers = action.payload?.data?.members;
+        state.code = action.payload.code;
+        state.message = action.payload.message;
+      })
+      .addCase(fetchWorkspaceMambersAction.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload?.message;
+        state.code = action.payload.code;
+      });
+
+    builder
+      .addCase(fetchActivitiesAction.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchActivitiesAction.fulfilled, (state, action: any) => {
+        state.loading = false;
+        state.workspaceActivities = action.payload?.data?.activities;
+        state.code = action.payload.code;
+        state.message = action.payload.message;
+      })
+      .addCase(fetchActivitiesAction.rejected, (state, action: any) => {
         state.loading = false;
         state.error = action.payload?.message;
         state.code = action.payload.code;
