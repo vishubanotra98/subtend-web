@@ -107,3 +107,61 @@ export const createIssueService = async (payload: any) => {
     throw error;
   }
 };
+
+export const fetchIssuesService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.ISSUE}/${workspaceId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const editIssueService = async (payload: any) => {
+  try {
+    const res = await axiosClient.patch(`${API.V1.ISSUE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const completedIssueCountService = async (payload: any) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.COMPLETED_COUNT}`, {
+      params: payload,
+    });
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchIssuesByProjectService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.ISSUE}/project/${projectId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const moveCardService = async (payload: any) => {
+  try {
+    const res = await axiosClient.put(`${API.V1.MOVE_ISSE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deletedIssueService = async (payload: any) => {
+  try {
+    const res = await axiosClient.delete(`${API.V1.ISSUE}`, {
+      params: payload,
+    });
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

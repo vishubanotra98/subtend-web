@@ -9,3 +9,15 @@ export const inviteMemberService = async (payload: InvitePayload) => {
     throw error;
   }
 };
+
+export const verifyInviteMemberService = async (payload: {
+  email: string;
+  token: string;
+}) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.INVITE}/verify`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

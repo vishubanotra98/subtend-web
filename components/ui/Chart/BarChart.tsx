@@ -1,5 +1,4 @@
 "use client";
-import { getCompletedTasksCount } from "@/actions/workspace.actions";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,39 +10,47 @@ import {
 import { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Spinner } from "../Spinner/spinner";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { completedIssueCountAction } from "@/Store/actions/workspace.action";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const TaskBarChart = ({ completedTaskId, workspaceId }: any) => {
-  const [chartData, setChartData] = useState([]);
+  const dispatch = useAppDispatch();
+  const {
+    workspaceData: { dashboardCount },
+  } = useAppSelector((store: any) => store);
+  // const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!workspaceId || !completedTaskId) return;
+
+    let isMounted = true;
     const init = async () => {
-      setIsLoading(true);
       const payload = {
         workspaceId,
         statusId: completedTaskId,
       };
-      const res: any = await getCompletedTasksCount(payload);
-
-      if (res?.success) {
-        setChartData(res?.data);
+      await dispatch(completedIssueCountAction(payload));
+      if (isMounted) {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
-    if (workspaceId && completedTaskId) {
-      init();
-    }
-  }, [workspaceId, completedTaskId]);
+    init();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [completedTaskId, dispatch, workspaceId]);
 
   const cdata = {
-    labels: chartData.map((d: any) => d?.day),
+    labels: dashboardCount?.map((d: any) => d?.day),
     datasets: [
       {
         label: "Tasks Completed",
-        data: chartData.map((d: any) => d?.count),
+        data: dashboardCount.map((d: any) => d?.count),
         backgroundColor: "#6366f1",
         borderRadius: 4,
         barThickness: 40,

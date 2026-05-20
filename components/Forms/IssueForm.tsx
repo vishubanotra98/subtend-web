@@ -5,11 +5,16 @@ import Tiptap from "../Common/TextEditor";
 import { CircleUser, Flag, SignalHigh } from "lucide-react";
 import Select, { ControlProps, components } from "react-select";
 import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
-import { addIssueAction } from "@/actions/workspace.actions";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { Spinner } from "../ui/Spinner/spinner";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import {
+  createIssueAction,
+  fetchIssuesByProjectAction,
+  fetchWorkspaceStatusAction,
+} from "@/Store/actions/workspace.action";
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
@@ -81,12 +86,14 @@ const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
 
 export const IssueForm = ({ issueFormProp }: any) => {
   const params = useParams();
+  const dispatch = useAppDispatch();
   const {
     workspaceMembers,
     statusList,
     issueState,
     setIssueState,
     handleClose,
+    setIssues,
   } = issueFormProp;
 
   const [loading, setLoading] = useState(false);
@@ -107,25 +114,36 @@ export const IssueForm = ({ issueFormProp }: any) => {
 
   const submitHandler = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
-    const payload = {
-      title,
-      description,
-      userId,
-      priority,
-      status,
-      projectId,
-      workspaceId,
-      teamId,
-    };
-    const res = await addIssueAction(payload);
-    if (res?.success) {
-      toast.success(res?.message);
-      handleClose();
-    } else {
-      toast.error(res?.message);
+    if (typeof workspaceId !== "string") {
+      return toast?.error("Error Creating Issue.");
     }
-    setLoading(false);
+    try {
+      setLoading(true);
+      const payload = {
+        title,
+        description,
+        userId,
+        priority,
+        status,
+        projectId,
+        workspaceId,
+        teamId,
+      };
+      const res = await dispatch(createIssueAction(payload)).unwrap();
+      const issuesRes = await dispatch(
+        fetchIssuesByProjectAction(projectId),
+      ).unwrap();
+      setIssues(issuesRes?.data?.issues ?? []);
+      await dispatch(fetchWorkspaceStatusAction(workspaceId));
+      if (res?.success) {
+        toast.success(res?.message);
+        handleClose();
+      }
+    } catch (err: any) {
+      toast.error(err?.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

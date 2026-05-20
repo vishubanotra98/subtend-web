@@ -2,8 +2,8 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 
-import { useEffect, useState, useRef } from "react";
-import { verifyInviteMember } from "@/actions/auth.actions";
+import { useEffect, useState } from "react";
+import { verifyInviteMemberService } from "@/services/user.service";
 import { CheckCircle2, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
@@ -29,22 +29,29 @@ const ClientVerification = () => {
         return;
       }
 
-      const res = await verifyInviteMember({
-        email: email,
-        token: token,
-      });
+      try {
+        const res = await verifyInviteMemberService({
+          email,
+          token,
+        });
 
-      if (res?.success) {
-        setStatus("SUCCESS");
-        setMessage("Verified Successfully!");
-        toast.success("Verified!");
+        if (res?.success) {
+          setStatus("SUCCESS");
+          setMessage("Verified Successfully!");
+          toast.success("Verified!");
 
-        setTimeout(() => {
-          router.push(
-            `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
-          );
-        }, 2000);
-      } else {
+          setTimeout(() => {
+            router.push(
+              `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
+            );
+          }, 2000);
+          return;
+        }
+
+        setStatus("ERROR");
+        setMessage(res?.message ?? "Verification failed");
+        toast.error("Verification failed");
+      } catch {
         setStatus("ERROR");
         setMessage("Verification failed");
         toast.error("Verification failed");
@@ -52,7 +59,7 @@ const ClientVerification = () => {
     };
 
     init();
-  }, [token, email, router]);
+  }, [email, role, router, token]);
 
   return (
     <div className="auth-bg w-full h-screen flex items-center justify-center bg-[#0C0E12]">

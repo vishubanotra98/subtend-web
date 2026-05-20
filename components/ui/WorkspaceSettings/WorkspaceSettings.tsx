@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { fetchWorkspaceMambersAction } from "@/Store/actions/workspace.action";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import MembersTabContent from "./MemberSettings";
 import TeamsProjectsTabContent from "./TeamsProjectsTabContent";
 import DangerContentTab from "./DangerContentTab";
@@ -14,8 +17,19 @@ const options: { label: string; value: OptionTypes }[] = [
   { label: "Danger Zone", value: "danger" },
 ];
 
-const WorkspaceSettings = ({ workspaceMembers, currentUser }: any) => {
+const WorkspaceSettings = () => {
+  const dispatch = useAppDispatch();
+  const { workspaceId } = useParams();
+  const {
+    userData: { user },
+    workspaceData: { workspaceMembers },
+  } = useAppSelector((store: any) => store);
   const [option, setOption] = useState<OptionTypes>("general");
+
+  useEffect(() => {
+    if (!workspaceId) return;
+    dispatch(fetchWorkspaceMambersAction(workspaceId as string));
+  }, [dispatch, workspaceId]);
 
   return (
     <div className="flex-1 p-10 overflow-y-auto text-white">
@@ -48,7 +62,7 @@ const WorkspaceSettings = ({ workspaceMembers, currentUser }: any) => {
           {option === "members" && (
             <MembersTabContent
               workspaceMembers={workspaceMembers}
-              currentUser={currentUser}
+              currentUser={user?.id}
             />
           )}
           {option === "teamproject" && <TeamsProjectsTabContent />}

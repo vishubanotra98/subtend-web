@@ -4,8 +4,8 @@ import {
   fetchUserAction,
   fetchWorkspaceAction,
 } from "@/Store/actions/workspace.action";
-import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import { useEffect } from "react";
+import { useAppDispatch } from "@/Store/hooks";
+import { useEffect, useRef } from "react";
 
 export default function AppProvider({
   children,
@@ -13,12 +13,19 @@ export default function AppProvider({
   children: React.ReactNode;
 }) {
   const dispatch = useAppDispatch();
+  const didInit = useRef(false);
 
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+
     const init = async () => {
-      await dispatch(fetchUserAction());
-      await dispatch(fetchWorkspaceAction());
+      await Promise.all([
+        dispatch(fetchUserAction()),
+        dispatch(fetchWorkspaceAction()),
+      ]);
     };
+
     init();
   }, [dispatch]);
 

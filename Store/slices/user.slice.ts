@@ -39,14 +39,15 @@ export const userSlice = createSlice({
       })
       .addCase(fetchUserAction.fulfilled, (state, action: any) => {
         state.loading = false;
-        state.message = action.payload.message;
-        state.code = action.payload.code;
-        state.user = action.payload.data?.user;
+        state.message = action.payload?.message ?? null;
+        state.code = action.payload?.code ?? "";
+        state.user = action.payload?.data?.user ?? null;
       })
       .addCase(fetchUserAction.rejected, (state, action: any) => {
         state.loading = false;
-        state.code = action.payload.code;
-        state.error = action.payload?.message;
+        state.user = null;
+        state.code = action.payload?.code ?? "";
+        state.error = action.payload?.message ?? action.error?.message ?? null;
       });
   },
 });

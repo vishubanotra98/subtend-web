@@ -1,15 +1,21 @@
 import {
+  completedIssueCountService,
   createIssueService,
   createProjectService,
   createTeamService,
   createWorkspaceService,
+  deletedIssueService,
+  editIssueService,
   fetchActivitiesService,
+  fetchIssuesByProjectService,
+  fetchIssuesService,
   fetchTeamsDataService,
   fetchUserService,
   fetchWorkspaceMambersService,
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
   lastActiveWorkspaceService,
+  moveCardService,
 } from "@/services/workspace.service";
 import {
   ProjectPayloadType,
@@ -143,6 +149,78 @@ export const createIssueAction = createAsyncThunk<any, any>(
   async (payload, { rejectWithValue }) => {
     try {
       const res = await createIssueService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchIssuesAction = createAsyncThunk<any, string>(
+  "fetchIssues",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchIssuesService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const editIssueAction = createAsyncThunk<any, any>(
+  "editIssue",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await editIssueService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const completedIssueCountAction = createAsyncThunk<any, any>(
+  "completedIssueCount",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await completedIssueCountService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchIssuesByProjectAction = createAsyncThunk<any, any>(
+  "issuesByProject",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await fetchIssuesByProjectService(projectId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const moveCardAction = createAsyncThunk<any, any>(
+  "moveCard",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await moveCardService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const deleteIssueAction = createAsyncThunk<any, any>(
+  "deleteIssue",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await deletedIssueService(payload);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

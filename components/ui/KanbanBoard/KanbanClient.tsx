@@ -4,26 +4,58 @@ import { DragDropProvider } from "@dnd-kit/react";
 import KanbanDroppable from "@/components/ui/KanbanBoard/KanbanDroppable";
 import { useEffect, useState } from "react";
 import DraggableCard from "@/components/ui/KanbanBoard/DraggableCard";
-import { moveCardAction } from "@/actions/workspace.actions";
 import { useParams, useRouter } from "next/navigation";
 import { socket } from "@/lib/socket";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import {
+  fetchIssuesByProjectAction,
+  fetchWorkspaceMambersAction,
+  fetchWorkspaceStatusAction,
+  moveCardAction,
+} from "@/Store/actions/workspace.action";
 
-const KanbanClient = ({
-  statusList,
-  workspaceMembers,
-  projectId,
-  issueList,
-  team,
-}: any) => {
+const KanbanClient = () => {
+  const dispatch = useAppDispatch();
+  const {
+    workspaceData: {
+      workspaceMembers,
+      workspaceStatus,
+      teamsData,
+      projectIssues,
+    },
+  } = useAppSelector((store: any) => store);
+
   const [issues, setIssues] = useState<any>([]);
   const params = useParams();
-  const workspaceId = params.workspaceId;
+  const workspaceId = params.workspaceId as string;
   const teamId = params?.teamId;
+  const projectId = params?.projectId as string;
   const router = useRouter();
 
   useEffect(() => {
-    setIssues(issueList);
-  }, [issueList]);
+    if (!projectId || !workspaceId) return;
+
+    let isMounted = true;
+
+    const init = async () => {
+      const [issuesRes] = await Promise.all([
+        dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
+        dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
+      ]);
+
+      if (isMounted) {
+        setIssues(issuesRes?.data?.issues ?? []);
+      }
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, projectId, workspaceId]);
+
+  const team = teamsData?.teamData?.find((team: any) => team?.id === teamId);
 
   useEffect(() => {
     const handleCreateIssue = (payload: any) => {
@@ -118,21 +150,29 @@ const KanbanClient = ({
       teamId,
     };
 
-    await moveCardAction(payload);
+    await dispatch(moveCardAction(payload));
+    const issuesRes = await dispatch(
+      fetchIssuesByProjectAction(projectId),
+    ).unwrap();
+    setIssues(issuesRes?.data?.issues ?? []);
+    await dispatch(fetchWorkspaceStatusAction(workspaceId));
   };
+
+  if (!projectIssues) return "LOADING...";
 
   return (
     <DragDropProvider onDragEnd={handleDragOver}>
       <div className="flex items-center gap-4">
-        {statusList?.map((status: any, id: any) => {
+        {workspaceStatus?.map((status: any, id: any) => {
           return (
             <KanbanDroppable
               workspaceMembers={workspaceMembers}
-              statusList={statusList}
+              statusList={workspaceStatus}
               status={status}
               key={status?.id}
               id={status?.id}
               projectId={projectId}
+              setIssues={setIssues}
             >
               {issues
                 ?.filter((issue: any) => issue?.statusId === status?.id)

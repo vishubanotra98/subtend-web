@@ -1,16 +1,19 @@
 "use client";
 
-import { AlertCircle, Clock, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertCircle, Clock, CheckCircle2 } from "lucide-react";
 import Card from "../Card/Card";
 import { useRouter } from "next/navigation";
 import { getTeamPrefix } from "@/utils/constants";
-import { editIssueAction } from "@/actions/workspace.actions";
 import toast from "react-hot-toast";
+import {
+  editIssueAction,
+  fetchIssuesAction,
+} from "@/Store/actions/workspace.action";
+import { useAppDispatch } from "@/Store/hooks";
 
 export default function MemberDashboard({
   myIssues,
   myIssuesCount,
-  urgentIssuesCount,
   urgentTasks,
   completedIssuesCount,
   totalIssuesCount,
@@ -20,25 +23,33 @@ export default function MemberDashboard({
   workspaceStatusList,
 }: any) {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const safeMyIssues = Array.isArray(myIssues) ? myIssues : [];
+  const safeUrgentTasks = Array.isArray(urgentTasks) ? urgentTasks : [];
+  const safeTeamData = Array.isArray(teamData) ? teamData : [];
+  const safeProjects = Array.isArray(totalProjects) ? totalProjects : [];
+  const safeWorkspaceStatusList = Array.isArray(workspaceStatusList)
+    ? workspaceStatusList
+    : [];
 
   const getTeamData = (projectId: string) => {
-    const project = totalProjects?.find(
+    const project = safeProjects.find(
       (project: any) => project?.id === projectId,
     );
 
-    const team = teamData?.find((team: any) => team?.id === project?.teamId);
+    const team = safeTeamData.find((team: any) => team?.id === project?.teamId);
     return team;
   };
 
-  const doneTaskStatus = workspaceStatusList?.find(
+  const doneTaskStatus = safeWorkspaceStatusList.find(
     (task: any) => task.name === "Done",
   );
 
-  const incompleteTasksUrg = urgentTasks?.filter(
+  const incompleteTasksUrg = safeUrgentTasks.filter(
     (task: any) => task?.statusId !== doneTaskStatus?.id,
   );
 
-  const incompleteTasksNormal = myIssues.filter(
+  const incompleteTasksNormal = safeMyIssues.filter(
     (task: any) => task?.statusId !== doneTaskStatus?.id,
   );
 
@@ -49,12 +60,13 @@ export default function MemberDashboard({
     e.stopPropagation();
     const payload = {
       workspaceId,
-      teamId: teamData?.id,
+      teamId: getTeamData(task?.projectId)?.id,
       projectId: task?.projectId,
       issueId: task?.id,
       statusId: doneTaskStatus?.id,
     };
-    const res = await editIssueAction(payload);
+    const res = await dispatch(editIssueAction(payload)).unwrap();
+    await dispatch(fetchIssuesAction(workspaceId));
     if (res?.success) {
       toast.success("Marked as completed.");
     }
@@ -84,7 +96,9 @@ export default function MemberDashboard({
             data={incompleteTasksUrg?.length}
             className="bg-[#1f2937] border-red-500/20"
             desc={
-              incompleteTasksUrg > 0 ? "Requires attention" : "No urgent issues"
+              incompleteTasksUrg.length > 0
+                ? "Requires attention"
+                : "No urgent issues"
             }
           />
 

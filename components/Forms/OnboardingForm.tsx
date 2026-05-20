@@ -43,6 +43,7 @@ export function CreateWorkspaceModal() {
       let res = await dispatch(createWorkspaceAction(payload)).unwrap();
       if (res?.success) {
         toast.success(res.message);
+        router.push(`/${res?.data?.workspace?.id}/dashboard`);
       }
     } catch (err: any) {
       toast.error(err?.message);

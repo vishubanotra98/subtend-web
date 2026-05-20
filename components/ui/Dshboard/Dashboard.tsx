@@ -1,107 +1,102 @@
-import prisma from "@/lib/prisma";
-import MemberDashboard from "@/components/ui/Dshboard/Memberdashboard";
+"use client";
+
 import AdminDashboard from "@/components/ui/Dshboard/AdminDashboard";
-import { notFound } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { useEffect } from "react";
+import {
+  fetchActivitiesAction,
+  fetchIssuesAction,
+  fetchTeamsDataAction,
+  fetchWorkspaceMambersAction,
+  fetchWorkspaceStatusAction,
+} from "@/Store/actions/workspace.action";
+import MemberDashboard from "./Memberdashboard";
 
-export default async function Dashboard({ params }: any) {
-  const { workspaceId } = await params;
+export default function Dashboard({ workspaceId }: { workspaceId: string }) {
+  const dispatch = useAppDispatch();
+  const {
+    workspaceData: {
+      workspaceData,
+      workspaceMembers,
+      workspaceActivities,
+      workspaceStatus,
+      issuesData,
+      teamsData,
+    },
+    userData,
+  } = useAppSelector((store: any) => store);
 
-  //   USing Only for name
-  //  Fetching member to get the know if the user is Admin or normal member
-  const [selectedWorkspace, member] = await Promise.all([
-    prisma.workspace.findFirst({ where: { id: workspaceId } }),
-    prisma.workspaceMembers.findFirst({
-      where: { userId: "cmo4oanxc000297qg0ihqgzgz" },
-    }),
-  ]);
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([
+        dispatch(fetchIssuesAction(workspaceId)),
+        dispatch(fetchTeamsDataAction(workspaceId)),
+        dispatch(fetchWorkspaceStatusAction(workspaceId)),
+        dispatch(fetchWorkspaceMambersAction(workspaceId)),
+        dispatch(fetchActivitiesAction(workspaceId)),
+      ]);
+    };
 
-  if (member?.role === "ADMIN") {
-    const [
-      totalTeamCount,
-      totalMembers,
-      totalProjectsCount,
-      totalIssues,
-      activities,
-      workspaceStatusList,
-    ] = await Promise.all([
-      prisma.team.count({ where: { workspaceId } }),
-      prisma.workspaceMembers.findMany({
-        where: { workspaceId },
-        include: { user: true },
-      }),
-      prisma.project.count({ where: { team: { workspaceId } } }),
-      prisma.issue.findMany({ where: { project: { team: { workspaceId } } } }),
-      prisma.activity.findMany({
-        where: { workspaceId },
-        orderBy: { created_at: "desc" },
-      }),
-      prisma.status.findMany({ where: { workspaceId } }),
-    ]);
+    init();
+  }, [dispatch, workspaceId]);
 
+  const isAdmin = workspaceData?.adminList?.includes(workspaceId);
+
+  const selectedWorkspace = workspaceData?.workspaces?.find(
+    (ws: any) => ws?.workspace?.id === workspaceId,
+  )?.workspace;
+
+  const issues = Array.isArray(issuesData) ? issuesData : [];
+  const statuses = Array.isArray(workspaceStatus) ? workspaceStatus : [];
+  const teams = Array.isArray(teamsData?.teamData) ? teamsData.teamData : [];
+  const projects = teams?.flatMap((team: any) => team?.projects ?? []);
+  const doneTaskStatus = statuses?.find(
+    (status: any) => status?.name === "Done",
+  );
+
+  const memberIssues = issues.filter(
+    (issue: any) => issue?.assigneeId === userData?.user?.id,
+  );
+
+  const myUrgentIssues = memberIssues.filter(
+    (issue: any) => issue?.priority === "URGENT",
+  );
+  const myCompletedIssues = memberIssues.filter(
+    (issue: any) => issue?.statusId === doneTaskStatus?.id,
+  );
+
+  if (isAdmin) {
     return (
       <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
         <AdminDashboard
           selectedWorkspace={selectedWorkspace}
           workspaceId={workspaceId}
-          totalTeamCount={totalTeamCount}
-          totalProjectsCount={totalProjectsCount}
-          totalMembers={totalMembers}
-          totalMembersCount={totalMembers.length}
-          totalIssues={totalIssues}
-          totalIssuesCount={totalIssues.length}
-          activities={activities}
-          workspaceStatusList={workspaceStatusList}
+          totalTeamCount={10}
+          totalProjectsCount={10}
+          totalMembers={workspaceMembers ?? []}
+          totalMembersCount={workspaceMembers?.length ?? 0}
+          totalIssuesCount={issues.length}
+          activities={workspaceActivities}
+          workspaceStatus={statuses}
+        />
+      </div>
+    );
+  } else {
+    return (
+      <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
+        <MemberDashboard
+          workspaceId={workspaceId}
+          totalIssuesCount={issues.length}
+          myIssues={memberIssues}
+          myIssuesCount={memberIssues.length}
+          urgentTasks={myUrgentIssues}
+          urgentIssuesCount={myUrgentIssues.length}
+          completedIssuesCount={myCompletedIssues.length}
+          totalProjects={projects}
+          teamData={teams}
+          workspaceStatusList={statuses}
         />
       </div>
     );
   }
-
-  const [
-    totalIssues,
-    myIssues,
-    urgentTasks,
-    completedIssuesCount,
-    totalProjects,
-    teamData,
-    workspaceStatusList,
-  ] = await Promise.all([
-    prisma.issue.findMany({ where: { project: { team: { workspaceId } } } }),
-    prisma.issue.findMany({
-      where: {
-        assigneeId: "cmo4oanxc000297qg0ihqgzgz",
-        project: { team: { workspaceId } },
-      },
-    }),
-    prisma.issue.findMany({
-      where: {
-        priority: "URGENT",
-        assigneeId: "cmo4oanxc000297qg0ihqgzgz",
-        project: { team: { workspaceId } },
-      },
-    }),
-    prisma.issue.count({
-      where: { status: { name: "Done" }, project: { team: { workspaceId } } },
-    }),
-    prisma.project.findMany({ where: { team: { workspaceId } } }),
-    prisma.team.findMany({ where: { workspaceId } }),
-    prisma.status.findMany({ where: { workspaceId } }),
-  ]);
-
-  return (
-    <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
-      <MemberDashboard
-        workspaceId={workspaceId}
-        totalIssues={totalIssues}
-        totalIssuesCount={totalIssues.length}
-        myIssues={myIssues}
-        myIssuesCount={myIssues.length}
-        urgentTasks={urgentTasks}
-        urgentIssuesCount={urgentTasks.length}
-        completedIssuesCount={completedIssuesCount}
-        totalProjects={totalProjects}
-        teamData={teamData}
-        workspaceStatusList={workspaceStatusList}
-      />
-    </div>
-  );
 }

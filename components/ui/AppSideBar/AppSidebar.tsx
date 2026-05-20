@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/collapsible";
 import Header from "./Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { signOut } from "next-auth/react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
@@ -56,6 +55,10 @@ type AppSidebarProps = {
 };
 
 const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
+
+const clearCookie = (name: string) => {
+  document.cookie = `${name}=; Max-Age=0; path=/`;
+};
 
 export function AppSidebar({ workspaceId }: AppSidebarProps) {
   const router = useRouter();
@@ -122,6 +125,15 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
 
   const showSidebarLoading =
     workspaceLoading || !user || !workspaceData || !teamsData;
+
+  const handleLogout = () => {
+    setLoading(true);
+    ["accessToken", "refreshToken", "access_token", "refresh_token"].forEach(
+      clearCookie,
+    );
+    router.replace("/sign-in");
+    router.refresh();
+  };
 
   if (showSidebarLoading) {
     return <SidebarLoading />;
@@ -245,10 +257,7 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
               {user?.email}
             </p>
             <button
-              onClick={() => {
-                setLoading(true);
-                signOut();
-              }}
+              onClick={handleLogout}
               disabled={loading}
               className="text-xs text-[#6b7280] hover:text-red-500 transition-colors text-left cursor-pointer"
             >

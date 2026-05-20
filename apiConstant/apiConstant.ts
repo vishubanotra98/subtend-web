@@ -19,6 +19,7 @@ export const API = {
     ISSUE: "/api/v1/issue",
     MOVE_ISSE: "/api/v1/issue-move",
     ACTIVITIES: "/api/v1/activities",
+    COMPLETED_COUNT: "/api/v1/completed/count",
   },
 };
 

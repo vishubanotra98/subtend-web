@@ -13,6 +13,7 @@ interface KanbanDroppableInterface {
   workspaceMembers: any;
   statusList: any;
   projectId: string;
+  setIssues: any;
 }
 
 const KanbanDroppable = ({
@@ -21,6 +22,7 @@ const KanbanDroppable = ({
   status,
   workspaceMembers,
   statusList,
+  setIssues,
 }: KanbanDroppableInterface) => {
   const [open, setOpen] = useState(false);
   const [issueState, setIssueState] = useState({
@@ -56,6 +58,7 @@ const KanbanDroppable = ({
     workspaceMembers,
     statusList,
     handleClose,
+    setIssues,
   };
 
   return (

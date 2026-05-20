@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserMinus, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { nameInitials } from "@/utils/constants";
@@ -9,7 +9,6 @@ import { InviteMemberForm } from "@/components/Forms/InviteMember";
 import Select from "react-select";
 import { commonSelectStyles } from "@/utils/styles";
 import { changRoleAction } from "@/actions/user.actions";
-import { WorkspaceMembers } from "@/app/generated/prisma/client";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -25,13 +24,9 @@ const options = [
 ];
 
 const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
-  const [members, setMembers] = useState<WorkspaceMembers[]>([]);
   const [userModal, setUserModal] = useState(false);
   const { workspaceId } = useParams();
-
-  useEffect(() => {
-    setMembers(workspaceMembers);
-  }, workspaceMembers);
+  const members = workspaceMembers ?? [];
 
   const handleRoleChange = async (
     workspaceId: string,
