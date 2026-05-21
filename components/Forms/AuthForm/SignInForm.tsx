@@ -16,6 +16,17 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
+const getErrorMessage = (err: unknown) => {
+  if (err instanceof Error) return err.message;
+
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+
+  return "Unable to sign in";
+};
+
 export function SignInForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -39,13 +50,11 @@ export function SignInForm() {
       if (res?.success) {
         router.push("/");
       }
-    } catch (err: any) {
-      toast.error(err?.message);
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

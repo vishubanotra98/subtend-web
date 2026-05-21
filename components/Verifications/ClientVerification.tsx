@@ -3,14 +3,16 @@
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
-import { verifyInviteMemberService } from "@/services/user.service";
 import { CheckCircle2, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
+import { useAppDispatch } from "@/Store/hooks";
+import { verifyInviteMemberAction } from "@/Store/actions/user.action";
 
 const ClientVerification = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const token = searchParams.get("utok");
   const email = searchParams.get("email");
@@ -30,10 +32,12 @@ const ClientVerification = () => {
       }
 
       try {
-        const res = await verifyInviteMemberService({
-          email,
-          token,
-        });
+        const res = await dispatch(
+          verifyInviteMemberAction({
+            email,
+            token,
+          }),
+        ).unwrap();
 
         if (res?.success) {
           setStatus("SUCCESS");

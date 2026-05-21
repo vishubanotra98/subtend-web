@@ -57,7 +57,7 @@ export function SignupForm() {
         const workspaceId = res?.workspaceId;
         const email = res?.data?.email;
 
-        if (email && workspaceId) {
+        if (!email && !workspaceId) {
           router.push(`/sign-in`);
         } else {
           router.push(`/account-verification?email=${email}`);

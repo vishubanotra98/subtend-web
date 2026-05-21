@@ -20,6 +20,7 @@ export const API = {
     MOVE_ISSE: "/api/v1/issue-move",
     ACTIVITIES: "/api/v1/activities",
     COMPLETED_COUNT: "/api/v1/completed/count",
+    VERIFY_INVITE: "/api/v1/verify-invite",
   },
 };
 
@@ -32,6 +33,12 @@ export const axiosClient = axios.create({
 });
 
 axiosClient.defaults.headers.post["Content-Type"] = "application/json";
+const AUTH_ROUTES = [...Object.values(API.AUTH), API.V1.VERIFY_INVITE];
+const isAuthRoute = (url?: string) => {
+  if (!url) return false;
+
+  return AUTH_ROUTES.some((route) => url.includes(route));
+};
 
 axiosClient.interceptors.response.use(
   function onFulfilled(response) {
@@ -39,8 +46,12 @@ axiosClient.interceptors.response.use(
   },
   async function onRejected(error) {
     const originalRequest = error.config;
+    const shouldTryRefresh =
+      error.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !isAuthRoute(originalRequest?.url);
 
-    if (error.response?.status === 401 && !originalRequest?._retry) {
+    if (shouldTryRefresh) {
       originalRequest._retry = true;
       try {
         await axios.post(`${BASE_URL_API}${API.AUTH.REFRESH}`, null, {

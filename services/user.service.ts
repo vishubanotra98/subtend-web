@@ -15,7 +15,7 @@ export const verifyInviteMemberService = async (payload: {
   token: string;
 }) => {
   try {
-    const res = await axiosClient.post(`${API.V1.INVITE}/verify`, payload);
+    const res = await axiosClient.post(`${API.V1.VERIFY_INVITE}`, payload);
     return res?.data;
   } catch (error) {
     throw error;

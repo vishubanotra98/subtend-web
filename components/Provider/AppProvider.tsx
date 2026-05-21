@@ -6,6 +6,14 @@ import {
 } from "@/Store/actions/workspace.action";
 import { useAppDispatch } from "@/Store/hooks";
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+
+const PUBLIC_ROUTES = [
+  "/user-invite",
+  "/sign-in",
+  "/sign-up",
+  "/account-verification",
+];
 
 export default function AppProvider({
   children,
@@ -14,9 +22,12 @@ export default function AppProvider({
 }) {
   const dispatch = useAppDispatch();
   const didInit = useRef(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (didInit.current) return;
+    if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) return;
+
     didInit.current = true;
 
     const init = async () => {
@@ -27,7 +38,7 @@ export default function AppProvider({
     };
 
     init();
-  }, [dispatch]);
+  }, [dispatch, pathname]);
 
   return <>{children}</>;
 }
