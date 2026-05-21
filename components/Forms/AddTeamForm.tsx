@@ -10,7 +10,10 @@ import { teamNameSchema, TeamNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { Spinner } from "../ui/Spinner/spinner";
-import { createTeamAction } from "@/Store/actions/workspace.action";
+import {
+  createTeamAction,
+  fetchTeamsDataAction,
+} from "@/Store/actions/workspace.action";
 import { useAppDispatch } from "@/Store/hooks";
 
 export const AddTeamForm = ({
@@ -37,15 +40,18 @@ export const AddTeamForm = ({
         workspaceId,
         teamName,
       };
-      const res: any = await dispatch(createTeamAction(payload));
+      const res = await dispatch(createTeamAction(payload)).unwrap();
       if (res?.success) {
+        await dispatch(fetchTeamsDataAction(workspaceId)).unwrap();
         toast.success(res?.message);
+        setModal(false);
       }
     } catch (err: any) {
-      toast.error(err?.message);
+      const message =
+        err instanceof Error ? err.message : "Failed to create team";
+      toast.error(message);
     } finally {
       setLoading(false);
-      setModal(false);
     }
   };
 

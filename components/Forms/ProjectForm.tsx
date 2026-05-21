@@ -10,7 +10,11 @@ import { projectNameSchema, ProjectNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
 import { useAppDispatch } from "@/Store/hooks";
-import { createProjectAction } from "@/Store/actions/workspace.action";
+import {
+  createProjectAction,
+  fetchTeamsDataAction,
+} from "@/Store/actions/workspace.action";
+import { useParams } from "next/navigation";
 
 export function CreateProjectModal({
   teamId,
@@ -20,6 +24,7 @@ export function CreateProjectModal({
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const dispatch = useAppDispatch();
+  const params = useParams();
 
   const [loading, setLoading] = useState(false);
   const {
@@ -39,15 +44,19 @@ export function CreateProjectModal({
         projectName,
       };
 
-      let res = await dispatch(createProjectAction(payload)).unwrap();
+      const res = await dispatch(createProjectAction(payload)).unwrap();
       if (res?.success) {
+        const workspaceId = params?.workspaceId as string;
+        await dispatch(fetchTeamsDataAction(workspaceId)).unwrap();
         toast.success(res?.message);
+        setIsModalOpen(false);
       }
-    } catch (err: any) {
-      toast.error(err?.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create project";
+      toast.error(message);
     } finally {
       setLoading(false);
-      setIsModalOpen(false);
     }
   };
 

@@ -6,11 +6,46 @@ import { useEffect } from "react";
 import {
   fetchActivitiesAction,
   fetchIssuesAction,
-  fetchTeamsDataAction,
+  fetchWorkspaceAction,
   fetchWorkspaceMambersAction,
   fetchWorkspaceStatusAction,
 } from "@/Store/actions/workspace.action";
 import MemberDashboard from "./Memberdashboard";
+import DashboardLoading from "./DashboardLoading";
+
+type WorkspaceItem = {
+  workspace?: {
+    id?: string;
+    [key: string]: unknown;
+  };
+};
+
+type WorkspaceListData = {
+  adminList?: string[];
+  workspaces?: WorkspaceItem[];
+};
+
+type Team = {
+  projects?: unknown[];
+  [key: string]: unknown;
+};
+
+type TeamsData = {
+  teamData?: Team[];
+};
+
+type Status = {
+  id?: string;
+  name?: string;
+  [key: string]: unknown;
+};
+
+type Issue = {
+  assigneeId?: string;
+  priority?: string;
+  statusId?: string;
+  [key: string]: unknown;
+};
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
@@ -22,47 +57,90 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       workspaceStatus,
       issuesData,
       teamsData,
+      teamsWorkspaceId,
+      statusWorkspaceId,
+      membersWorkspaceId,
+      activitiesWorkspaceId,
+      issuesWorkspaceId,
     },
     userData,
-  } = useAppSelector((store: any) => store);
+  } = useAppSelector((store) => store);
+
+  const workspaceListData = workspaceData as WorkspaceListData | null;
+  const workspaceList = workspaceListData?.workspaces ?? [];
+
+  const selectedWorkspace = workspaceList.find(
+    (ws) => ws?.workspace?.id === workspaceId,
+  )?.workspace;
 
   useEffect(() => {
     const init = async () => {
-      await Promise.all([
-        dispatch(fetchIssuesAction(workspaceId)),
-        dispatch(fetchTeamsDataAction(workspaceId)),
-        dispatch(fetchWorkspaceStatusAction(workspaceId)),
-        dispatch(fetchWorkspaceMambersAction(workspaceId)),
-        dispatch(fetchActivitiesAction(workspaceId)),
-      ]);
+      const requests: Promise<unknown>[] = [];
+
+      if (issuesWorkspaceId !== workspaceId) {
+        requests.push(dispatch(fetchIssuesAction(workspaceId)));
+      }
+
+      if (statusWorkspaceId !== workspaceId) {
+        requests.push(dispatch(fetchWorkspaceStatusAction(workspaceId)));
+      }
+
+      if (membersWorkspaceId !== workspaceId) {
+        requests.push(dispatch(fetchWorkspaceMambersAction(workspaceId)));
+      }
+
+      if (activitiesWorkspaceId !== workspaceId) {
+        requests.push(dispatch(fetchActivitiesAction(workspaceId)));
+      }
+
+      await Promise.all(requests);
     };
 
     init();
-  }, [dispatch, workspaceId]);
+  }, [
+    activitiesWorkspaceId,
+    dispatch,
+    issuesWorkspaceId,
+    membersWorkspaceId,
+    statusWorkspaceId,
+    workspaceId,
+  ]);
 
-  const isAdmin = workspaceData?.adminList?.includes(workspaceId);
+  useEffect(() => {
+    if (selectedWorkspace) return;
 
-  const selectedWorkspace = workspaceData?.workspaces?.find(
-    (ws: any) => ws?.workspace?.id === workspaceId,
-  )?.workspace;
+    dispatch(fetchWorkspaceAction());
+  }, [dispatch, selectedWorkspace, workspaceId]);
 
-  const issues = Array.isArray(issuesData) ? issuesData : [];
-  const statuses = Array.isArray(workspaceStatus) ? workspaceStatus : [];
-  const teams = Array.isArray(teamsData?.teamData) ? teamsData.teamData : [];
-  const projects = teams?.flatMap((team: any) => team?.projects ?? []);
+  if (!selectedWorkspace) {
+    return <DashboardLoading />;
+  }
+
+  const isAdmin = workspaceListData?.adminList?.includes(workspaceId);
+
+  const issues = Array.isArray(issuesData) ? (issuesData as Issue[]) : [];
+  const statuses = Array.isArray(workspaceStatus)
+    ? (workspaceStatus as Status[])
+    : [];
+  const teamsListData = teamsData as TeamsData | null;
+  const teams =
+    teamsWorkspaceId === workspaceId && Array.isArray(teamsListData?.teamData)
+      ? teamsListData.teamData
+      : [];
+  const projects = teams?.flatMap((team) => team?.projects ?? []);
   const doneTaskStatus = statuses?.find(
-    (status: any) => status?.name === "Done",
+    (status) => status?.name === "Done",
   );
 
   const memberIssues = issues.filter(
-    (issue: any) => issue?.assigneeId === userData?.user?.id,
+    (issue) => issue?.assigneeId === userData?.user?.id,
   );
 
   const myUrgentIssues = memberIssues.filter(
-    (issue: any) => issue?.priority === "URGENT",
+    (issue) => issue?.priority === "URGENT",
   );
   const myCompletedIssues = memberIssues.filter(
-    (issue: any) => issue?.statusId === doneTaskStatus?.id,
+    (issue) => issue?.statusId === doneTaskStatus?.id,
   );
 
   if (isAdmin) {

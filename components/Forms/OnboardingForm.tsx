@@ -10,7 +10,10 @@ import {} from "@/actions/user.actions";
 import { workspaceNameSchema, WorkspaceNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import { createWorkspaceAction } from "@/Store/actions/workspace.action";
+import {
+  createWorkspaceAction,
+  fetchWorkspaceAction,
+} from "@/Store/actions/workspace.action";
 import { useRouter } from "next/navigation";
 
 export function CreateWorkspaceModal() {
@@ -40,13 +43,16 @@ export function CreateWorkspaceModal() {
         workspaceName: workspaceName.name,
         userId,
       };
-      let res = await dispatch(createWorkspaceAction(payload)).unwrap();
+      const res = await dispatch(createWorkspaceAction(payload)).unwrap();
       if (res?.success) {
+        await dispatch(fetchWorkspaceAction()).unwrap();
         toast.success(res.message);
         router.push(`/${res?.data?.workspace?.id}/dashboard`);
       }
-    } catch (err: any) {
-      toast.error(err?.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create workspace";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

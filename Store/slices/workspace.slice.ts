@@ -10,7 +10,51 @@ import {
   fetchWorkspaceStatusAction,
 } from "../actions/workspace.action";
 
-const initialState = {
+type WorkspaceState = {
+  workspaceData: unknown | null;
+  workspaceMembers: unknown[];
+  workspaceStatus: unknown[];
+  workspaceActivities: unknown[];
+  dashboardCount: unknown[];
+  teamsData: unknown | null;
+  issuesData: unknown[];
+  projectIssues: unknown[];
+  teamsWorkspaceId: string | null;
+  statusWorkspaceId: string | null;
+  membersWorkspaceId: string | null;
+  activitiesWorkspaceId: string | null;
+  issuesWorkspaceId: string | null;
+  loading: boolean;
+  message: string | null;
+  error: string | null;
+};
+
+type ApiData = {
+  status?: unknown[];
+  members?: unknown[];
+  activities?: unknown[];
+  issues?: unknown[];
+  completedTasks?: unknown[];
+};
+
+type ApiResponse = {
+  data?: ApiData | unknown;
+  message?: string | null;
+};
+
+const getData = (payload?: ApiResponse) => payload?.data as ApiData | undefined;
+
+const hasMessage = (payload: unknown): payload is { message?: string } =>
+  typeof payload === "object" && payload !== null && "message" in payload;
+
+const getErrorMessage = (action: {
+  payload?: unknown;
+  error?: { message?: string };
+}) =>
+  (hasMessage(action.payload) ? action.payload.message : action.error?.message) ??
+  null;
+
+const initialState: WorkspaceState = {
   workspaceData: null,
   workspaceMembers: [],
   workspaceStatus: [],
@@ -19,6 +63,11 @@ const initialState = {
   teamsData: null,
   issuesData: [],
   projectIssues: [],
+  teamsWorkspaceId: null,
+  statusWorkspaceId: null,
+  membersWorkspaceId: null,
+  activitiesWorkspaceId: null,
+  issuesWorkspaceId: null,
   loading: false,
   message: null,
   error: null,
@@ -34,14 +83,14 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchWorkspaceAction.fulfilled, (state, action: any) => {
+      .addCase(fetchWorkspaceAction.fulfilled, (state, action) => {
         state.loading = false;
         state.workspaceData = action.payload?.data;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchWorkspaceAction.rejected, (state, action: any) => {
+      .addCase(fetchWorkspaceAction.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -49,14 +98,15 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTeamsDataAction.fulfilled, (state, action: any) => {
+      .addCase(fetchTeamsDataAction.fulfilled, (state, action) => {
         state.loading = false;
         state.teamsData = action.payload?.data;
+        state.teamsWorkspaceId = action.meta.arg;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchTeamsDataAction.rejected, (state, action: any) => {
+      .addCase(fetchTeamsDataAction.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -64,15 +114,16 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchWorkspaceStatusAction.fulfilled, (state, action: any) => {
+      .addCase(fetchWorkspaceStatusAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.workspaceStatus = action.payload?.data?.status ?? [];
+        state.workspaceStatus = getData(action.payload)?.status ?? [];
+        state.statusWorkspaceId = action.meta.arg;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchWorkspaceStatusAction.rejected, (state, action: any) => {
+      .addCase(fetchWorkspaceStatusAction.rejected, (state, action) => {
         state.loading = false;
         state.workspaceStatus = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -80,15 +131,16 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchWorkspaceMambersAction.fulfilled, (state, action: any) => {
+      .addCase(fetchWorkspaceMambersAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.workspaceMembers = action.payload?.data?.members ?? [];
+        state.workspaceMembers = getData(action.payload)?.members ?? [];
+        state.membersWorkspaceId = action.meta.arg;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchWorkspaceMambersAction.rejected, (state, action: any) => {
+      .addCase(fetchWorkspaceMambersAction.rejected, (state, action) => {
         state.loading = false;
         state.workspaceMembers = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -96,15 +148,16 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchActivitiesAction.fulfilled, (state, action: any) => {
+      .addCase(fetchActivitiesAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.workspaceActivities = action.payload?.data?.activities ?? [];
+        state.workspaceActivities = getData(action.payload)?.activities ?? [];
+        state.activitiesWorkspaceId = action.meta.arg;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchActivitiesAction.rejected, (state, action: any) => {
+      .addCase(fetchActivitiesAction.rejected, (state, action) => {
         state.loading = false;
         state.workspaceActivities = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -112,15 +165,16 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchIssuesAction.fulfilled, (state, action: any) => {
+      .addCase(fetchIssuesAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.issuesData = action.payload?.data?.issues ?? [];
+        state.issuesData = getData(action.payload)?.issues ?? [];
+        state.issuesWorkspaceId = action.meta.arg;
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchIssuesAction.rejected, (state, action: any) => {
+      .addCase(fetchIssuesAction.rejected, (state, action) => {
         state.loading = false;
         state.issuesData = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -128,15 +182,15 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(completedIssueCountAction.fulfilled, (state, action: any) => {
+      .addCase(completedIssueCountAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.dashboardCount = action.payload?.data?.completedTasks ?? [];
+        state.dashboardCount = getData(action.payload)?.completedTasks ?? [];
         state.message = action.payload?.message ?? null;
       })
-      .addCase(completedIssueCountAction.rejected, (state, action: any) => {
+      .addCase(completedIssueCountAction.rejected, (state, action) => {
         state.loading = false;
         state.dashboardCount = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
 
     builder
@@ -144,15 +198,15 @@ export const workspaceSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchIssuesByProjectAction.fulfilled, (state, action: any) => {
+      .addCase(fetchIssuesByProjectAction.fulfilled, (state, action) => {
         state.loading = false;
-        state.projectIssues = action.payload?.data?.issues ?? [];
+        state.projectIssues = getData(action.payload)?.issues ?? [];
         state.message = action.payload?.message ?? null;
       })
-      .addCase(fetchIssuesByProjectAction.rejected, (state, action: any) => {
+      .addCase(fetchIssuesByProjectAction.rejected, (state, action) => {
         state.loading = false;
         state.projectIssues = [];
-        state.error = action.payload?.message ?? action.error?.message ?? null;
+        state.error = getErrorMessage(action);
       });
   },
 });

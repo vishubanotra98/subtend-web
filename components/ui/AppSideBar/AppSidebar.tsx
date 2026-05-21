@@ -31,10 +31,8 @@ import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
 import { nameInitials } from "@/utils/constants";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import type { RootState } from "@/Store/store";
 import {
   fetchTeamsDataAction,
-  fetchWorkspaceStatusAction,
   lastActiveWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { SidebarLoading } from "./SidebarLoading";
@@ -50,8 +48,26 @@ type Team = {
   projects?: ProjectItem[];
 };
 
+type SidebarTeamsData = {
+  teamData?: Team[];
+};
+
+type SidebarWorkspaceData = {
+  adminList?: string[];
+};
+
 type AppSidebarProps = {
   workspaceId: string;
+};
+
+type TeamItemProps = {
+  team: Team;
+  params: {
+    workspaceId?: string | string[];
+    teamId?: string | string[];
+    projectId?: string | string[];
+  };
+  isAdmin?: boolean;
 };
 
 const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
@@ -67,15 +83,20 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
 
   const {
     userData: { user },
-    workspaceData: { workspaceData, teamsData, loading: workspaceLoading },
-  } = useAppSelector((store: any) => store);
+    workspaceData: { workspaceData, teamsData, teamsWorkspaceId },
+  } = useAppSelector((store) => store);
   const dispatch = useAppDispatch();
 
   const [teamsOpen, setTeamsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
   const [, setIsOnline] = useState(false);
-  const teamsList = teamsData?.teamData ?? [];
+  const sidebarTeamsData = teamsData as SidebarTeamsData | null;
+  const sidebarWorkspaceData = workspaceData as SidebarWorkspaceData | null;
+  const teamsList =
+    teamsWorkspaceId === workspaceId
+      ? (sidebarTeamsData?.teamData ?? [])
+      : [];
 
   useEffect(() => {
     if (!navigator.onLine) {
@@ -102,13 +123,14 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   }, []);
 
   useEffect(() => {
-    const init = async () => {
-      await dispatch(lastActiveWorkspaceAction(workspaceId));
-      await dispatch(fetchTeamsDataAction(workspaceId));
-      await dispatch(fetchWorkspaceStatusAction(workspaceId));
-    };
-    init();
+    dispatch(lastActiveWorkspaceAction(workspaceId));
   }, [dispatch, workspaceId]);
+
+  useEffect(() => {
+    if (teamsWorkspaceId === workspaceId) return;
+
+    dispatch(fetchTeamsDataAction(workspaceId));
+  }, [dispatch, teamsWorkspaceId, workspaceId]);
 
   // useEffect(() => {
   //   const getTeamData = (data: any) => {
@@ -121,10 +143,9 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   //   };
   // }, []);
 
-  const isAdmin = workspaceData?.adminList?.includes(workspaceId);
+  const isAdmin = sidebarWorkspaceData?.adminList?.includes(workspaceId);
 
-  const showSidebarLoading =
-    workspaceLoading || !user || !workspaceData || !teamsData;
+  const showSidebarLoading = !user || !workspaceData;
 
   const handleLogout = () => {
     setLoading(true);
@@ -270,9 +291,10 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   );
 }
 
-function TeamItem({ team, params, isAdmin }: any) {
+function TeamItem({ team, params, isAdmin }: TeamItemProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const projects = team.projects ?? [];
   const isProjectActive = (projectId: string) => {
     return projectId === String(params?.projectId ?? "");
   };
@@ -303,8 +325,8 @@ function TeamItem({ team, params, isAdmin }: any) {
 
           <ul className="space-y-0.5 border-l border-[#1f2937] ml-1 pl-3">
             {/* Project List */}
-            {team?.projects?.length > 0 ? (
-              team?.projects.map((project: ProjectItem, idx: number) => {
+            {projects.length > 0 ? (
+              projects.map((project: ProjectItem, idx: number) => {
                 return (
                   <li key={`project-idx-${idx + 1}`}>
                     <Link
