@@ -22,6 +22,7 @@ export const API = {
     COMPLETED_COUNT: "/api/v1/completed/count",
     VERIFY_INVITE: "/api/v1/verify-invite",
     CHANGE_ROLE: "/api/v1/change-role",
+    REMOVE_USER: "/api/v1/remove-user",
   },
 };
 

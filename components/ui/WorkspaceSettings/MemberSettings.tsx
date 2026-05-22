@@ -10,8 +10,12 @@ import Select from "react-select";
 import { commonSelectStyles } from "@/utils/styles";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { changRoleAction } from "@/Store/actions/user.action";
+import {
+  changRoleAction,
+  removeUsersAction,
+} from "@/Store/actions/user.action";
 import { useAppDispatch } from "@/Store/hooks";
+import { fetchWorkspaceMambersAction } from "@/Store/actions/workspace.action";
 
 const options = [
   {
@@ -28,7 +32,6 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
   const dispatch = useAppDispatch();
   const [userModal, setUserModal] = useState(false);
   const { workspaceId } = useParams();
-  const members = workspaceMembers ?? [];
 
   const handleRoleChange = async (
     workspaceId: string,
@@ -37,8 +40,28 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
   ) => {
     const payload = { workspaceId, userId, role };
     const res = await dispatch(changRoleAction(payload)).unwrap();
+    if (res?.success) {
+      await dispatch(fetchWorkspaceMambersAction(workspaceId));
+      toast.success(res?.message);
+    }
     if (!res?.success) {
       toast?.error("Something went wrong.");
+    }
+  };
+
+  const handleRemoveUser = async (workspaceId: string, userId: string) => {
+    try {
+      const params = {
+        workspaceId,
+        userId,
+      };
+      const res = await dispatch(removeUsersAction(params)).unwrap();
+      if (res?.success) {
+        await dispatch(fetchWorkspaceMambersAction(workspaceId));
+        toast.success(res?.message);
+      }
+    } catch (err: any) {
+      toast.error(err?.message);
     }
   };
 
@@ -86,9 +109,9 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
-            {members?.map((member: any) => (
+            {workspaceMembers?.map((member: any) => (
               <tr
-                key={member.id}
+                key={member?.user?.id}
                 className="hover:bg-[#161826]/50 transition-colors"
               >
                 <td className="px-6 py-5 flex items-center gap-4">
@@ -106,7 +129,7 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
                       {member?.user?.name ||
                         member?.user?.firstName + " " + member?.user?.lastName}
                     </span>
-                    {member?.userId === currentUser && (
+                    {member?.user?.id === currentUser && (
                       <span className="text-xs text-purple-400 font-medium">
                         (You)
                       </span>
@@ -125,7 +148,7 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
                       onChange={(val) => {
                         handleRoleChange(
                           member?.workspaceId,
-                          member?.userId,
+                          member?.user?.id,
                           val?.value,
                         );
                       }}
@@ -137,14 +160,14 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
                       placeholder="Change Role"
                       styles={commonSelectStyles}
                       menuPortalTarget={document?.body}
-                      isDisabled={member?.userId === currentUser}
+                      isDisabled={member?.user?.id === currentUser}
                       isClearable={false}
                     />
                   </div>
                 </td>
 
                 <td className="px-6 py-5 relative">
-                  {member?.userId === currentUser ? (
+                  {member?.user?.id === currentUser ? (
                     <button
                       disabled
                       className="px-4 py-2 bg-gray-800/60 text-gray-500 font-medium rounded-lg text-xs flex items-center gap-2 cursor-not-allowed border border-gray-700/50"
@@ -153,7 +176,12 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
                       Remove
                     </button>
                   ) : (
-                    <button className="px-4 py-2 border border-red-900 bg-red-950/20 text-red-400 hover:bg-red-950/40 font-medium rounded-lg text-xs flex items-center gap-2 transition-colors group">
+                    <button
+                      onClick={() =>
+                        handleRemoveUser(member?.workspaceId, member?.user?.id)
+                      }
+                      className="cursor-pointer px-4 py-2 border border-red-900 bg-red-950/20 text-red-400 hover:bg-red-950/40 font-medium rounded-lg text-xs flex items-center gap-2 transition-colors group"
+                    >
                       <UserMinus size={14} className="transition-transform" />
                       Remove
                     </button>

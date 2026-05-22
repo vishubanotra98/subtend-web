@@ -3,6 +3,7 @@ import { InvitePayload } from "@/types/types";
 import {
   changRoleService,
   inviteMemberService,
+  removeUserService,
   verifyInviteMemberService,
 } from "@/services/user.service";
 
@@ -35,6 +36,18 @@ export const changRoleAction = createAsyncThunk<any, any>(
   async (payload, { rejectWithValue }) => {
     try {
       const res = await changRoleService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const removeUsersAction = createAsyncThunk<any, any>(
+  "removeUser",
+  async (params, { rejectWithValue }) => {
+    try {
+      const res = await removeUserService(params);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

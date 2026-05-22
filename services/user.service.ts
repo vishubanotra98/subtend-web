@@ -22,12 +22,20 @@ export const verifyInviteMemberService = async (payload: {
   }
 };
 
-export const changRoleService = async (payload: {
-  email: string;
-  token: string;
-}) => {
+export const changRoleService = async (payload: any) => {
   try {
     const res = await axiosClient.post(`${API.V1.CHANGE_ROLE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const removeUserService = async (params: any) => {
+  try {
+    const res = await axiosClient.delete(`${API.V1.REMOVE_USER}`, {
+      params: params,
+    });
     return res?.data;
   } catch (error) {
     throw error;
