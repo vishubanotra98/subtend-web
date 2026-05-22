@@ -21,6 +21,7 @@ export const API = {
     ACTIVITIES: "/api/v1/activities",
     COMPLETED_COUNT: "/api/v1/completed/count",
     VERIFY_INVITE: "/api/v1/verify-invite",
+    CHANGE_ROLE: "/api/v1/change-role",
   },
 };
 

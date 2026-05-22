@@ -8,9 +8,10 @@ import { Modal } from "@/components/Common/Modal";
 import { InviteMemberForm } from "@/components/Forms/InviteMember";
 import Select from "react-select";
 import { commonSelectStyles } from "@/utils/styles";
-import { changRoleAction } from "@/actions/user.actions";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { changRoleAction } from "@/Store/actions/user.action";
+import { useAppDispatch } from "@/Store/hooks";
 
 const options = [
   {
@@ -24,6 +25,7 @@ const options = [
 ];
 
 const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
+  const dispatch = useAppDispatch();
   const [userModal, setUserModal] = useState(false);
   const { workspaceId } = useParams();
   const members = workspaceMembers ?? [];
@@ -33,7 +35,8 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
     userId: string,
     role: any,
   ) => {
-    const res = await changRoleAction(workspaceId, userId, role);
+    const payload = { workspaceId, userId, role };
+    const res = await dispatch(changRoleAction(payload)).unwrap();
     if (!res?.success) {
       toast?.error("Something went wrong.");
     }

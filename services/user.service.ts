@@ -21,3 +21,15 @@ export const verifyInviteMemberService = async (payload: {
     throw error;
   }
 };
+
+export const changRoleService = async (payload: {
+  email: string;
+  token: string;
+}) => {
+  try {
+    const res = await axiosClient.post(`${API.V1.CHANGE_ROLE}`, payload);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

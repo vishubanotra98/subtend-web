@@ -41,6 +41,7 @@ const KanbanClient = () => {
       const [issuesRes] = await Promise.all([
         dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
         dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
+        dispatch(fetchWorkspaceStatusAction(workspaceId)),
       ]);
 
       if (isMounted) {
@@ -56,77 +57,6 @@ const KanbanClient = () => {
   }, [dispatch, projectId, workspaceId]);
 
   const team = teamsData?.teamData?.find((team: any) => team?.id === teamId);
-
-  useEffect(() => {
-    const handleCreateIssue = (payload: any) => {
-      const { issueData } = payload?.data;
-      setIssues((prev: any) => {
-        const safePrev = prev || [];
-
-        const issueExists = safePrev?.some(
-          (iss: any) => iss?.id === issueData?.id,
-        );
-
-        if (issueExists) {
-          return safePrev;
-        }
-
-        return [...safePrev, payload?.data];
-      });
-    };
-
-    const handleDeleteIssue = (payload: any) => {
-      const { deletedIssueId } = payload?.data;
-      setIssues((prev: any) => {
-        const safePrev = prev || [];
-        return safePrev?.filter((iss: any) => iss?.id !== deletedIssueId);
-      });
-    };
-
-    const editHandler = (payload: any) => {
-      const { issueData } = payload?.data;
-      setIssues((prev: any) => {
-        const safePrev = prev || [];
-
-        const issueExists = safePrev?.some(
-          (iss: any) => iss?.id === issueData?.id,
-        );
-
-        if (issueExists) {
-          const filteredIsssues = safePrev.filter(
-            (iss: any) => iss?.id !== issueData?.id,
-          );
-
-          return [...filteredIsssues, issueData];
-        }
-
-        return safePrev;
-      });
-    };
-
-    const handleIssueMove = (payload: any) => {
-      const { cardData } = payload?.data;
-      setIssues((prev: any) => {
-        const safePrev = prev || [];
-        const filteredIssues = safePrev?.filter(
-          (issue: any) => issue?.id !== cardData?.id,
-        );
-        return [...filteredIssues, cardData];
-      });
-    };
-
-    socket.on("create_issue", handleCreateIssue);
-    socket.on("delete_issue", handleDeleteIssue);
-    socket.on("edit_issue", editHandler);
-    socket.on("issue_moved", handleIssueMove);
-
-    return () => {
-      socket.off("create_issue", handleCreateIssue);
-      socket.off("delete_issue", handleDeleteIssue);
-      socket.off("edit_issue", editHandler);
-      socket.off("issue_moved", handleIssueMove);
-    };
-  }, []);
 
   const handleDragOver = async (event: any) => {
     const sourceId = event.operation.source?.id as string;

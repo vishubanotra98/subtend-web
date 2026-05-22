@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { InvitePayload } from "@/types/types";
 import {
+  changRoleService,
   inviteMemberService,
   verifyInviteMemberService,
 } from "@/services/user.service";
@@ -22,6 +23,18 @@ export const verifyInviteMemberAction = createAsyncThunk<any, any>(
   async (payload, { rejectWithValue }) => {
     try {
       const res = await verifyInviteMemberService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const changRoleAction = createAsyncThunk<any, any>(
+  "changeRole",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const res = await changRoleService(payload);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

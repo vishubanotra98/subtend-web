@@ -94,9 +94,7 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   const sidebarTeamsData = teamsData as SidebarTeamsData | null;
   const sidebarWorkspaceData = workspaceData as SidebarWorkspaceData | null;
   const teamsList =
-    teamsWorkspaceId === workspaceId
-      ? (sidebarTeamsData?.teamData ?? [])
-      : [];
+    teamsWorkspaceId === workspaceId ? (sidebarTeamsData?.teamData ?? []) : [];
 
   useEffect(() => {
     if (!navigator.onLine) {
@@ -131,17 +129,6 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
 
     dispatch(fetchTeamsDataAction(workspaceId));
   }, [dispatch, teamsWorkspaceId, workspaceId]);
-
-  // useEffect(() => {
-  //   const getTeamData = (data: any) => {
-  //     const newData = data.data;
-  //     setTeamsList((prev: any) => [...prev, newData]);
-  //   };
-  //   socket.on("create_team", getTeamData);
-  //   return () => {
-  //     socket.off("create_team", getTeamData);
-  //   };
-  // }, []);
 
   const isAdmin = sidebarWorkspaceData?.adminList?.includes(workspaceId);
 
