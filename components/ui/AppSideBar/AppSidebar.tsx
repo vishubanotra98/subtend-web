@@ -23,37 +23,78 @@ import {
 } from "@/components/ui/collapsible";
 import Header from "./Header";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { signOut } from "next-auth/react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Modal } from "@/components/Common/Modal";
 import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
-import { socket } from "@/lib/socket";
 import { nameInitials } from "@/utils/constants";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import {
+  fetchTeamsDataAction,
+  lastActiveWorkspaceAction,
+} from "@/Store/actions/workspace.action";
+import { SidebarLoading } from "./SidebarLoading";
 
-export function AppSidebar({
-  workspaceData,
-  teams,
-  currentUser,
-  workspaceMemberData,
-}: any) {
-  const [teamsOpen, setTeamsOpen] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [teamModal, setTeamModal] = useState(false);
-  const [online, setIsOnline] = useState(false);
-  const [teamsList, setTeamsList] = useState(teams);
+type ProjectItem = {
+  id: string;
+  name: string;
+};
 
+type Team = {
+  id: string;
+  name: string;
+  projects?: ProjectItem[];
+};
+
+type SidebarTeamsData = {
+  teamData?: Team[];
+};
+
+type SidebarWorkspaceData = {
+  adminList?: string[];
+};
+
+type AppSidebarProps = {
+  workspaceId: string;
+};
+
+type TeamItemProps = {
+  team: Team;
+  params: {
+    workspaceId?: string | string[];
+    teamId?: string | string[];
+    projectId?: string | string[];
+  };
+  isAdmin?: boolean;
+};
+
+const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
+
+const clearCookie = (name: string) => {
+  document.cookie = `${name}=; Max-Age=0; path=/`;
+};
+
+export function AppSidebar({ workspaceId }: AppSidebarProps) {
   const router = useRouter();
   const params = useParams();
   const pathName = usePathname();
 
-  const isActiveItem = (key: string) => pathName.includes(key);
+  const {
+    userData: { user },
+    workspaceData: { workspaceData, teamsData, teamsWorkspaceId },
+  } = useAppSelector((store) => store);
+  const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    setTeamsList(teams);
-  }, [teams]);
+  const [teamsOpen, setTeamsOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [teamModal, setTeamModal] = useState(false);
+  const [, setIsOnline] = useState(false);
+  const sidebarTeamsData = teamsData as SidebarTeamsData | null;
+  const sidebarWorkspaceData = workspaceData as SidebarWorkspaceData | null;
+  const teamsList =
+    teamsWorkspaceId === workspaceId ? (sidebarTeamsData?.teamData ?? []) : [];
 
   useEffect(() => {
     if (!navigator.onLine) {
@@ -80,28 +121,42 @@ export function AppSidebar({
   }, []);
 
   useEffect(() => {
-    const getTeamData = (data: any) => {
-      const newData = data.data;
-      setTeamsList((prev: any) => [...prev, newData]);
-    };
-    socket.on("create_team", getTeamData);
-    return () => {
-      socket.off("create_team", getTeamData);
-    };
-  }, []);
+    dispatch(lastActiveWorkspaceAction(workspaceId));
+  }, [dispatch, workspaceId]);
 
-  const isAdmin = workspaceMemberData?.role === "ADMIN";
+  useEffect(() => {
+    if (teamsWorkspaceId === workspaceId) return;
+
+    dispatch(fetchTeamsDataAction(workspaceId));
+  }, [dispatch, teamsWorkspaceId, workspaceId]);
+
+  const isAdmin = sidebarWorkspaceData?.adminList?.includes(workspaceId);
+
+  const showSidebarLoading = !user || !workspaceData;
+
+  const handleLogout = () => {
+    setLoading(true);
+    ["accessToken", "refreshToken", "access_token", "refresh_token"].forEach(
+      clearCookie,
+    );
+    router.replace("/sign-in");
+    router.refresh();
+  };
+
+  if (showSidebarLoading) {
+    return <SidebarLoading />;
+  }
 
   return (
     <Sidebar>
-      <Header userData={workspaceData} isAdmin={isAdmin} />
+      <Header userData={user} isAdmin={isAdmin} workspaceData={workspaceData} />
 
       <SidebarContent className="gap-0 flex flex-col justify-between">
         <SidebarGroup>
           <SidebarMenuButton
             onClick={() => router.push(`/${params?.workspaceId}/dashboard`)}
             className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
-              isActiveItem("dashboard") ? "bg-[#1f2937]" : ""
+              isActiveItem("dashboard", pathName) ? "bg-[#1f2937]" : ""
             } cursor-pointer`}
           >
             <LayoutDashboard size={18} className="text-[#e5e7eb]" />
@@ -135,7 +190,7 @@ export function AppSidebar({
             <CollapsibleContent>
               <ul className="flex flex-col gap-1 mt-1 px-2">
                 {teamsList?.length > 0 ? (
-                  teamsList?.map((team: any) => (
+                  teamsList?.map((team: Team) => (
                     <TeamItem
                       key={team.id}
                       team={team}
@@ -177,7 +232,7 @@ export function AppSidebar({
           <SidebarMenuButton
             onClick={() => router.push(`/${params?.workspaceId}/settings`)}
             className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
-              isActiveItem("settings") ? "bg-[#1f2937]" : ""
+              isActiveItem("settings", pathName) ? "bg-[#1f2937]" : ""
             } cursor-pointer`}
           >
             <Settings2 size={18} className="text-[#e5e7eb]" />
@@ -194,26 +249,23 @@ export function AppSidebar({
         <div className="flex items-center gap-3 w-full rounded-lg hover:bg-[#1f2937] transition-colors">
           <Avatar className="h-8 w-8 rounded-full border border-[#1f2937] bg-[#111827] shrink-0">
             <AvatarImage
-              src={currentUser?.image}
+              src={user?.image}
               className="object-cover rounded-full"
             />
             <AvatarFallback className="rounded-full flex items-center justify-center my-auto h-full  text-[#e5e7eb]">
-              {nameInitials(currentUser)}
+              {nameInitials(user)}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 overflow-hidden">
             <p
               className="text-sm font-medium truncate text-[#e5e7eb]"
-              title={currentUser?.email}
+              title={user?.email}
             >
-              {currentUser?.email}
+              {user?.email}
             </p>
             <button
-              onClick={() => {
-                setLoading(true);
-                signOut();
-              }}
+              onClick={handleLogout}
               disabled={loading}
               className="text-xs text-[#6b7280] hover:text-red-500 transition-colors text-left cursor-pointer"
             >
@@ -226,11 +278,12 @@ export function AppSidebar({
   );
 }
 
-function TeamItem({ team, params, isAdmin }: any) {
+function TeamItem({ team, params, isAdmin }: TeamItemProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const projects = team.projects ?? [];
   const isProjectActive = (projectId: string) => {
-    return projectId === params?.projectId;
+    return projectId === String(params?.projectId ?? "");
   };
 
   return (
@@ -259,8 +312,8 @@ function TeamItem({ team, params, isAdmin }: any) {
 
           <ul className="space-y-0.5 border-l border-[#1f2937] ml-1 pl-3">
             {/* Project List */}
-            {team?.projects?.length > 0 ? (
-              team?.projects.map((project: any, idx: number) => {
+            {projects.length > 0 ? (
+              projects.map((project: ProjectItem, idx: number) => {
                 return (
                   <li key={`project-idx-${idx + 1}`}>
                     <Link

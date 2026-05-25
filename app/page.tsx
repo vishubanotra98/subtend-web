@@ -1,29 +1,50 @@
-import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function RootPage() {
-  const session = await auth();
+import { useAppSelector } from "@/Store/hooks";
+import RootPageLoading from "@/components/ui/AppLoading/RootPageLoading";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-  if (!session?.user?.id) {
-    redirect("/sign-in");
-  }
+export default function RootPage() {
+  const {
+    workspaceData: { workspaceData, loading: workspaceLoading },
+    userData,
+  } = useAppSelector((state: any) => state);
+  const router = useRouter();
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: {
-      workspaces: {
-        include: { workspace: true },
-      },
-    },
-  });
+  useEffect(() => {
+    if (userData?.loading || workspaceLoading) return;
+    if (!userData?.user && !userData?.code) return;
 
-  if (!user?.workspaces || user.workspaces.length === 0) {
-    redirect("/onboarding");
-  }
+    if (!userData?.user?.id) {
+      router.push("/sign-in");
+      return;
+    }
 
-  const targetWorkspaceId =
-    user.lastActiveWorkspaceId ?? user.workspaces[0].workspaceId;
+    if (!workspaceData?.workspaces) return;
 
-  redirect(`/${targetWorkspaceId}/dashboard`);
+    if (workspaceData?.workspaces?.length === 0) {
+      router.push("/onboarding");
+      return;
+    }
+
+    const targetWorkspaceId =
+      userData?.user?.lastActiveWorkspaceId ||
+      workspaceData?.workspaces[0]?.workspaceId;
+
+    if (targetWorkspaceId) {
+      router.push(`/${targetWorkspaceId}/dashboard`);
+    }
+  }, [
+    userData?.loading,
+    workspaceLoading,
+    userData?.code,
+    userData?.user,
+    userData?.user?.id,
+    userData?.user?.lastActiveWorkspaceId,
+    workspaceData?.workspaces,
+    router,
+  ]);
+
+  return <RootPageLoading />;
 }

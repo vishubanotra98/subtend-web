@@ -6,12 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createWorkspaceAction } from "@/actions/user.actions";
 import { workspaceNameSchema, WorkspaceNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import {
+  createWorkspaceAction,
+  fetchWorkspaceAction,
+} from "@/Store/actions/workspace.action";
+import { useRouter } from "next/navigation";
 
-export function CreateWorkspaceModal({ userId }: { userId: string }) {
+export function CreateWorkspaceModal() {
+  const dispatch = useAppDispatch();
+  const { userData } = useAppSelector((store) => store);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -21,17 +29,32 @@ export function CreateWorkspaceModal({ userId }: { userId: string }) {
     resolver: zodResolver(workspaceNameSchema),
   });
 
-  const onSubmit = async (wsName: WorkspaceNameType) => {
-    setLoading(true);
+  const onSubmit = async (workspaceName: WorkspaceNameType) => {
+    try {
+      setLoading(true);
+      const userId = userData.user?.id;
+      if (!userId) {
+        toast.error("User not found. Please sign in again.");
+        return;
+      }
 
-    let res = await createWorkspaceAction(wsName, userId);
-
-    if (res?.success) {
-      toast.success(res.message);
-    } else {
-      toast.error("Error creating workspace.");
+      const payload = {
+        workspaceName: workspaceName.name,
+        userId,
+      };
+      const res = await dispatch(createWorkspaceAction(payload)).unwrap();
+      if (res?.success) {
+        await dispatch(fetchWorkspaceAction()).unwrap();
+        toast.success(res.message);
+        router.push(`/${res?.data?.workspace?.id}/dashboard`);
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create workspace";
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

@@ -6,10 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createProjectAction } from "@/actions/user.actions";
 import { projectNameSchema, ProjectNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
+import { useAppDispatch } from "@/Store/hooks";
+import {
+  createProjectAction,
+  fetchTeamsDataAction,
+} from "@/Store/actions/workspace.action";
+import { useParams } from "next/navigation";
 
 export function CreateProjectModal({
   teamId,
@@ -18,8 +23,10 @@ export function CreateProjectModal({
   teamId: string;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const params = useParams();
 
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -29,16 +36,28 @@ export function CreateProjectModal({
   });
 
   const onSubmit = async ({ projectName }: ProjectNameType) => {
-    setLoading(true);
-    let res = await createProjectAction(projectName, teamId);
+    try {
+      setLoading(true);
 
-    if (res?.success) {
-      toast.success(res?.message);
-    } else {
-      toast.error(res?.message || "Error creating project.");
+      const payload = {
+        teamId,
+        projectName,
+      };
+
+      const res = await dispatch(createProjectAction(payload)).unwrap();
+      if (res?.success) {
+        const workspaceId = params?.workspaceId as string;
+        await dispatch(fetchTeamsDataAction(workspaceId)).unwrap();
+        toast.success(res?.message);
+        setIsModalOpen(false);
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Failed to create project";
+      toast.error(message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    setIsModalOpen(false);
   };
 
   return (

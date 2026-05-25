@@ -1,14 +1,20 @@
 "use client";
 
-import { editIssueAction } from "@/actions/workspace.actions";
 import DescriptionEditor from "@/components/Common/TextEditor";
 import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
 import { commonSelectStyles } from "@/utils/styles";
 import { ArrowLeft, CircleUser, Flag, SignalHigh } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Select, { ControlProps, components } from "react-select";
 import { DeleteModal } from "./DeleteModal";
+import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import {
+  editIssueAction,
+  fetchIssuesByProjectAction,
+  fetchWorkspaceMambersAction,
+  fetchWorkspaceStatusAction,
+} from "@/Store/actions/workspace.action";
 
 const createCustomControl = (Icon: any) => {
   return function CustomSelectControl({
@@ -78,29 +84,97 @@ const createCustomPlaceholder = (PlaceholderIcon: any) => {
 const StatusPlaceholder = createCustomPlaceholder(Flag);
 const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
 
-export const IssuePageClient = ({ issueData }: any) => {
-  const { selectedIssue, statusList, workspaceMembers } = issueData;
+export const IssuePageClient = () => {
+  const dispatch = useAppDispatch();
+  const {
+    workspaceData: { workspaceStatus, workspaceMembers, projectIssues },
+  } = useAppSelector((store: any) => store);
+
   const router = useRouter();
   const { workspaceId, teamId, projectId, issueId } = useParams();
-  const [issueState, setIssueState] = useState(selectedIssue);
+  const [issueState, setIssueState] = useState<any>(null);
+  const [isLoadingIssue, setIsLoadingIssue] = useState(true);
   const [open, setOpen] = useState(false);
   const firstRdr = useRef(true);
 
-  const { title, description, priority, statusId, assigneeId } = issueState;
+  const { title, description, priority, statusId, assigneeId } =
+    issueState ?? {};
 
-  const members = workspaceMembers?.map((mem: any) => {
-    const name = !mem?.name
-      ? mem?.user?.firstName + " " + mem?.user?.lastName
-      : mem?.name;
-    return {
-      userId: mem.userId,
-      role: mem?.role,
-      name,
-      email: mem.user?.email,
-    };
-  });
+  const members = useMemo(
+    () =>
+      workspaceMembers?.map((mem: any) => {
+        const name =
+          mem?.user?.name ||
+          [mem?.user?.firstName, mem?.user?.lastName].filter(Boolean).join(" ");
+
+        return {
+          userId: mem.user?.id,
+          role: mem?.role,
+          name,
+          email: mem.user?.email,
+        };
+      }) ?? [],
+    [workspaceMembers],
+  );
+
+  const statusList = useMemo(() => workspaceStatus ?? [], [workspaceStatus]);
 
   useEffect(() => {
+    if (!workspaceId || !projectId || !issueId) return;
+
+    let isMounted = true;
+    const wsId = workspaceId as string;
+    const prjId = projectId as string;
+    const issId = issueId as string;
+
+    const init = async () => {
+      setIsLoadingIssue(true);
+      const [issuesRes] = await Promise.all([
+        dispatch(fetchIssuesByProjectAction(prjId)).unwrap(),
+        dispatch(fetchWorkspaceStatusAction(wsId)).unwrap(),
+        dispatch(fetchWorkspaceMambersAction(wsId)).unwrap(),
+      ]);
+
+      if (!isMounted) return;
+
+      const selectedIssue =
+        issuesRes?.data?.issues?.find((issue: any) => issue?.id === issId) ??
+        null;
+
+      setIssueState(selectedIssue);
+      firstRdr.current = true;
+      setIsLoadingIssue(false);
+    };
+
+    init().catch(() => {
+      if (isMounted) {
+        setIssueState(null);
+        setIsLoadingIssue(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, issueId, projectId, workspaceId]);
+
+  useEffect(() => {
+    if (!issueId || issueState?.id) return;
+
+    const selectedIssue = projectIssues?.find(
+      (issue: any) => issue?.id === issueId,
+    );
+
+    if (selectedIssue) {
+      setIssueState(selectedIssue);
+      firstRdr.current = true;
+      setIsLoadingIssue(false);
+    }
+  }, [issueId, issueState?.id, projectIssues]);
+
+  useEffect(() => {
+    if (!issueState?.id) return;
+
     if (firstRdr.current) {
       firstRdr.current = false;
       return;
@@ -118,11 +192,33 @@ export const IssuePageClient = ({ issueData }: any) => {
         priority,
         statusId,
       };
-      await editIssueAction(payload);
+      await dispatch(editIssueAction(payload));
     }, 1000);
 
     return () => clearTimeout(delayDebounce);
-  }, [title, description, priority, statusId, assigneeId]);
+  }, [
+    assigneeId,
+    description,
+    dispatch,
+    issueId,
+    issueState?.id,
+    priority,
+    projectId,
+    statusId,
+    teamId,
+    title,
+    workspaceId,
+  ]);
+
+  if (isLoadingIssue) {
+    return (
+      <div className="w-[90%] mx-auto text-gray-300">Loading issue...</div>
+    );
+  }
+
+  if (!issueState) {
+    return <div className="w-[90%] mx-auto text-gray-300">Issue not found</div>;
+  }
 
   return (
     <div className="w-[90%] mx-auto">
@@ -144,7 +240,7 @@ export const IssuePageClient = ({ issueData }: any) => {
             placeholder="Issue Title"
             rows={1}
             autoFocus
-            value={issueState?.title}
+            value={issueState?.title ?? ""}
             onChange={(e) => {
               const newVal = e.target.value;
               setIssueState((prev: any) => ({
@@ -198,9 +294,6 @@ export const IssuePageClient = ({ issueData }: any) => {
               </label>
               <Select
                 options={statusList}
-                defaultValue={statusList.find(
-                  (item: any) => item?.id === issueState?.statusId,
-                )}
                 onChange={(val: any) => {
                   setIssueState((prev: any) => ({
                     ...prev,

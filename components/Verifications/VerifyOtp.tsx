@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { verifyOtpAction } from "@/actions/auth.actions";
-import { Loader2 } from "lucide-react";
+
 import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
+import { useAppDispatch } from "@/Store/hooks";
+import { otpVerificationAction } from "@/Store/actions/auth.action";
 
 export function VerifyOtpForm() {
+  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email");
@@ -18,27 +20,35 @@ export function VerifyOtpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    if (otp.length !== 6) {
-      setError("Please enter a valid 6-digit code.");
-      return;
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (otp.length !== 6) {
+        setError("Please enter a valid 6-digit code.");
+        return;
+      }
+
+      if (!email) {
+        setError("Email is missing. Please sign up again.");
+        return;
+      }
+
+      const payload = {
+        email,
+        otp,
+      };
+
+      const res = await dispatch(otpVerificationAction(payload)).unwrap();
+      if (res?.success) {
+        router.push("/sign-in");
+      }
+    } catch (err: any) {
+      toast.error(err?.message);
+    } finally {
+      setLoading(false);
     }
-
-    if (!email) {
-      setError("Email is missing. Please sign up again.");
-      return;
-    }
-
-    const res = await verifyOtpAction(otp, email);
-
-    if (!res.success) {
-      toast.error(res.message);
-    } else {
-      router.push("/sign-in");
-    }
-    setLoading(false);
   };
 
   return (

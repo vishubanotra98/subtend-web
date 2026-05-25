@@ -13,15 +13,15 @@ dayjs.extend(utc);
 
 export default function AdminDashboard({
   totalTeamCount,
-  totalIssuesCount,
+  totalIssuesCount = 10,
   totalMembers,
   totalMembersCount,
   selectedWorkspace,
   workspaceId,
   totalProjectsCount,
   activities,
-  totalIssues,
-  workspaceStatusList,
+  // totalIssues,
+  workspaceStatus,
 }: any) {
   const router = useRouter();
 
@@ -39,27 +39,25 @@ export default function AdminDashboard({
     return name;
   };
 
-  const getTime = (utcTime: any) => {
+  const getTime = (utcTime: string) => {
     const localTime = dayjs.utc(utcTime).local().format("DD/MM/YYYY hh:mm A");
     return localTime;
   };
 
   const handleRedirect = (item: any) => {
-    const findIssue = totalIssues?.some(
-      (issue: any) => issue?.id === item?.issueId,
-    );
+    if (item?.action === "DELETED") toast.error("Issue is deleted.");
 
-    if (!findIssue) toast.error("Issue is deleted.");
-
-    if (findIssue && item?.action !== "DELETED") {
+    if (item?.action !== "DELETED") {
       router.push(
         `/${item?.workspaceId}/team/${item?.teamId}/project/${item?.projectId}/issue/${item?.issueId}?from=dashboard`,
       );
     }
   };
 
-  const findStatus = (statusId: string) => {
-    const status = workspaceStatusList.find((st: any) => st?.id === statusId);
+  const findStatus = (statusId?: string) => {
+    if (!statusId) return undefined;
+
+    const status = workspaceStatus?.find((st: any) => st?.id === statusId);
     return status?.name;
   };
 
@@ -76,7 +74,7 @@ export default function AdminDashboard({
     };
   };
 
-  const completedTaskId = workspaceStatusList?.find(
+  const completedTaskId = workspaceStatus?.find(
     (status: any) => status?.name === "Done",
   )?.id;
 
@@ -140,6 +138,7 @@ export default function AdminDashboard({
                 {activities?.length > 0 ? (
                   activities?.map((item: any) => {
                     const selectedMember = findMember(item?.userId);
+
                     const name = getName(selectedMember);
                     const Icon = activityConfig[item?.action]?.icon;
                     const iconColor = activityConfig[item?.action]?.color;

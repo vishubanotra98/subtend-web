@@ -10,10 +10,14 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
-import { deleteIssue } from "@/actions/workspace.actions";
 import toast from "react-hot-toast";
 import { Spinner } from "../Spinner/spinner";
 import { useParams, useRouter } from "next/navigation";
+import { useAppDispatch } from "@/Store/hooks";
+import {
+  deleteIssueAction,
+  fetchWorkspaceStatusAction,
+} from "@/Store/actions/workspace.action";
 
 interface ModalTypes {
   open: boolean;
@@ -22,6 +26,7 @@ interface ModalTypes {
 
 export function DeleteModal({ open, setOpen }: ModalTypes) {
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
   const { workspaceId, teamId, projectId, issueId } = useParams();
   const router = useRouter();
@@ -34,7 +39,9 @@ export function DeleteModal({ open, setOpen }: ModalTypes) {
       projectId,
       teamId,
     };
-    const res = await deleteIssue(payload);
+    const wsId = workspaceId as string;
+    const res = await dispatch(deleteIssueAction(payload)).unwrap();
+    await dispatch(fetchWorkspaceStatusAction(wsId));
     if (res?.success) {
       toast.success(res?.message);
       setOpen(false);

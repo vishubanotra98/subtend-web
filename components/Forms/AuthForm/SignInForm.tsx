@@ -1,16 +1,35 @@
 "use client";
 
-import { credentials_signIn } from "@/actions/auth.actions";
 import { Input } from "@/components/ui/Input/input";
 import { Spinner } from "@/components/ui/Spinner/spinner";
 import { SignInSchema, signInSchema } from "@/lib/schema";
+import { signInAction } from "@/Store/actions/auth.action";
+import {
+  fetchUserAction,
+  fetchWorkspaceAction,
+} from "@/Store/actions/workspace.action";
+import { useAppDispatch } from "@/Store/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
+const getErrorMessage = (err: unknown) => {
+  if (err instanceof Error) return err.message;
+
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+
+  return "Unable to sign in";
+};
+
 export function SignInForm() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const {
     register,
     handleSubmit,
@@ -22,13 +41,20 @@ export function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSignIn = async (data: SignInSchema) => {
-    setLoading(true);
-    const res = await credentials_signIn(data);
-    if (!res?.success) {
-      toast.error(res?.message);
+  const handleSignIn = async (payload: SignInSchema) => {
+    try {
+      setLoading(true);
+      const res = await dispatch(signInAction(payload)).unwrap();
+      await dispatch(fetchUserAction()).unwrap();
+      await dispatch(fetchWorkspaceAction()).unwrap();
+      if (res?.success) {
+        router.push("/");
+      }
+    } catch (err: unknown) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

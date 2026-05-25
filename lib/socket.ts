@@ -1,4 +1,4 @@
+import { BASE_URL_API } from "@/apiConstant/apiConstant";
 import { io } from "socket.io-client";
-import { SOCKET_BASE_URL } from "./utils";
 
-export const socket = io(SOCKET_BASE_URL);
+export const socket = io(BASE_URL_API);
