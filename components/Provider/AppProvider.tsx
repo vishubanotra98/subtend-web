@@ -31,10 +31,14 @@ export default function AppProvider({
     didInit.current = true;
 
     const init = async () => {
-      await Promise.all([
-        dispatch(fetchUserAction()),
-        dispatch(fetchWorkspaceAction()),
-      ]);
+      try {
+        await dispatch(fetchUserAction()).unwrap();
+        await dispatch(fetchWorkspaceAction()).unwrap();
+      } catch (err) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to initialize app session", err);
+        }
+      }
     };
 
     init();
