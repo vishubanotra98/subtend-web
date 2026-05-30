@@ -36,6 +36,7 @@ import {
   lastActiveWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { SidebarLoading } from "./SidebarLoading";
+import { logoutAction } from "@/Store/actions/auth.action";
 
 type ProjectItem = {
   id: string;
@@ -71,10 +72,6 @@ type TeamItemProps = {
 };
 
 const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
-
-const clearCookie = (name: string) => {
-  document.cookie = `${name}=; Max-Age=0; path=/`;
-};
 
 export function AppSidebar({ workspaceId }: AppSidebarProps) {
   const router = useRouter();
@@ -134,13 +131,12 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
 
   const showSidebarLoading = !user || !workspaceData;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLoading(true);
-    ["accessToken", "refreshToken", "access_token", "refresh_token"].forEach(
-      clearCookie,
-    );
+    await dispatch(logoutAction());
     router.replace("/sign-in");
     router.refresh();
+    setLoading(false);
   };
 
   if (showSidebarLoading) {

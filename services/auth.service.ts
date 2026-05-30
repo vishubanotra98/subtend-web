@@ -33,3 +33,12 @@ export const otpVerificationService = async (
     throw error;
   }
 };
+
+export const logoutService = async () => {
+  try {
+    const res = await axiosClient.post(`${API.AUTH.LOGOUT}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
