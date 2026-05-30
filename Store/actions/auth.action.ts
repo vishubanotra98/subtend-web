@@ -1,4 +1,5 @@
 import {
+  logoutService,
   otpVerificationService,
   signInService,
   signUpService,
@@ -45,3 +46,15 @@ export const otpVerificationAction = createAsyncThunk<
     return rejectWithValue(err?.response?.data);
   }
 });
+
+export const logoutAction = createAsyncThunk(
+  "logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await logoutService();
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);

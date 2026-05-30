@@ -6,6 +6,7 @@ export const API = {
     SIGN_IN: "/auth/signin",
     REFRESH: "/auth/refresh",
     OTP_VERIFICATION: "/auth/verification",
+    LOGOUT: "/auth/logout",
   },
   V1: {
     ME: "/api/v1/user",
