@@ -54,10 +54,14 @@ export function SignupForm() {
       const res = await dispatch(signUpAction(payload)).unwrap();
 
       if (res?.success) {
-        const workspaceId = res?.workspaceId;
+        const workspaceId = res?.data?.workspaceId;
         const email = res?.data?.email;
+        const isInvited = res?.data?.invited;
 
         if (!email && !workspaceId) {
+          router.push(`/sign-in`);
+        } else if (workspaceId && token && isInvited) {
+          toast.success("Sign in to access the workspace!");
           router.push(`/sign-in`);
         } else {
           router.push(`/account-verification?email=${email}`);
