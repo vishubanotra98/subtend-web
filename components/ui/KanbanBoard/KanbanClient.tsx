@@ -41,7 +41,7 @@ const KanbanClient = () => {
       const [issuesRes] = await Promise.all([
         dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
         dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
-        dispatch(fetchWorkspaceStatusAction(workspaceId)),
+        dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId })),
       ]);
 
       if (isMounted) {
@@ -85,7 +85,7 @@ const KanbanClient = () => {
       fetchIssuesByProjectAction(projectId),
     ).unwrap();
     setIssues(issuesRes?.data?.issues ?? []);
-    await dispatch(fetchWorkspaceStatusAction(workspaceId));
+    await dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId }));
   };
 
   if (!projectIssues) return "LOADING...";

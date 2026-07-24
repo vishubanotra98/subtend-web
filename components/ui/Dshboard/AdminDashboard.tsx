@@ -20,7 +20,7 @@ export default function AdminDashboard({
   workspaceId,
   totalProjectsCount,
   activities,
-  // totalIssues,
+  completedTaskStatus,
   workspaceStatus,
 }: any) {
   const router = useRouter();
@@ -74,10 +74,6 @@ export default function AdminDashboard({
     };
   };
 
-  const completedTaskId = workspaceStatus?.find(
-    (status: any) => status?.name === "Done",
-  )?.id;
-
   return (
     <div>
       <header className="flex justify-between items-center mb-12">
@@ -122,7 +118,7 @@ export default function AdminDashboard({
             <h4 className="font-semibold mb-4">Task Completion</h4>
             <div className="bg-[#1f2937] p-6 rounded-xl border border-white/5 h-[300px]">
               <TaskBarChart
-                completedTaskId={completedTaskId}
+                completedTaskId={completedTaskStatus?.id}
                 workspaceId={workspaceId}
               />
             </div>

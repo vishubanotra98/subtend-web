@@ -39,9 +39,10 @@ export function DeleteModal({ open, setOpen }: ModalTypes) {
       projectId,
       teamId,
     };
-    const wsId = workspaceId as string;
+
     const res = await dispatch(deleteIssueAction(payload)).unwrap();
-    await dispatch(fetchWorkspaceStatusAction(wsId));
+    const payload2 = { projectId, workspaceId };
+    await dispatch(fetchWorkspaceStatusAction(payload2));
     if (res?.success) {
       toast.success(res?.message);
       setOpen(false);

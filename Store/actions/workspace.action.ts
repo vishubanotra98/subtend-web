@@ -108,11 +108,11 @@ export const lastActiveWorkspaceAction = createAsyncThunk<any, string>(
   },
 );
 
-export const fetchWorkspaceStatusAction = createAsyncThunk<any, string>(
+export const fetchWorkspaceStatusAction = createAsyncThunk<any, any>(
   "workspaceStatus",
-  async (workspaceId, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const res = await fetchWorkspaceStatusService(workspaceId);
+      const res = await fetchWorkspaceStatusService(payload);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

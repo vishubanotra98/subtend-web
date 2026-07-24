@@ -70,9 +70,12 @@ export const lastActiveWorkspaceService = async (workspaceId: string) => {
   }
 };
 
-export const fetchWorkspaceStatusService = async (workspaceId: string) => {
+export const fetchWorkspaceStatusService = async (payload: any) => {
+  const { workspaceId, projectId } = payload;
   try {
-    const res = await axiosClient.get(`${API.V1.STATUS}/${workspaceId}`);
+    const res = await axiosClient.get(`${API.V1.STATUS}/${workspaceId}`, {
+      params: { projectId },
+    });
     return res?.data;
   } catch (error) {
     throw error;
