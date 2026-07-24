@@ -131,7 +131,9 @@ export const IssuePageClient = () => {
       setIsLoadingIssue(true);
       const [issuesRes] = await Promise.all([
         dispatch(fetchIssuesByProjectAction(prjId)).unwrap(),
-        dispatch(fetchWorkspaceStatusAction(wsId)).unwrap(),
+        dispatch(
+          fetchWorkspaceStatusAction({ workspaceId: wsId, projectId }),
+        ).unwrap(),
         dispatch(fetchWorkspaceMambersAction(wsId)).unwrap(),
       ]);
 

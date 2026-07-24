@@ -2,7 +2,7 @@
 
 import AdminDashboard from "@/components/ui/Dshboard/AdminDashboard";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchActivitiesAction,
   fetchIssuesAction,
@@ -49,6 +49,8 @@ type Issue = {
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
+  const [dashboardLoad, setdashboardLoad] = useState(true);
+
   const {
     workspaceData: {
       workspaceData,
@@ -58,10 +60,6 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       issuesData,
       teamsData,
       teamsWorkspaceId,
-      statusWorkspaceId,
-      membersWorkspaceId,
-      activitiesWorkspaceId,
-      issuesWorkspaceId,
     },
     userData,
   } = useAppSelector((store) => store);
@@ -75,36 +73,17 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     const init = async () => {
+      setdashboardLoad(true);
       const requests: Promise<unknown>[] = [];
-
-      if (issuesWorkspaceId !== workspaceId) {
-        requests.push(dispatch(fetchIssuesAction(workspaceId)));
-      }
-
-      if (statusWorkspaceId !== workspaceId) {
-        requests.push(dispatch(fetchWorkspaceStatusAction(workspaceId)));
-      }
-
-      if (membersWorkspaceId !== workspaceId) {
-        requests.push(dispatch(fetchWorkspaceMambersAction(workspaceId)));
-      }
-
-      if (activitiesWorkspaceId !== workspaceId) {
-        requests.push(dispatch(fetchActivitiesAction(workspaceId)));
-      }
-
+      requests.push(dispatch(fetchIssuesAction(workspaceId)));
+      requests.push(dispatch(fetchWorkspaceStatusAction({ workspaceId })));
+      requests.push(dispatch(fetchWorkspaceMambersAction(workspaceId)));
+      requests.push(dispatch(fetchActivitiesAction(workspaceId)));
       await Promise.all(requests);
+      setdashboardLoad(false);
     };
-
     init();
-  }, [
-    activitiesWorkspaceId,
-    dispatch,
-    issuesWorkspaceId,
-    membersWorkspaceId,
-    statusWorkspaceId,
-    workspaceId,
-  ]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (selectedWorkspace) return;
@@ -112,7 +91,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
     dispatch(fetchWorkspaceAction());
   }, [dispatch, selectedWorkspace, workspaceId]);
 
-  if (!selectedWorkspace) {
+  if (dashboardLoad) {
     return <DashboardLoading />;
   }
 
@@ -128,19 +107,18 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       ? teamsListData.teamData
       : [];
   const projects = teams?.flatMap((team) => team?.projects ?? []);
-  const doneTaskStatus = statuses?.find(
+  const completedTaskStatus = statuses?.find(
     (status) => status?.name === "Done",
   );
 
   const memberIssues = issues.filter(
     (issue) => issue?.assigneeId === userData?.user?.id,
   );
-
   const myUrgentIssues = memberIssues.filter(
     (issue) => issue?.priority === "URGENT",
   );
   const myCompletedIssues = memberIssues.filter(
-    (issue) => issue?.statusId === doneTaskStatus?.id,
+    (issue) => issue?.statusId === completedTaskStatus?.id,
   );
 
   if (isAdmin) {
@@ -149,13 +127,14 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
         <AdminDashboard
           selectedWorkspace={selectedWorkspace}
           workspaceId={workspaceId}
-          totalTeamCount={10}
-          totalProjectsCount={10}
+          totalTeamCount={teams?.length ?? "No team found"}
+          totalProjectsCount={projects?.length ?? "No project found"}
           totalMembers={workspaceMembers ?? []}
           totalMembersCount={workspaceMembers?.length ?? 0}
           totalIssuesCount={issues.length}
           activities={workspaceActivities}
           workspaceStatus={statuses}
+          completedTaskStatus={completedTaskStatus}
         />
       </div>
     );

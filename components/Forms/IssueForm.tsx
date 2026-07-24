@@ -134,7 +134,11 @@ export const IssueForm = ({ issueFormProp }: any) => {
         fetchIssuesByProjectAction(projectId),
       ).unwrap();
       setIssues(issuesRes?.data?.issues ?? []);
-      await dispatch(fetchWorkspaceStatusAction(workspaceId));
+      const payload2 = {
+        workspaceId,
+        projectId,
+      };
+      await dispatch(fetchWorkspaceStatusAction(payload2));
       if (res?.success) {
         toast.success(res?.message);
         handleClose();
