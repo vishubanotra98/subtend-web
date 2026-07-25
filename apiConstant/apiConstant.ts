@@ -43,31 +43,41 @@ const isAuthRoute = (url?: string) => {
   return AUTH_ROUTES.some((route) => url.includes(route));
 };
 
-axiosClient.interceptors.response.use(
-  function onFulfilled(response) {
-    return response;
-  },
-  async function onRejected(error) {
-    const originalRequest = error.config;
-    const shouldTryRefresh =
-      error.response?.status === 401 &&
-      !originalRequest?._retry &&
-      !isAuthRoute(originalRequest?.url);
+let refreshPromise: Promise<void> | null = null;
 
-    if (shouldTryRefresh) {
-      originalRequest._retry = true;
-      try {
-        await axios.post(`${BASE_URL_API}${API.AUTH.REFRESH}`, null, {
-          withCredentials: true,
-        });
-        return axiosClient(originalRequest);
-      } catch (refreshError: any) {
-        if (!location.href.includes("/sign-in")) {
-          location.href = `${BASE_URL_CLIENT}/sign-in`;
-        }
-        return Promise.reject(refreshError);
-      }
+axiosClient.interceptors.response.use(
+  (response) => response,
+
+  async (error) => {
+    const originalRequest = error.config;
+
+    const shouldTryRefresh =
+      error.response?.status === 401 && !isAuthRoute(originalRequest?.url);
+
+    if (!shouldTryRefresh) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    try {
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post(`${BASE_URL_API}${API.AUTH.REFRESH}`, null, {
+            withCredentials: true,
+          })
+          .then(() => {})
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      const res = await refreshPromise;
+      return axiosClient(originalRequest);
+    } catch (refreshError) {
+      if (!location.href.includes("/sign-in")) {
+        location.href = `${BASE_URL_CLIENT}/sign-in`;
+      }
+
+      return Promise.reject(refreshError);
+    }
   },
 );
