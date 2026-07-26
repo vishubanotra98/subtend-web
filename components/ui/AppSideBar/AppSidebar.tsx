@@ -37,39 +37,7 @@ import {
 } from "@/Store/actions/workspace.action";
 import { SidebarLoading } from "./SidebarLoading";
 import { logoutAction } from "@/Store/actions/auth.action";
-
-type ProjectItem = {
-  id: string;
-  name: string;
-};
-
-type Team = {
-  id: string;
-  name: string;
-  projects?: ProjectItem[];
-};
-
-type SidebarTeamsData = {
-  teamData?: Team[];
-};
-
-type SidebarWorkspaceData = {
-  adminList?: string[];
-};
-
-type AppSidebarProps = {
-  workspaceId: string;
-};
-
-type TeamItemProps = {
-  team: Team;
-  params: {
-    workspaceId?: string | string[];
-    teamId?: string | string[];
-    projectId?: string | string[];
-  };
-  isAdmin?: boolean;
-};
+import { AppSidebarProps, ProjectItem, SidebarTeamsData, SidebarTeamType, SidebarWorkspaceData, TeamItemProps } from "@/types/types";
 
 const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
 
@@ -186,7 +154,7 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
             <CollapsibleContent>
               <ul className="flex flex-col gap-1 mt-1 px-2">
                 {teamsList?.length > 0 ? (
-                  teamsList?.map((team: Team) => (
+                  teamsList?.map((team: SidebarTeamType) => (
                     <TeamItem
                       key={team.id}
                       team={team}
