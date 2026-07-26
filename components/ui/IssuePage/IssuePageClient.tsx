@@ -1,184 +1,105 @@
 "use client";
 
 import DescriptionEditor from "@/components/Common/TextEditor";
-import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
+import { priorityList } from "@/utils/constants";
 import { commonSelectStyles } from "@/utils/styles";
-import { ArrowLeft, CircleUser, Flag, SignalHigh } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import Select, { ControlProps, components } from "react-select";
+import { useEffect, useState } from "react";
+import Select from "react-select";
 import { DeleteModal } from "./DeleteModal";
-import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { useAppDispatch } from "@/Store/hooks";
 import {
   editIssueAction,
   fetchIssuesByProjectAction,
   fetchWorkspaceMambersAction,
   fetchWorkspaceStatusAction,
 } from "@/Store/actions/workspace.action";
-
-const createCustomControl = (Icon: any) => {
-  return function CustomSelectControl({
-    children,
-    ...props
-  }: ControlProps<any>) {
-    return (
-      <components.Control {...props}>
-        <div className="pl-2.5 flex items-center text-gray-400 shrink-0">
-          <Icon size={14} />
-        </div>
-        {children}
-      </components.Control>
-    );
-  };
-};
-const AssigneeControl = createCustomControl(CircleUser);
-
-const CustomOption = (props: any) => {
-  const Icon =
-    props.data.icon ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
-  const color =
-    props.data.color ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
-
-  return (
-    <components.Option {...props}>
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={14} style={{ color: color }} />}
-        <span>{props.label || props.data.name}</span>
-      </div>
-    </components.Option>
-  );
-};
-
-const CustomSingleValue = (props: any) => {
-  const Icon =
-    props.data.icon ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
-  const color =
-    props.data.color ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
-
-  return (
-    <components.SingleValue {...props}>
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={14} style={{ color: color }} />}
-        <span>{props.children}</span>
-      </div>
-    </components.SingleValue>
-  );
-};
-
-const createCustomPlaceholder = (PlaceholderIcon: any) => {
-  return function CustomPlaceholder(props: any) {
-    return (
-      <components.Placeholder {...props}>
-        <div className="flex items-center gap-2 text-gray-400">
-          <PlaceholderIcon size={14} />
-          <span>{props.children}</span>
-        </div>
-      </components.Placeholder>
-    );
-  };
-};
-const StatusPlaceholder = createCustomPlaceholder(Flag);
-const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
+import IssueNotFound from "./IssueNotFound";
+import {
+  AssigneeControl,
+  CustomOption,
+  CustomSingleValue,
+  PriorityPlaceholder,
+  StatusPlaceholder,
+} from "../Common";
+import IssueLoading from "./IssueLoading";
+import { IssueType, Params } from "@/types/types";
 
 export const IssuePageClient = () => {
   const dispatch = useAppDispatch();
-  const {
-    workspaceData: { workspaceStatus, workspaceMembers, projectIssues },
-  } = useAppSelector((store: any) => store);
-
   const router = useRouter();
-  const { workspaceId, teamId, projectId, issueId } = useParams();
-  const [issueState, setIssueState] = useState<any>(null);
+  const { workspaceId, teamId, projectId, issueId } = useParams<Params>();
+
+  const [issueState, setIssueState] = useState<IssueType>({
+    assigneeId: "",
+    description: "",
+    id: null,
+    priority: "",
+    projectId: "",
+    statusId: "",
+    ticket_num: null,
+    title: "",
+  });
+  const [members, setMembers] = useState<any>(null);
+  const [statusList, setStatusList] = useState<any>(null);
   const [isLoadingIssue, setIsLoadingIssue] = useState(true);
   const [open, setOpen] = useState(false);
-  const firstRdr = useRef(true);
 
-  const { title, description, priority, statusId, assigneeId } =
-    issueState ?? {};
-
-  const members = useMemo(
-    () =>
-      workspaceMembers?.map((mem: any) => {
-        const name =
-          mem?.user?.name ||
-          [mem?.user?.firstName, mem?.user?.lastName].filter(Boolean).join(" ");
-
-        return {
-          userId: mem.user?.id,
-          role: mem?.role,
-          name,
-          email: mem.user?.email,
-        };
-      }) ?? [],
-    [workspaceMembers],
-  );
-
-  const statusList = useMemo(() => workspaceStatus ?? [], [workspaceStatus]);
+  const { title, description, priority, statusId, assigneeId } = issueState;
 
   useEffect(() => {
     if (!workspaceId || !projectId || !issueId) return;
 
-    let isMounted = true;
-    const wsId = workspaceId as string;
-    const prjId = projectId as string;
-    const issId = issueId as string;
-
     const init = async () => {
       setIsLoadingIssue(true);
-      const [issuesRes] = await Promise.all([
-        dispatch(fetchIssuesByProjectAction(prjId)).unwrap(),
-        dispatch(
-          fetchWorkspaceStatusAction({ workspaceId: wsId, projectId }),
-        ).unwrap(),
-        dispatch(fetchWorkspaceMambersAction(wsId)).unwrap(),
-      ]);
 
-      if (!isMounted) return;
+      const issuesRes: any = await dispatch(
+        fetchIssuesByProjectAction(projectId),
+      ).unwrap();
+
+      const workspaceStatusRes: any = await dispatch(
+        fetchWorkspaceStatusAction({ workspaceId, projectId }),
+      ).unwrap();
+
+      const membersRes = await dispatch(
+        fetchWorkspaceMambersAction(workspaceId),
+      ).unwrap();
+
+      const issuesData = issuesRes?.data?.issues;
+      const membersList = membersRes?.data?.members;
+      const statusRes = workspaceStatusRes?.data?.status;
 
       const selectedIssue =
-        issuesRes?.data?.issues?.find((issue: any) => issue?.id === issId) ??
-        null;
+        issuesData?.find((issue: any) => issue?.id === issueId) ?? null;
+
+      const membersData =
+        membersList?.map((mem: any) => {
+          const name =
+            mem?.user?.name ||
+            [mem?.user?.firstName, mem?.user?.lastName]
+              .filter(Boolean)
+              .join(" ");
+
+          return {
+            userId: mem.user?.id,
+            role: mem?.role,
+            name,
+            email: mem.user?.email,
+          };
+        }) ?? [];
 
       setIssueState(selectedIssue);
-      firstRdr.current = true;
+      setMembers(membersData);
+      setStatusList(statusRes);
       setIsLoadingIssue(false);
     };
 
-    init().catch(() => {
-      if (isMounted) {
-        setIssueState(null);
-        setIsLoadingIssue(false);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [dispatch, issueId, projectId, workspaceId]);
+    init();
+  }, [dispatch, workspaceId, projectId, issueId]);
 
   useEffect(() => {
-    if (!issueId || issueState?.id) return;
-
-    const selectedIssue = projectIssues?.find(
-      (issue: any) => issue?.id === issueId,
-    );
-
-    if (selectedIssue) {
-      setIssueState(selectedIssue);
-      firstRdr.current = true;
-      setIsLoadingIssue(false);
-    }
-  }, [issueId, issueState?.id, projectIssues]);
-
-  useEffect(() => {
-    if (!issueState?.id) return;
-
-    if (firstRdr.current) {
-      firstRdr.current = false;
+    if (!issueState.id) {
       return;
     }
 
@@ -202,24 +123,18 @@ export const IssuePageClient = () => {
     assigneeId,
     description,
     dispatch,
-    issueId,
     issueState?.id,
     priority,
-    projectId,
     statusId,
-    teamId,
     title,
-    workspaceId,
   ]);
 
   if (isLoadingIssue) {
-    return (
-      <div className="w-[90%] mx-auto text-gray-300">Loading issue...</div>
-    );
+    return <IssueLoading />;
   }
 
-  if (!issueState) {
-    return <div className="w-[90%] mx-auto text-gray-300">Issue not found</div>;
+  if (!issueState?.id) {
+    return <IssueNotFound />;
   }
 
   return (

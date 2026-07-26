@@ -74,3 +74,55 @@ export type InvitePayload = {
   workspaceId: string;
   role: string;
 };
+
+export type WorkspaceItem = {
+  workspace?: {
+    id?: string;
+    [key: string]: unknown;
+  };
+};
+
+export type WorkspaceListData = {
+  adminList?: string[];
+  workspaces?: WorkspaceItem[];
+};
+
+export type Team = {
+  projects?: unknown[];
+  [key: string]: unknown;
+};
+
+export type TeamsData = {
+  teamData?: Team[];
+};
+
+export type Status = {
+  id?: string;
+  name?: string;
+  [key: string]: unknown;
+};
+
+export type Issue = {
+  assigneeId?: string;
+  priority?: string;
+  statusId?: string;
+  [key: string]: unknown;
+};
+
+export type Params = {
+  workspaceId: string;
+  teamId: string;
+  projectId: string;
+  issueId: string;
+};
+
+export type IssueType = {
+  assigneeId: string;
+  description: string;
+  id: null;
+  priority: string;
+  projectId: string;
+  statusId: string;
+  ticket_num: null;
+  title: string;
+};

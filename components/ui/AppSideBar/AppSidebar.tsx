@@ -224,19 +224,21 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
           </Collapsible>
         </SidebarGroup>
 
-        <SidebarGroup className="">
-          <SidebarMenuButton
-            onClick={() => router.push(`/${params?.workspaceId}/settings`)}
-            className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
-              isActiveItem("settings", pathName) ? "bg-[#1f2937]" : ""
-            } cursor-pointer`}
-          >
-            <Settings2 size={18} className="text-[#e5e7eb]" />
-            <span className="text-sm font-medium text-[#e5e7eb]">
-              Workspace Settings
-            </span>
-          </SidebarMenuButton>
-        </SidebarGroup>
+        {isAdmin && (
+          <SidebarGroup className="">
+            <SidebarMenuButton
+              onClick={() => router.push(`/${params?.workspaceId}/settings`)}
+              className={`menu-item-button hover:bg-[#1f2937] transition-colors mb-1 ${
+                isActiveItem("settings", pathName) ? "bg-[#1f2937]" : ""
+              } cursor-pointer`}
+            >
+              <Settings2 size={18} className="text-[#e5e7eb]" />
+              <span className="text-sm font-medium text-[#e5e7eb]">
+                Workspace Settings
+              </span>
+            </SidebarMenuButton>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <div className="h-px bg-[#1f2937] my-2 opacity-50" />
