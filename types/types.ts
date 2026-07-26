@@ -126,3 +126,36 @@ export type IssueType = {
   ticket_num: null;
   title: string;
 };
+
+export type ProjectItem = {
+  id: string;
+  name: string;
+};
+
+export type SidebarTeamType = {
+  id: string;
+  name: string;
+  projects?: ProjectItem[];
+};
+
+export type SidebarTeamsData = {
+  teamData?: SidebarTeamType[];
+};
+
+export type SidebarWorkspaceData = {
+  adminList?: string[];
+};
+
+export type AppSidebarProps = {
+  workspaceId: string;
+};
+
+export type TeamItemProps = {
+  team: SidebarTeamType;
+  params: {
+    workspaceId?: string | string[];
+    teamId?: string | string[];
+    projectId?: string | string[];
+  };
+  isAdmin?: boolean;
+};
