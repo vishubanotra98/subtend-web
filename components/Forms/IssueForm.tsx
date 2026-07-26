@@ -2,87 +2,25 @@
 
 import { commonSelectStyles } from "@/utils/styles";
 import Tiptap from "../Common/TextEditor";
-import { CircleUser, Flag, SignalHigh } from "lucide-react";
-import Select, { ControlProps, components } from "react-select";
-import { DEFAULT_STATUSES, priorityList } from "@/utils/constants";
+import Select from "react-select";
+import { priorityList } from "@/utils/constants";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import { Spinner } from "../ui/Spinner/spinner";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { useAppDispatch } from "@/Store/hooks";
 import {
   createIssueAction,
   fetchIssuesByProjectAction,
   fetchWorkspaceStatusAction,
 } from "@/Store/actions/workspace.action";
-
-const createCustomControl = (Icon: any) => {
-  return function CustomSelectControl({
-    children,
-    ...props
-  }: ControlProps<any>) {
-    return (
-      <components.Control {...props}>
-        <div className="pl-2.5 flex items-center text-gray-400 shrink-0">
-          <Icon size={14} />
-        </div>
-        {children}
-      </components.Control>
-    );
-  };
-};
-const AssigneeControl = createCustomControl(CircleUser);
-
-const CustomOption = (props: any) => {
-  const Icon =
-    props.data.icon ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
-  const color =
-    props.data.color ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
-
-  return (
-    <components.Option {...props}>
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={14} style={{ color: color }} />}
-        <span>{props.label || props.data.name}</span>
-      </div>
-    </components.Option>
-  );
-};
-
-const CustomSingleValue = (props: any) => {
-  const Icon =
-    props.data.icon ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.icon;
-  const color =
-    props.data.color ||
-    DEFAULT_STATUSES.find((st) => st.name === props.data.name)?.color;
-
-  return (
-    <components.SingleValue {...props}>
-      <div className="flex items-center gap-2">
-        {Icon && <Icon size={14} style={{ color: color }} />}
-        <span>{props.children}</span>
-      </div>
-    </components.SingleValue>
-  );
-};
-
-const createCustomPlaceholder = (PlaceholderIcon: any) => {
-  return function CustomPlaceholder(props: any) {
-    return (
-      <components.Placeholder {...props}>
-        <div className="flex items-center gap-2 text-gray-400">
-          <PlaceholderIcon size={14} />
-          <span>{props.children}</span>
-        </div>
-      </components.Placeholder>
-    );
-  };
-};
-const StatusPlaceholder = createCustomPlaceholder(Flag);
-const PriorityPlaceholder = createCustomPlaceholder(SignalHigh);
+import {
+  AssigneeControl,
+  CustomOption,
+  CustomSingleValue,
+  PriorityPlaceholder,
+  StatusPlaceholder,
+} from "../ui/Common";
 
 export const IssueForm = ({ issueFormProp }: any) => {
   const params = useParams();
@@ -105,7 +43,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
       ? mem?.user?.firstName + " " + mem?.user?.lastName
       : mem?.name;
     return {
-      userId: mem.userId,
+      userId: mem?.user?.id,
       role: mem?.role,
       name,
       email: mem.user?.email,
@@ -184,7 +122,9 @@ export const IssueForm = ({ issueFormProp }: any) => {
               members?.find((mem: any) => mem.userId === issueState.userId) ||
               null
             }
-            getOptionValue={(val: any) => val.userId}
+            getOptionValue={(val: any) => {
+              return val.userId;
+            }}
             getOptionLabel={(val: any) => val.name}
             placeholder="Assignee"
             styles={commonSelectStyles}

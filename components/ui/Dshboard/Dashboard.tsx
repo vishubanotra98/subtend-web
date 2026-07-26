@@ -12,40 +12,7 @@ import {
 } from "@/Store/actions/workspace.action";
 import MemberDashboard from "./Memberdashboard";
 import DashboardLoading from "./DashboardLoading";
-
-type WorkspaceItem = {
-  workspace?: {
-    id?: string;
-    [key: string]: unknown;
-  };
-};
-
-type WorkspaceListData = {
-  adminList?: string[];
-  workspaces?: WorkspaceItem[];
-};
-
-type Team = {
-  projects?: unknown[];
-  [key: string]: unknown;
-};
-
-type TeamsData = {
-  teamData?: Team[];
-};
-
-type Status = {
-  id?: string;
-  name?: string;
-  [key: string]: unknown;
-};
-
-type Issue = {
-  assigneeId?: string;
-  priority?: string;
-  statusId?: string;
-  [key: string]: unknown;
-};
+import { Issue, Status, TeamsData, WorkspaceListData } from "@/types/types";
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
