@@ -41,13 +41,16 @@ const ClientVerification = () => {
 
         if (res?.success) {
           setStatus("SUCCESS");
-          setMessage("Verified Successfully!");
-          toast.success("Verified!");
-
           setTimeout(() => {
-            router.push(
-              `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
-            );
+            if (res?.data?.exists) {
+              router.push("/");
+            } else {
+              setMessage("Verified Successfully!");
+              toast.success("Verified!");
+              router.push(
+                `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
+              );
+            }
           }, 2000);
           return;
         }
