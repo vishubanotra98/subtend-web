@@ -8,7 +8,6 @@ type UserInterface = {
   firstName: string | null;
   lastName: string | null;
   image: string;
-  lastActiveWorkspaceId: string | null;
 };
 
 type UserActionType = {
