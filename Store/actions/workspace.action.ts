@@ -14,7 +14,6 @@ import {
   fetchWorkspaceMambersService,
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
-  lastActiveWorkspaceService,
   moveCardService,
 } from "@/services/workspace.service";
 import {
@@ -96,17 +95,17 @@ export const createProjectAction = createAsyncThunk<any, ProjectPayloadType>(
   },
 );
 
-export const lastActiveWorkspaceAction = createAsyncThunk<any, string>(
-  "lastActiveWorkspace",
-  async (workspaceId, { rejectWithValue }) => {
-    try {
-      const res = await lastActiveWorkspaceService(workspaceId);
-      return res;
-    } catch (err: any) {
-      return rejectWithValue(err?.response?.data);
-    }
-  },
-);
+// export const lastActiveWorkspaceAction = createAsyncThunk<any, string>(
+//   "lastActiveWorkspace",
+//   async (workspaceId, { rejectWithValue }) => {
+//     try {
+//       const res = await lastActiveWorkspaceService(workspaceId);
+//       return res;
+//     } catch (err: any) {
+//       return rejectWithValue(err?.response?.data);
+//     }
+//   },
+// );
 
 export const fetchWorkspaceStatusAction = createAsyncThunk<any, any>(
   "workspaceStatus",

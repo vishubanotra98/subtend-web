@@ -59,16 +59,16 @@ export const createProjectService = async (payload: ProjectPayloadType) => {
   }
 };
 
-export const lastActiveWorkspaceService = async (workspaceId: string) => {
-  try {
-    const res = await axiosClient.post(
-      `${API.V1.LAST_ACTIVE_WORKSPACE}/${workspaceId}`,
-    );
-    return res?.data;
-  } catch (error) {
-    throw error;
-  }
-};
+// export const lastActiveWorkspaceService = async (workspaceId: string) => {
+//   try {
+//     const res = await axiosClient.post(
+//       `${API.V1.LAST_ACTIVE_WORKSPACE}/${workspaceId}`,
+//     );
+//     return res?.data;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 export const fetchWorkspaceStatusService = async (payload: any) => {
   const { workspaceId, projectId } = payload;

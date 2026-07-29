@@ -31,13 +31,17 @@ import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import toast from "react-hot-toast";
 import { nameInitials } from "@/utils/constants";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import {
-  fetchTeamsDataAction,
-  lastActiveWorkspaceAction,
-} from "@/Store/actions/workspace.action";
+import { fetchTeamsDataAction } from "@/Store/actions/workspace.action";
 import { SidebarLoading } from "./SidebarLoading";
 import { logoutAction } from "@/Store/actions/auth.action";
-import { AppSidebarProps, ProjectItem, SidebarTeamsData, SidebarTeamType, SidebarWorkspaceData, TeamItemProps } from "@/types/types";
+import {
+  AppSidebarProps,
+  ProjectItem,
+  SidebarTeamsData,
+  SidebarTeamType,
+  SidebarWorkspaceData,
+  TeamItemProps,
+} from "@/types/types";
 
 const isActiveItem = (key: string, pathName: string) => pathName.includes(key);
 
@@ -84,10 +88,6 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
-  useEffect(() => {
-    dispatch(lastActiveWorkspaceAction(workspaceId));
-  }, [dispatch, workspaceId]);
 
   useEffect(() => {
     if (teamsWorkspaceId === workspaceId) return;

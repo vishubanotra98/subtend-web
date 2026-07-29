@@ -28,9 +28,7 @@ export default function RootPage() {
       return;
     }
 
-    const targetWorkspaceId =
-      userData?.user?.lastActiveWorkspaceId ||
-      workspaceData?.workspaces[0]?.workspaceId;
+    const targetWorkspaceId = workspaceData?.workspaces[0]?.workspaceId;
 
     if (targetWorkspaceId) {
       router.push(`/${targetWorkspaceId}/dashboard`);
@@ -41,7 +39,6 @@ export default function RootPage() {
     userData?.code,
     userData?.user,
     userData?.user?.id,
-    userData?.user?.lastActiveWorkspaceId,
     workspaceData?.workspaces,
     router,
   ]);
