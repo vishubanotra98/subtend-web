@@ -43,13 +43,13 @@ const ClientVerification = () => {
           setStatus("SUCCESS");
           setTimeout(() => {
             if (res?.data?.exists) {
-              // router.push("/");
+              router.push("/");
             } else {
               setMessage("Verified Successfully!");
               toast.success("Verified!");
-              // router.push(
-              //   `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
-              // );
+              router.push(
+                `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
+              );
             }
           }, 2000);
           return;

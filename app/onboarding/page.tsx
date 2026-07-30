@@ -1,44 +1,46 @@
-import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
-import { LayoutGrid } from "lucide-react";
+import Image from "next/image";
 
-export default async function OnboardingPage() {
+import { OnboardingForm } from "@/components/Forms/OnboardingForm";
+
+export default function OnboardingPage() {
   return (
-    <div className="auth-bg flex min-h-screen items-center justify-center px-6 py-10">
-      <div className="w-full max-w-md">
-        <div className="rounded-card border border-default bg-card p-10 shadow-card animate-in fade-in zoom-in-95 duration-300">
-          <div className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent">
-              <LayoutGrid className="size-8 text-brand" />
+    <div className="auth-bg flex min-h-screen items-center justify-center px-6 py-12">
+      <div className="relative z-10 w-full max-w-2xl">
+        <div className="flex flex-col items-center">
+          <div className="relative flex justify-center">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="h-40 w-40 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle, rgba(20,184,166,0.08) 0%, rgba(20,184,166,0.04) 35%, transparent 70%)",
+                  filter: "blur(28px)",
+                }}
+              />
             </div>
 
-            <span className="mt-6 inline-flex rounded-full border border-default bg-accent px-3 py-1 text-xs font-medium text-brand">
-              Almost there
-            </span>
+            <Image
+              src="/assets/svg/subtend.svg"
+              alt="Subtend"
+              width={180}
+              height={60}
+              className="h-auto w-[160px] md:w-[180px] relative z-10"
+              priority
+            />
+          </div>
 
-            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-primary">
-              Create your workspace
+          <div className="mt-10 space-y-3 text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-primary md:text-5xl">
+              Welcome to Subtend
             </h1>
 
-            <p className="mt-3 text-sm leading-6 text-secondary">
-              Every project, team and issue in Subtend lives inside a workspace.
+            <p className="mx-auto max-w-md text-base leading-7 text-secondary">
               Create your first workspace to get started.
             </p>
           </div>
 
-          <div className="mt-10">
-            <CreateWorkspaceModal />
-          </div>
-
-          <div className="mt-8 border-t border-default pt-6 text-center">
-            <p className="text-sm text-secondary">
-              Already have an invitation?{" "}
-              <button
-                type="button"
-                className="font-medium text-brand transition-colors hover:opacity-80"
-              >
-                Join a workspace
-              </button>
-            </p>
+          <div className="mt-10 w-full max-w-lg rounded-card border border-default bg-card p-8 shadow-card md:p-10">
+            <OnboardingForm />
           </div>
         </div>
       </div>

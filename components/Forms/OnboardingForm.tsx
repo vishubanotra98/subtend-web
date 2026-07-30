@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/Spinner/spinner";
 import { workspaceNameSchema, WorkspaceNameType } from "@/lib/schema";
 import toast from "react-hot-toast";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
@@ -14,23 +13,28 @@ import {
   fetchWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { useRouter } from "next/navigation";
-import { Spinner } from "@/components/ui/Spinner/spinner";
 
-export function CreateWorkspaceModal() {
+export function OnboardingForm() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { userData } = useAppSelector((store) => store);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const {
     register,
+    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<WorkspaceNameType>({
     resolver: zodResolver(workspaceNameSchema),
+    defaultValues: {
+      name: "",
+    },
   });
 
-  const onSubmit = async (workspaceName: WorkspaceNameType) => {
+  const workspaceName = watch("name") || "";
+
+  const onSubmit = async (data: WorkspaceNameType) => {
     try {
       setLoading(true);
 
@@ -42,7 +46,7 @@ export function CreateWorkspaceModal() {
       }
 
       const payload = {
-        workspaceName: workspaceName.name,
+        workspaceName: data.name,
         userId,
       };
 
@@ -53,7 +57,7 @@ export function CreateWorkspaceModal() {
 
         toast.success(res.message);
 
-        router.push(`/${res?.data?.workspace?.id}/dashboard`);
+        router.push(`/${res.data.workspace.id}/dashboard`);
       }
     } catch (err: unknown) {
       const message =
@@ -66,30 +70,46 @@ export function CreateWorkspaceModal() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-2">
-        <label
-          htmlFor="workspaceName"
-          className="block text-sm font-medium text-primary"
-        >
-          Workspace name
-        </label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-4">
+        <div>
+          <label
+            htmlFor="workspaceName"
+            className="block text-sm font-medium text-primary"
+          >
+            Name your workspace
+          </label>
+        </div>
 
         <Input
           id="workspaceName"
-          {...register("name")}
-          placeholder="Acme Inc."
+          autoFocus
+          autoComplete="off"
           maxLength={50}
           disabled={loading}
-          className={`primary-input ${errors.name ? "border-destructive focus:ring-destructive" : ""}`}
+          placeholder="My Workspace"
+          {...register("name")}
+          className={`primary-input mb-2 ${
+            errors.name ? "border-destructive focus:ring-destructive" : ""
+          }`}
         />
 
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
+        <div className="flex items-start justify-between">
+          {errors.name ? (
+            <p className="text-xs text-destructive">{errors.name.message}</p>
+          ) : (
+            <span />
+          )}
+
+          {workspaceName.length > 0 && (
+            <span className="text-xs text-secondary">
+              {workspaceName.length}/50
+            </span>
+          )}
+        </div>
       </div>
 
-      <Button
+      <button
         type="submit"
         disabled={loading}
         className="button-primary w-full"
@@ -102,7 +122,7 @@ export function CreateWorkspaceModal() {
         ) : (
           "Create workspace"
         )}
-      </Button>
+      </button>
     </form>
   );
 }

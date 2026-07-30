@@ -64,7 +64,6 @@ export function SignInForm() {
 
   return (
     <form onSubmit={handleSubmit(handleSignIn)} className="flex flex-col gap-6">
-      {/* Email */}
       <div className="space-y-2">
         <Input
           {...register("email")}
@@ -82,7 +81,6 @@ export function SignInForm() {
         )}
       </div>
 
-      {/* Password */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label
@@ -131,7 +129,6 @@ export function SignInForm() {
         )}
       </div>
 
-      {/* Submit */}
       <button type="submit" disabled={loading} className="button-primary">
         {loading ? (
           <span className="flex items-center justify-center gap-2">
