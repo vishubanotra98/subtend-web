@@ -14,6 +14,7 @@ import {
   fetchWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/Spinner/spinner";
 
 export function CreateWorkspaceModal() {
   const dispatch = useAppDispatch();
@@ -25,14 +26,16 @@ export function CreateWorkspaceModal() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<WorkspaceNameType>({
     resolver: zodResolver(workspaceNameSchema),
   });
 
   const onSubmit = async (workspaceName: WorkspaceNameType) => {
     try {
       setLoading(true);
+
       const userId = userData.user?.id;
+
       if (!userId) {
         toast.error("User not found. Please sign in again.");
         return;
@@ -42,15 +45,20 @@ export function CreateWorkspaceModal() {
         workspaceName: workspaceName.name,
         userId,
       };
+
       const res = await dispatch(createWorkspaceAction(payload)).unwrap();
+
       if (res?.success) {
         await dispatch(fetchWorkspaceAction()).unwrap();
+
         toast.success(res.message);
+
         router.push(`/${res?.data?.workspace?.id}/dashboard`);
       }
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Failed to create workspace";
+
       toast.error(message);
     } finally {
       setLoading(false);
@@ -58,32 +66,43 @@ export function CreateWorkspaceModal() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-300">
-          Workspace Name
+        <label
+          htmlFor="workspaceName"
+          className="block text-sm font-medium text-primary"
+        >
+          Workspace name
         </label>
+
         <Input
+          id="workspaceName"
           {...register("name")}
-          placeholder="Eg: Acme Corp"
-          className={`primary-input mt-0.5 ${errors.name ? "error" : ""}`}
-          required
+          placeholder="Acme Inc."
           maxLength={50}
+          disabled={loading}
+          className={`primary-input ${errors.name ? "border-destructive focus:ring-destructive" : ""}`}
         />
+
         {errors.name && (
-          <p className="text-sm text-red-400">{errors.name.message}</p>
+          <p className="text-sm text-destructive">{errors.name.message}</p>
         )}
       </div>
 
-      <div className="flex justify-end pt-2">
-        <Button
-          type="submit"
-          className="w-full button-primary shadow-lg shadow-indigo-500/20"
-          disabled={loading}
-        >
-          {loading ? "Creating..." : "Create Workspace"}
-        </Button>
-      </div>
+      <Button
+        type="submit"
+        disabled={loading}
+        className="button-primary w-full"
+      >
+        {loading ? (
+          <>
+            <Spinner className="mr-2 size-4" />
+            Creating workspace...
+          </>
+        ) : (
+          "Create workspace"
+        )}
+      </Button>
     </form>
   );
 }

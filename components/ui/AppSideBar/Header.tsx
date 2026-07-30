@@ -34,7 +34,7 @@ const Header = ({ userData, isAdmin, workspaceData }: any) => {
   return (
     <>
       <SidebarHeader>
-        <span className="mt-2 text-18-500-primary mb-2">TaskFlow</span>
+        <span className="mt-2 text-18-500-primary mb-2">Subtend</span>
 
         <SidebarMenu>
           <Collapsible open={open} onOpenChange={setOpen}>

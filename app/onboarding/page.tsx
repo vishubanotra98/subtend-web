@@ -1,35 +1,45 @@
-import { redirect } from "next/navigation";
 import { CreateWorkspaceModal } from "@/components/Forms/OnboardingForm";
 import { LayoutGrid } from "lucide-react";
 
 export default async function OnboardingPage() {
   return (
-    <div className="bg-[#111827] w-full h-[100vh]">
-      <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
-        <div className="flex flex-col items-center text-center w-full max-w-[440px] px-8 py-10 bg-[#1f2937] border border-white/5 rounded-2xl shadow-2xl">
-          <div className="w-16 h-16 bg-[#0b1220] border border-white/10 rounded-2xl flex items-center justify-center mb-6">
-            <LayoutGrid className="w-8 h-8 text-[#6366F1]" />
+    <div className="auth-bg flex min-h-screen items-center justify-center px-6 py-10">
+      <div className="w-full max-w-md">
+        <div className="rounded-card border border-default bg-card p-10 shadow-card animate-in fade-in zoom-in-95 duration-300">
+          <div className="text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent">
+              <LayoutGrid className="size-8 text-brand" />
+            </div>
+
+            <span className="mt-6 inline-flex rounded-full border border-default bg-accent px-3 py-1 text-xs font-medium text-brand">
+              Almost there
+            </span>
+
+            <h1 className="mt-5 text-3xl font-semibold tracking-tight text-primary">
+              Create your workspace
+            </h1>
+
+            <p className="mt-3 text-sm leading-6 text-secondary">
+              Every project, team and issue in Subtend lives inside a workspace.
+              Create your first workspace to get started.
+            </p>
           </div>
 
-          <h1 className="text-2xl font-bold text-white mb-3 tracking-tight">
-            Welcome to Taskflow
-          </h1>
-
-          <p className="text-gray-400 mb-10 text-sm leading-relaxed">
-            To get started, you&apos;ll need a workspace. This is where your
-            teams, projects, and issues will live.
-          </p>
-
-          <div className="w-full">
+          <div className="mt-10">
             <CreateWorkspaceModal />
           </div>
 
-          <p className="mt-8 text-xs text-gray-500">
-            Have an invite?{" "}
-            <button className="text-[#6366F1] font-medium hover:underline transition-all">
-              Join existing workspace
-            </button>
-          </p>
+          <div className="mt-8 border-t border-default pt-6 text-center">
+            <p className="text-sm text-secondary">
+              Already have an invitation?{" "}
+              <button
+                type="button"
+                className="font-medium text-brand transition-colors hover:opacity-80"
+              >
+                Join a workspace
+              </button>
+            </p>
+          </div>
         </div>
       </div>
     </div>

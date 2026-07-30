@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { StoreProvider } from "@/Store/StoreProvider";
 import AppProvider from "@/components/Provider/AppProvider";
+import { ThemeProvider } from "@/components/Provider/theme/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Taskflow",
-  description: "Taskflow is a team collaboration app.",
+  title: "Subtend",
+  description: "Subtend is a team collaboration app.",
 };
 
 export default function RootLayout({
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <StoreProvider>
-          <AppProvider>{children}</AppProvider>
-        </StoreProvider>
+        <ThemeProvider>
+          <StoreProvider>
+            <AppProvider>{children}</AppProvider>
+          </StoreProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

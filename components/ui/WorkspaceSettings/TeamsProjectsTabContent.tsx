@@ -22,7 +22,7 @@ const initialTeams: Team[] = [
 
 const initialProjects: Project[] = [
   { id: "p1", name: "Demo-Project", status: "Active" },
-  { id: "p2", name: "Taskflow MVP", status: "Active" },
+  { id: "p2", name: "Subtend MVP", status: "Active" },
 ];
 
 const TeamsProjectsTabContent = () => {

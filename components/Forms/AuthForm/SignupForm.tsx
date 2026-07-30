@@ -1,56 +1,73 @@
 "use client";
 
 import { Input } from "../../ui/Input/input";
-import { signUpAction } from "@/Store/actions/auth.action";
-import { useState } from "react";
 import { Spinner } from "../../ui/Spinner/spinner";
-import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpAction } from "@/Store/actions/auth.action";
+import { useAppDispatch } from "@/Store/hooks";
 import {
   RegisterUserWithConfirmSchema,
   registerUserWithConfirmSchema,
 } from "@/lib/schema";
-import { useAppDispatch } from "@/Store/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+
+const getErrorMessage = (err: unknown) => {
+  if (err instanceof Error) return err.message;
+
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+
+    if (typeof message === "string") return message;
+  }
+
+  return "Unable to create account";
+};
 
 export function SignupForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useSearchParams();
+
   const [loading, setLoading] = useState(false);
+
   const [showPassword, setShowPassword] = useState({
     password: false,
     confirmPassword: false,
   });
 
   const token = params.get("utok");
-  const inivitedEmail = params.get("email");
+  const invitedEmail = params.get("email");
   const role = params.get("role");
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<RegisterUserWithConfirmSchema>({
     resolver: zodResolver(registerUserWithConfirmSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: inivitedEmail ? inivitedEmail : "",
+      email: invitedEmail ?? "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const handleSignup = async (formData: RegisterUserWithConfirmSchema) => {
     try {
       setLoading(true);
-      const isAdmin = role === "ADMIN" ? true : false;
+
       const payload = {
         formData,
         token,
-        isAdmin,
+        isAdmin: role === "ADMIN",
       };
+
       const res = await dispatch(signUpAction(payload)).unwrap();
 
       if (res?.success) {
@@ -59,147 +76,168 @@ export function SignupForm() {
         const isInvited = res?.data?.invited;
 
         if (!email && !workspaceId) {
-          router.push(`/sign-in`);
+          router.push("/sign-in");
         } else if (workspaceId && token && isInvited) {
           toast.success("Sign in to access the workspace!");
-          router.push(`/sign-in`);
+          router.push("/sign-in");
         } else {
+          toast.success(res.message);
           router.push(`/account-verification?email=${email}`);
-          toast.success(res?.message);
         }
       }
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col gap-3">
-      <div className="flex gap-3">
-        <div>
+    <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col gap-8">
+      {/* Name */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Input
             {...register("firstName")}
             type="text"
+            autoComplete="given-name"
             placeholder="First name"
-            required
-            className="primary-input"
+            disabled={loading}
+            className={`primary-input ${errors.firstName ? "error" : ""}`}
           />
+
           {errors.firstName && (
-            <p className="mt-0.5 ml-0.5 text-sm text-destructive">
+            <p className="pl-1 text-xs leading-5 text-destructive">
               {errors.firstName.message}
             </p>
           )}
         </div>
-        <div>
+
+        <div className="space-y-2">
           <Input
             {...register("lastName")}
             type="text"
-            required
+            autoComplete="family-name"
             placeholder="Last name"
-            className="primary-input"
+            disabled={loading}
+            className={`primary-input ${errors.lastName ? "error" : ""}`}
           />
+
           {errors.lastName && (
-            <p className="mt-0.5 ml-0.5 text-sm text-destructive">
+            <p className="pl-1 text-xs leading-5 text-destructive">
               {errors.lastName.message}
             </p>
           )}
         </div>
       </div>
 
-      <div>
+      {/* Email */}
+      <div className="space-y-2">
         <Input
           {...register("email")}
           type="email"
+          autoComplete="email"
           placeholder="Email address"
+          disabled={loading || !!invitedEmail}
           className={`primary-input ${errors.email ? "error" : ""}`}
-          required
-          disabled={inivitedEmail ? true : false}
         />
+
         {errors.email && (
-          <p className="mt-0.5 ml-0.5 text-sm text-destructive">
+          <p className="pl-1 text-xs leading-5 text-destructive">
             {errors.email.message}
           </p>
         )}
       </div>
 
-      <div className="relative">
-        <Input
-          {...register("password")}
-          type={showPassword.password ? "text" : "password"}
-          placeholder="Password"
-          className={`primary-input ${errors.password ? "error" : ""}`}
-          required
-        />
-        <div className=" absolute top-[30%] right-5">
-          {showPassword.password ? (
-            <EyeOff
-              color="#6b7280"
-              size={14}
-              onClick={() =>
-                setShowPassword((prev) => ({ ...prev, password: false }))
-              }
-            />
-          ) : (
-            <Eye
-              color="#6b7280"
-              size={14}
-              onClick={() =>
-                setShowPassword((prev) => ({ ...prev, password: true }))
-              }
-            />
-          )}
+      {/* Password */}
+      <div className="space-y-2">
+        <div className="relative">
+          <Input
+            {...register("password")}
+            type={showPassword.password ? "text" : "password"}
+            autoComplete="new-password"
+            placeholder="Password"
+            disabled={loading}
+            className={`primary-input pr-12 ${errors.password ? "error" : ""}`}
+          />
+
+          <button
+            type="button"
+            disabled={loading}
+            aria-label={
+              showPassword.password ? "Hide password" : "Show password"
+            }
+            onClick={() =>
+              setShowPassword((prev) => ({
+                ...prev,
+                password: !prev.password,
+              }))
+            }
+            className="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-secondary transition-colors hover:text-primary focus:outline-none focus-visible:text-primary disabled:pointer-events-none disabled:opacity-50"
+          >
+            {showPassword.password ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
         </div>
+
         {errors.password && (
-          <p className="mt-0.5 ml-0.5 text-sm text-destructive">
+          <p className="pl-1 text-xs leading-5 text-destructive">
             {errors.password.message}
           </p>
         )}
       </div>
 
-      <div className="relative">
-        <Input
-          {...register("confirmPassword")}
-          type={showPassword.confirmPassword ? "text" : "password"}
-          placeholder="Confirm password"
-          className={`primary-input ${errors.confirmPassword ? "error" : ""}`}
-          required
-        />
-        <div className=" absolute top-[30%] right-5">
-          {showPassword.confirmPassword ? (
-            <EyeOff
-              color="#6b7280"
-              size={14}
-              onClick={() =>
-                setShowPassword((prev) => ({ ...prev, confirmPassword: false }))
-              }
-            />
-          ) : (
-            <Eye
-              color="#6b7280"
-              size={14}
-              onClick={() =>
-                setShowPassword((prev) => ({ ...prev, confirmPassword: true }))
-              }
-            />
-          )}
+      {/* Confirm Password */}
+      <div className="space-y-2">
+        <div className="relative">
+          <Input
+            {...register("confirmPassword")}
+            type={showPassword.confirmPassword ? "text" : "password"}
+            autoComplete="new-password"
+            placeholder="Confirm password"
+            disabled={loading}
+            className={`primary-input pr-12 ${
+              errors.confirmPassword ? "error" : ""
+            }`}
+          />
+
+          <button
+            type="button"
+            disabled={loading}
+            aria-label={
+              showPassword.confirmPassword ? "Hide password" : "Show password"
+            }
+            onClick={() =>
+              setShowPassword((prev) => ({
+                ...prev,
+                confirmPassword: !prev.confirmPassword,
+              }))
+            }
+            className="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-secondary transition-colors hover:text-primary focus:outline-none focus-visible:text-primary disabled:pointer-events-none disabled:opacity-50"
+          >
+            {showPassword.confirmPassword ? (
+              <EyeOff size={16} />
+            ) : (
+              <Eye size={16} />
+            )}
+          </button>
         </div>
+
         {errors.confirmPassword && (
-          <p className="mt-0.5 ml-0.5 text-sm text-destructive">
+          <p className="pl-1 text-xs leading-5 text-destructive">
             {errors.confirmPassword.message}
           </p>
         )}
       </div>
 
-      <button type="submit" className="button-primary" disabled={loading}>
+      {/* Submit */}
+      <button type="submit" disabled={loading} className="button-primary">
         {loading ? (
-          <span className="flex items-center justify-center gap-1">
-            <Spinner color="#ffffff" />
-            <span>Creating Account</span>
+          <span className="flex items-center justify-center gap-2">
+            <Spinner />
+            <span>Creating account...</span>
           </span>
         ) : (
-          "Create Account"
+          "Create account"
         )}
       </button>
     </form>

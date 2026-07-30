@@ -43,13 +43,13 @@ const ClientVerification = () => {
           setStatus("SUCCESS");
           setTimeout(() => {
             if (res?.data?.exists) {
-              router.push("/");
+              // router.push("/");
             } else {
               setMessage("Verified Successfully!");
               toast.success("Verified!");
-              router.push(
-                `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
-              );
+              // router.push(
+              //   `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
+              // );
             }
           }, 2000);
           return;
@@ -69,63 +69,64 @@ const ClientVerification = () => {
   }, [email, role, router, token]);
 
   return (
-    <div className="auth-bg w-full h-screen flex items-center justify-center bg-[#0C0E12]">
-      <div
-        className={`
-          flex flex-col items-center justify-center gap-4
-          min-w-[320px] py-8 px-6 rounded-xl shadow-2xl border transition-colors duration-300
-          bg-bg-primary
-        : "border-[#2C2E33]"}
-          
-        `}
-      >
-        {status === "VERIFYING" && (
-          <>
-            <Spinner color="#ffffff" />
-            <h1 className="text-gray-300 text-sm font-medium animate-pulse">
-              Verifying your invitation...
-            </h1>
-          </>
-        )}
+    <div className="auth-bg flex min-h-screen items-center justify-center px-6">
+      <div className="mx-auto w-full max-w-md">
+        <div className="rounded-card border border-default bg-card p-10 shadow-card animate-in fade-in zoom-in-95 duration-300">
+          {status === "VERIFYING" && (
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent">
+                <Spinner className="size-7 text-brand" />
+              </div>
 
-        {status === "SUCCESS" && (
-          <>
-            <CheckCircle2
-              size={48}
-              className="text-green-500 animate-in zoom-in duration-300"
-            />
-            <div className="text-center">
-              <h1 className="text-white text-lg font-semibold">Verified!</h1>
-              <p className="text-gray-400 text-sm mt-1">
-                Redirecting to setup...
+              <h1 className="mt-6 text-3xl font-semibold tracking-tight text-primary">
+                Verifying invitation
+              </h1>
+
+              <p className="mt-3 max-w-xs text-sm leading-6 text-secondary">
+                Please wait while we securely verify your workspace invitation.
               </p>
             </div>
-          </>
-        )}
+          )}
 
-        {status === "ERROR" && (
-          <>
-            <XCircle
-              size={48}
-              className="text-red-500 animate-in zoom-in duration-300"
-            />
-            <div className="text-center">
-              <h1 className="text-white text-lg font-semibold">
-                Verification Failed
+          {status === "SUCCESS" && (
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10">
+                <CheckCircle2 className="size-8 text-success" />
+              </div>
+
+              <h1 className="mt-6 text-3xl font-semibold tracking-tight text-primary">
+                Invitation verified
               </h1>
-              <p className="text-red-400 text-sm mt-1 max-w-[250px]">
+
+              <p className="mt-3 max-w-xs text-sm leading-6 text-secondary">
+                Preparing your workspace...
+              </p>
+            </div>
+          )}
+
+          {status === "ERROR" && (
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
+                <XCircle className="size-8 text-destructive" />
+              </div>
+
+              <h1 className="mt-6 text-3xl font-semibold tracking-tight text-primary">
+                Verification failed
+              </h1>
+
+              <p className="mt-3 max-w-xs text-sm leading-6 text-secondary">
                 {message}
               </p>
-            </div>
 
-            <button
-              onClick={() => router.push("/")}
-              className="mt-4 text-xs text-gray-500 hover:text-white underline"
-            >
-              Back to Home
-            </button>
-          </>
-        )}
+              <button
+                onClick={() => router.push("/")}
+                className="button-primary mt-8"
+              >
+                Back to Home
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
