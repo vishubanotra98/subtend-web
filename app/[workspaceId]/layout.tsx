@@ -8,11 +8,11 @@ export default async function MainLayout({
   const wsParams = await params;
 
   return (
-    <div>
+    <div className="h-screen bg-background">
       <SidebarProvider>
         <AppSidebar workspaceId={wsParams?.workspaceId} />
-        <main className="py-3 px-4 w-full bg-primary-2">
-          <SidebarTrigger className=" cursor-pointer bg-transparent hover:bg-[#1f2937]" />
+
+        <main className="min-w-0 flex-1 overflow-y-auto bg-background">
           {children}
         </main>
       </SidebarProvider>

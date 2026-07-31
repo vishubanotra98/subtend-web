@@ -85,7 +85,7 @@
   --popover-foreground: #f3f4f6;
 
   --primary: #14b8a6;
-  --primary-foreground: #081311;
+  --primary-foreground: #0b2f2b;
 
   --primary-hover: #2dd4bf;
   --primary-active: #5eead4;
@@ -292,7 +292,6 @@ select {
 
   .button-primary:hover {
     background: var(--primary-hover);
-    transform: translateY(-1px);
   }
 
   .button-primary:active {

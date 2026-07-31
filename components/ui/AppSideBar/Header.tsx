@@ -1,111 +1,78 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ChevronDown, CirclePlus } from "lucide-react";
-import {
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import Image from "next/image";
+import { Building2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
-import { FolderKanban } from "lucide-react";
-import { useParams } from "next/navigation";
-import { OnboardingForm } from "@/components/Forms/OnboardingForm";
-import Link from "next/link";
-import { Modal } from "@/components/Common/Modal";
+type HeaderProps = {
+  workspaceData: any;
+};
 
-const Header = ({ userData, isAdmin, workspaceData }: any) => {
-  const [open, setOpen] = useState(false);
-  const params = useParams();
-  const [modalOpen, setModalOpen] = useState(false);
+const Header = ({ workspaceData }: HeaderProps) => {
+  const { state, toggleSidebar } = useSidebar();
 
-  useEffect(() => {
-    if (params?.workspaceId) {
-      setOpen(true);
-    }
-  }, [params?.workspaceId]);
+  const isCollapsed = state === "collapsed";
+
+  const currentWorkspace = workspaceData?.workspaces?.[0]?.workspace;
 
   return (
-    <>
-      <SidebarHeader>
-        <span className="mt-2 text-18-500-primary mb-2">Subtend</span>
+    <header className="shrink-0">
+      <div
+        className={`flex h-11 py-8 items-center ${isCollapsed ? "justify-center px-2" : "justify-between px-3"}`}
+      >
+        {!isCollapsed && (
+          <div className="flex size-9 items-center justify-center rounded-lg border border-brand/20 bg-brand/5">
+            <Image
+              src="/assets/svg/subtend.svg"
+              alt="Subtend"
+              width={30}
+              height={30}
+              priority
+              className="h-auto w-7 object-contain"
+            />
+          </div>
+        )}
 
-        <SidebarMenu>
-          <Collapsible open={open} onOpenChange={setOpen}>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton className="menu-item-button hover:bg-[#1f2937]">
-                  <span className="text-14-500-primary flex items-center gap-1.5">
-                    <FolderKanban size={14} className="mb-0.5" />
-                    Workspaces
-                  </span>
-                  <span
-                    className={`ml-auto chevron-rotate ${open ? "open" : ""}`}
-                  >
-                    <ChevronDown color="#e5e7eb" size={14} />
-                  </span>
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="flex size-7 shrink-0 items-center justify-center rounded-md text-secondary transition-colors duration-150 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer"
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="size-[17px]" />
+          ) : (
+            <PanelLeftClose className="size-[17px]" />
+          )}
+        </button>
+      </div>
 
-              <CollapsibleContent className="sidebar-transition">
-                <ul className="space-y-1 mt-2">
-                  {workspaceData?.workspaces?.map((wsData: any, idx: any) => {
-                    const activeWs =
-                      wsData?.workspaceId === params?.workspaceId;
+      <div className={isCollapsed ? "px-2 pb-3" : "px-2 pb-3"}>
+        <div
+          className={`
+            flex min-h-10 w-full items-center rounded-lg
+            transition-colors duration-150
+            ${isCollapsed ? "justify-center p-1" : "gap-2.5 px-2 py-1.5"}
+          `}
+        >
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-md border border-default bg-accent">
+            <Building2 className="size-3.5 text-brand" />
+          </div>
 
-                    return (
-                      <Link
-                        href={`/${wsData?.workspace?.id}/dashboard`}
-                        key={wsData?.workspace?.id}
-                        className={`sidebar-item block px-3 py-2 rounded-md ${
-                          activeWs
-                            ? "sidebar-item-active"
-                            : "hover:bg-[#1f2937]"
-                        }`}
-                      >
-                        <span className="text-14-400-primary">
-                          {wsData?.workspace?.name}
-                        </span>
-                      </Link>
-                    );
-                  })}
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-primary">
+                {currentWorkspace?.name || "Workspace"}
+              </p>
 
-                  {isAdmin && (
-                    <div>
-                      <div className="h-px bg-[#1f2937] my-2" />
-                      <li className="">
-                        <Modal
-                          open={modalOpen}
-                          setOpen={() => setModalOpen((prev) => !prev)}
-                          buttonClassName="w-full"
-                          title="Create your workspace"
-                          buttonInnerText={
-                            <span className="flex gap-1.5 items-center">
-                              <CirclePlus color="#e5e7eb" size={15} />
-                              <span className="text-14-400-primary">
-                                Add New Workspace
-                              </span>
-                            </span>
-                          }
-                          body={<OnboardingForm />}
-                        />
-                      </li>
-                    </div>
-                  )}
-                </ul>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu>
-      </SidebarHeader>
-      <div className="h-px bg-[#1f2937] my-2" />
-    </>
+              <p className="mt-0.5 text-[11px] leading-none text-secondary">
+                Workspace
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
 };
 

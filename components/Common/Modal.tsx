@@ -7,40 +7,54 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 
 interface ModalTypes {
   open: boolean;
-  setOpen: () => void;
+  setOpen: (open: boolean) => void;
   buttonInnerText: React.ReactNode;
-  buttonClassName: string;
+  buttonClassName?: string;
   title: string;
   body: React.ReactNode;
+  buttonVariant: string;
+  buttonSize?: "lg" | "default" | "sm" | "icon";
 }
 
 export function Modal({
   open,
   setOpen,
   buttonInnerText,
-  buttonClassName,
+  buttonClassName = "",
   title,
   body,
+  buttonSize,
+  buttonVariant,
 }: ModalTypes) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={`button-primary ${buttonClassName}`}>
+        <Button className={buttonClassName} size={buttonSize}>
           {buttonInnerText}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-[#1f2937] text-white border-white/10 shadow-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold tracking-tight">
+
+      <DialogContent
+        className="
+          border-default
+          bg-card
+          text-primary
+          shadow-card
+          sm:max-w-[440px]
+        "
+      >
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-lg font-semibold tracking-tight text-primary">
             {title}
           </DialogTitle>
         </DialogHeader>
 
-        <div>{body}</div>
+        <div className="pt-2">{body}</div>
       </DialogContent>
     </Dialog>
   );
