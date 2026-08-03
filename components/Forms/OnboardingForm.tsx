@@ -13,6 +13,7 @@ import {
   fetchWorkspaceAction,
 } from "@/Store/actions/workspace.action";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 export function OnboardingForm() {
   const dispatch = useAppDispatch();
@@ -89,7 +90,7 @@ export function OnboardingForm() {
           disabled={loading}
           placeholder="My Workspace"
           {...register("name")}
-          className={`primary-input mb-2 ${
+          className={`mb-2 ${
             errors.name ? "border-destructive focus:ring-destructive" : ""
           }`}
         />
@@ -109,11 +110,7 @@ export function OnboardingForm() {
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="button-primary w-full"
-      >
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? (
           <>
             <Spinner className="mr-2 size-4" />
@@ -122,7 +119,7 @@ export function OnboardingForm() {
         ) : (
           "Create workspace"
         )}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -17,8 +17,9 @@ interface ModalTypes {
   buttonClassName?: string;
   title: string;
   body: React.ReactNode;
-  buttonVariant: string;
+  buttonVariant?: string;
   buttonSize?: "lg" | "default" | "sm" | "icon";
+  subHeading?: string;
 }
 
 export function Modal({
@@ -29,7 +30,8 @@ export function Modal({
   title,
   body,
   buttonSize,
-  buttonVariant,
+  buttonVariant = "default",
+  subHeading,
 }: ModalTypes) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -39,22 +41,15 @@ export function Modal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        className="
-          border-default
-          bg-card
-          text-primary
-          shadow-card
-          sm:max-w-[440px]
-        "
-      >
-        <DialogHeader className="space-y-1">
+      <DialogContent className="border-default bg-card text-primary shadow-card sm:max-w-[600px]">
+        <DialogHeader className="space-y-1 ">
           <DialogTitle className="text-lg font-semibold tracking-tight text-primary">
             {title}
           </DialogTitle>
         </DialogHeader>
+        <p className="text-sm leading-5 mb-2 text-secondary">{subHeading}</p>
 
-        <div className="pt-2">{body}</div>
+        <div className="py-2">{body}</div>
       </DialogContent>
     </Dialog>
   );

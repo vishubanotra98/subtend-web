@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
-
+import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/Spinner/spinner";
 import { emailSchema, EmailType } from "@/lib/schema";
-import toast from "react-hot-toast";
 import { commonSelectStyles2 } from "@/utils/styles";
 import { inviteMemberAction } from "@/Store/actions/user.action";
 import { useAppDispatch } from "@/Store/hooks";
@@ -30,13 +31,14 @@ const options = [
 ];
 
 export const InviteMemberForm = ({
-  workspaceId,
   setModal,
 }: {
-  workspaceId: any;
   setModal: (value: boolean) => void;
 }) => {
   const dispatch = useAppDispatch();
+  const params = useParams();
+  const workspaceId = params.workspaceId as string;
+
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<RoleInterface>({
     label: "Member",
@@ -47,67 +49,94 @@ export const InviteMemberForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<EmailType>({
     resolver: zodResolver(emailSchema),
   });
 
   const onSubmit = async (data: EmailType) => {
     try {
       setLoading(true);
-      let res = await dispatch(
+
+      const res = await dispatch(
         inviteMemberAction({
           email: data.email,
           workspaceId,
-          role: role?.value,
+          role: role.value,
         }),
       ).unwrap();
 
-      if (res?.success) {
+      if (res.success) {
         toast.success(res.message);
+        setModal(false);
       }
     } catch (err: any) {
       toast.error(err.message);
     } finally {
       setLoading(false);
-      setModal(false);
     }
   };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 pt-2">
-      <div className="flex flex-col gap-0.5">
-        <label className="text-sm font-medium text-gray-300">Enter email</label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-primary">
+          Email Address
+        </label>
+
         <Input
           {...register("email")}
-          placeholder="Eg: example@gmail.com"
-          className={`primary-input mt-0.5 ${errors.email ? "error" : ""}`}
-          required
+          placeholder="john@example.com"
           maxLength={50}
+          variant={errors.email ? "error" : "default"}
+          className="mt-1"
         />
+
         {errors.email && (
-          <p className="text-sm text-red-400">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <label className="text-sm font-medium text-gray-300">Invite as</label>
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium text-primary">
+          Workspace Role
+        </label>
+
         <Select
           options={options}
-          onChange={(val: any) => setRole(val)}
-          value={options.find((val) => val?.value === role?.value)}
-          getOptionValue={(val: any) => val.value}
-          getOptionLabel={(val: any) => val.label}
-          placeholder="Assignee"
+          value={role}
+          onChange={(value) => setRole(value as RoleInterface)}
+          getOptionLabel={(option: any) => option.label}
+          getOptionValue={(option: any) => option.value}
+          placeholder="Select role"
           styles={commonSelectStyles2}
+          isSearchable={false}
         />
+
+        <p className="text-xs text-secondary">
+          Members can collaborate on projects. Admins can manage workspace
+          settings and members.
+        </p>
       </div>
 
-      <div className="flex justify-end pt-2">
+      <div className="flex justify-end gap-3 pt-2">
         <Button
-          type="submit"
-          className="w-full button-primary shadow-lg shadow-indigo-500/20"
+          type="button"
+          variant="secondary"
+          onClick={() => setModal(false)}
           disabled={loading}
         >
-          {loading ? "Inviting..." : "Invite member"}
+          Cancel
+        </Button>
+
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Spinner color="#ffffff" />
+              Inviting...
+            </span>
+          ) : (
+            "Invite Member"
+          )}
         </Button>
       </div>
     </form>

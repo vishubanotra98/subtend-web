@@ -1,18 +1,55 @@
-import * as React from "react"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+const textareaVariants = cva(
+  [
+    "w-full rounded-lg border resize-none outline-none transition-normal",
+    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+    "aria-invalid:border-red-500",
+    "aria-invalid:ring-4",
+    "aria-invalid:ring-red-500/20",
+  ],
+  {
+    variants: {
+      variant: {
+        default: [
+          "min-h-[120px] px-4 py-3 text-sm",
+          "border-default bg-card text-primary placeholder:text-secondary",
+          "hover:border-brand",
+          "focus:border-brand",
+          "focus:ring-4 focus:ring-[rgba(20,184,166,0.12)]",
+        ],
+
+        auth: [
+          "min-h-[120px] px-4 py-3 text-sm",
+          "border-default bg-card text-primary placeholder:text-secondary",
+          "hover:border-brand",
+          "focus:border-brand",
+          "focus:ring-4 focus:ring-[rgba(20,184,166,0.18)]",
+        ],
+      },
+    },
+
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+export interface TextareaProps
+  extends
+    React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+    VariantProps<typeof textareaVariants> {}
+
+function Textarea({ className, variant, ...props }: TextareaProps) {
   return (
     <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-stone-200 placeholder:text-stone-500 focus-visible:border-stone-950 focus-visible:ring-stone-950/50 aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:bg-stone-200/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:border-stone-800 dark:placeholder:text-stone-400 dark:focus-visible:border-stone-300 dark:focus-visible:ring-stone-300/50 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900 dark:dark:bg-stone-800/30",
-        className
-      )}
+      className={cn(textareaVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
-export { Textarea }
+export { Textarea };

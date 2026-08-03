@@ -6,14 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/Spinner/spinner";
+
 import { teamNameSchema, TeamNameType } from "@/lib/schema";
 import {
   createTeamAction,
   fetchTeamsDataAction,
 } from "@/Store/actions/workspace.action";
-
 import { useAppDispatch } from "@/Store/hooks";
 
 type AddTeamFormProps = {
@@ -41,49 +42,39 @@ export const AddTeamForm = ({ setModal }: AddTeamFormProps) => {
     try {
       setLoading(true);
 
-      const workspaceId = params?.workspaceId as string;
+      const workspaceId = params.workspaceId as string;
 
       if (!workspaceId) {
         toast.error("Workspace not found.");
         return;
       }
 
-      const payload = {
-        workspaceId,
-        teamName,
-      };
+      const res = await dispatch(
+        createTeamAction({
+          workspaceId,
+          teamName,
+        }),
+      ).unwrap();
 
-      const res = await dispatch(createTeamAction(payload)).unwrap();
-
-      if (res?.success) {
+      if (res.success) {
         await dispatch(fetchTeamsDataAction(workspaceId)).unwrap();
 
         toast.success(res.message);
         setModal(false);
       }
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to create team";
-
-      toast.error(message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create team");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-2">
-        <label
-          htmlFor="teamName"
-          className="block text-sm font-medium text-primary"
-        >
-          Team name
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="space-y-1.5">
+        <label htmlFor="teamName" className="text-sm font-medium text-primary">
+          Team Name
         </label>
-
-        <p className="text-sm leading-5 text-secondary">
-          Teams help organize people and projects within your workspace.
-        </p>
 
         <Input
           id="teamName"
@@ -93,9 +84,8 @@ export const AddTeamForm = ({ setModal }: AddTeamFormProps) => {
           maxLength={50}
           disabled={loading}
           placeholder="Engineering"
-          className={`primary-input ${
-            errors.teamName ? "border-destructive focus:ring-destructive" : ""
-          }`}
+          variant={errors.teamName ? "error" : "default"}
+          className="mt-1"
         />
 
         {errors.teamName && (
@@ -103,20 +93,27 @@ export const AddTeamForm = ({ setModal }: AddTeamFormProps) => {
         )}
       </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="button-primary w-full"
-      >
-        {loading ? (
-          <span className="flex items-center justify-center gap-2">
-            <Spinner className="size-4" />
-            Creating team...
-          </span>
-        ) : (
-          "Create team"
-        )}
-      </button>
+      <div className="flex justify-end gap-3 pt-2">
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={loading}
+          onClick={() => setModal(false)}
+        >
+          Cancel
+        </Button>
+
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <Spinner color="#fff" />
+              Creating...
+            </span>
+          ) : (
+            "Create Team"
+          )}
+        </Button>
+      </div>
     </form>
   );
 };

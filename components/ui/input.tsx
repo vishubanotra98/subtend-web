@@ -1,21 +1,65 @@
-import * as React from "react"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+const inputVariants = cva(
+  [
+    "flex w-full rounded-lg border outline-none transition-normal",
+    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+    "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+    "aria-invalid:border-red-500",
+    "aria-invalid:ring-4",
+    "aria-invalid:ring-red-500/20",
+  ],
+  {
+    variants: {
+      variant: {
+        default: [
+          "h-12 px-4 text-sm",
+          "border-default bg-card text-primary placeholder:text-secondary",
+          "hover:border-brand",
+          "focus:border-brand",
+          "focus:ring-4 focus:ring-[rgba(20,184,166,0.12)]",
+        ],
+
+        auth: [
+          "h-12 px-4 text-sm",
+          "border-default bg-card text-primary placeholder:text-secondary",
+          "hover:border-brand",
+          "focus:border-brand",
+          "focus:ring-4 focus:ring-[rgba(20,184,166,0.18)]",
+        ],
+
+        error: [
+          "h-12 px-4 text-sm",
+          "border-[var(--destructive)] bg-card text-primary placeholder:text-secondary",
+          "hover:border-[var(--destructive)]",
+          "focus:border-[var(--destructive)]",
+          "focus:ring-4 focus:ring-[rgba(220,38,38,0.18)]",
+        ],
+      },
+    },
+
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+export interface InputProps
+  extends
+    React.InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof inputVariants> {}
+
+function Input({ className, variant, type, ...props }: InputProps) {
   return (
     <input
       type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-stone-950 placeholder:text-stone-500 selection:bg-stone-900 selection:text-stone-50 dark:bg-stone-200/30 border-stone-200 h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:file:text-stone-50 dark:placeholder:text-stone-400 dark:selection:bg-stone-50 dark:selection:text-stone-900 dark:dark:bg-stone-800/30 dark:border-stone-800",
-        "focus-visible:border-stone-950 focus-visible:ring-stone-950/50 focus-visible:ring-[3px] dark:focus-visible:border-stone-300 dark:focus-visible:ring-stone-300/50",
-        "aria-invalid:ring-red-500/20 dark:aria-invalid:ring-red-500/40 aria-invalid:border-red-500 dark:aria-invalid:ring-red-900/20 dark:dark:aria-invalid:ring-red-900/40 dark:aria-invalid:border-red-900",
-        className
-      )}
+      className={cn(inputVariants({ variant }), className)}
       {...props}
     />
-  )
+  );
 }
 
-export { Input }
+export { Input };

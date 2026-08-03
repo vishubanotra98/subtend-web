@@ -1,9 +1,10 @@
 "use client";
 
-import { Input } from "../../ui/Input/input";
 import { Spinner } from "../../ui/Spinner/spinner";
 import { signUpAction } from "@/Store/actions/auth.action";
 import { useAppDispatch } from "@/Store/hooks";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   RegisterUserWithConfirmSchema,
   registerUserWithConfirmSchema,
@@ -94,7 +95,6 @@ export function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit(handleSignup)} className="flex flex-col gap-8">
-      {/* Name */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Input
@@ -131,7 +131,6 @@ export function SignupForm() {
         </div>
       </div>
 
-      {/* Email */}
       <div className="space-y-2">
         <Input
           {...register("email")}
@@ -149,7 +148,6 @@ export function SignupForm() {
         )}
       </div>
 
-      {/* Password */}
       <div className="space-y-2">
         <div className="relative">
           <Input
@@ -186,7 +184,6 @@ export function SignupForm() {
         )}
       </div>
 
-      {/* Confirm Password */}
       <div className="space-y-2">
         <div className="relative">
           <Input
@@ -229,8 +226,7 @@ export function SignupForm() {
         )}
       </div>
 
-      {/* Submit */}
-      <button type="submit" disabled={loading} className="button-primary">
+      <Button type="submit" disabled={loading}>
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <Spinner />
@@ -239,7 +235,7 @@ export function SignupForm() {
         ) : (
           "Create account"
         )}
-      </button>
+      </Button>
     </form>
   );
 }

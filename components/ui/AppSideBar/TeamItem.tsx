@@ -136,12 +136,8 @@ function TeamItem({ team, params, isAdmin }: TeamItemProps) {
                   buttonVariant="ghost"
                   buttonSize="sm"
                   buttonClassName="mt-1.5 h-8 w-full justify-start gap-2 px-2 text-xs font-normal hover:bg-accent hover:text-primary"
-                  buttonInnerText={
-                    <>
-                      <Plus className="size-3.5" />
-                      <span>Add project</span>
-                    </>
-                  }
+                  buttonInnerText={<ProjectButton />}
+                  subHeading="Organize work, track progress and collaborate."
                 />
               )}
             </div>
@@ -153,3 +149,12 @@ function TeamItem({ team, params, isAdmin }: TeamItemProps) {
 }
 
 export default TeamItem;
+
+const ProjectButton = () => {
+  return (
+    <>
+      <Plus className="size-3.5" />
+      <span>Add project</span>
+    </>
+  );
+};

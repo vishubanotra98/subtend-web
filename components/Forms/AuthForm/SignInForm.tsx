@@ -1,6 +1,6 @@
 "use client";
 
-import { Input } from "@/components/ui/Input/input";
+import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/Spinner/spinner";
 import { SignInSchema, signInSchema } from "@/lib/schema";
 import { signInAction } from "@/Store/actions/auth.action";
@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 
 const getErrorMessage = (err: unknown) => {
   if (err instanceof Error) return err.message;
@@ -71,7 +72,8 @@ export function SignInForm() {
           autoComplete="email"
           placeholder="Email address"
           disabled={loading}
-          className={`primary-input ${errors.email ? "error" : ""}`}
+          className={`${errors.email ? "error" : ""}`}
+          variant={"auth"}
         />
 
         {errors.email && (
@@ -82,15 +84,7 @@ export function SignInForm() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label
-            htmlFor="password"
-            className="text-sm font-medium text-foreground"
-          >
-            Password
-          </label>
-
-          {/*
+        {/*
           <Link
             href="/forgot-password"
             className="text-xs font-medium text-brand transition-colors hover:underline"
@@ -98,7 +92,6 @@ export function SignInForm() {
             Forgot password?
           </Link>
           */}
-        </div>
 
         <div className="relative">
           <Input
@@ -108,7 +101,8 @@ export function SignInForm() {
             autoComplete="current-password"
             placeholder="Enter your password"
             disabled={loading}
-            className={`primary-input pr-12 ${errors.password ? "error" : ""}`}
+            className={`pr-12 ${errors.password ? "error" : ""}`}
+            variant="auth"
           />
 
           <button
@@ -129,7 +123,7 @@ export function SignInForm() {
         )}
       </div>
 
-      <button type="submit" disabled={loading} className="button-primary">
+      <Button type="submit" disabled={loading}>
         {loading ? (
           <span className="flex items-center justify-center gap-2">
             <Spinner />
@@ -138,7 +132,7 @@ export function SignInForm() {
         ) : (
           "Sign In"
         )}
-      </button>
+      </Button>
     </form>
   );
 }
