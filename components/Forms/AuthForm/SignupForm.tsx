@@ -138,7 +138,7 @@ export function SignupForm() {
           autoComplete="email"
           placeholder="Email address"
           disabled={loading || !!invitedEmail}
-          className={`primary-input ${errors.email ? "error" : ""}`}
+          variant={errors.email ? "error" : "auth"}
         />
 
         {errors.email && (
@@ -156,7 +156,9 @@ export function SignupForm() {
             autoComplete="new-password"
             placeholder="Password"
             disabled={loading}
-            className={`primary-input pr-12 ${errors.password ? "error" : ""}`}
+            variant={
+              errors.password || errors.confirmPassword ? "error" : "auth"
+            }
           />
 
           <button
@@ -179,7 +181,7 @@ export function SignupForm() {
 
         {errors.password && (
           <p className="pl-1 text-xs leading-5 text-destructive">
-            {errors.password.message}
+            {errors.password.message || errors.password.message}
           </p>
         )}
       </div>
@@ -192,9 +194,7 @@ export function SignupForm() {
             autoComplete="new-password"
             placeholder="Confirm password"
             disabled={loading}
-            className={`primary-input pr-12 ${
-              errors.confirmPassword ? "error" : ""
-            }`}
+            variant={errors.confirmPassword ? "error" : "auth"}
           />
 
           <button
@@ -220,7 +220,7 @@ export function SignupForm() {
         </div>
 
         {errors.confirmPassword && (
-          <p className="pl-1 text-xs leading-5 text-destructive">
+          <p className="pl-1 text-xs leading-5 text-red-50 ">
             {errors.confirmPassword.message}
           </p>
         )}

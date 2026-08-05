@@ -20,6 +20,7 @@ interface ModalTypes {
   buttonVariant?: string;
   buttonSize?: "lg" | "default" | "sm" | "icon";
   subHeading?: string;
+  modalWidth?: string;
 }
 
 export function Modal({
@@ -32,7 +33,9 @@ export function Modal({
   buttonSize,
   buttonVariant = "default",
   subHeading,
+  modalWidth = "600px",
 }: ModalTypes) {
+  console.log(modalWidth);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -41,7 +44,9 @@ export function Modal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="border-default bg-card text-primary shadow-card sm:max-w-[600px]">
+      <DialogContent
+        className={`border-default bg-card text-primary shadow-card   sm:max-w-[${modalWidth}]`}
+      >
         <DialogHeader className="space-y-1 ">
           <DialogTitle className="text-lg font-semibold tracking-tight text-primary">
             {title}

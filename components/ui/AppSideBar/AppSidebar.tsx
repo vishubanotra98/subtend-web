@@ -45,7 +45,7 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
   const {
     userData: { user },
     workspaceData: { workspaceData, teamsData, teamsWorkspaceId },
-  } = useAppSelector((store) => store);
+  } = useAppSelector((store: any) => store);
 
   const [loading, setLoading] = useState(false);
   const [teamModal, setTeamModal] = useState(false);
@@ -134,6 +134,9 @@ export function AppSidebar({ workspaceId }: AppSidebarProps) {
                   buttonSize="icon"
                   buttonClassName="size-7 hover:bg-accent hover:text-primary"
                   buttonInnerText={<Plus className="size-3.5" />}
+                  subHeading={
+                    "Teams help organize people and projects within your workspace."
+                  }
                 />
               )}
             </div>

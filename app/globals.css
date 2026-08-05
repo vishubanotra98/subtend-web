@@ -13,6 +13,14 @@
   --color-brand-active: var(--primary-active);
   --color-primary: var(--foreground);
   --color-secondary: var(--muted-foreground);
+  --color-background: var(--background);
+
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+
+  --color-button-border: var(--border);
+  --color-button-hover: var(--card);
+  --color-button-text: var(--foreground);
 }
 
 :root {
@@ -506,4 +514,67 @@ select {
   .chevron-rotate.open {
     transform: rotate(180deg);
   }
+}
+
+/* ---------- TipTap ---------- */
+
+.tiptap {
+  min-height: 220px;
+  color: var(--foreground);
+  outline: none;
+}
+
+.tiptap p {
+  margin: 0;
+}
+
+.tiptap p + p {
+  margin-top: 0.75rem;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3 {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.25rem;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--border);
+  color: var(--muted-foreground);
+  padding-left: 1rem;
+  margin: 1rem 0;
+}
+
+.tiptap code {
+  background: var(--secondary);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 0.875rem;
+}
+
+.tiptap pre {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.tiptap img {
+  border-radius: 12px;
+  max-width: 100%;
+}
+
+.tiptap .is-empty::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

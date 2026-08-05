@@ -10,7 +10,7 @@ const DescriptionEditor = ({ state, setState, isEditing = false }: any) => {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: "Add description...",
+        placeholder: "Describe the issue...",
       }),
     ],
     content: isEditing ? JSON.parse(description) : description || "",
@@ -31,8 +31,17 @@ const DescriptionEditor = ({ state, setState, isEditing = false }: any) => {
   });
 
   return (
-    <div className="w-full rounded-md p-3 bg-transparent border border-[#374151] focus-within:border-[#4B5563] focus-within:bg-[#111827]30 transition-all duration-200">
-      <EditorContent editor={editor} />
+    <div
+      className="
+        transition-all
+        duration-200
+        focus-within:border-foreground/15
+        focus-within:shadow-card
+      "
+    >
+      <div className="px-4 py-4">
+        <EditorContent editor={editor} />
+      </div>
     </div>
   );
 };

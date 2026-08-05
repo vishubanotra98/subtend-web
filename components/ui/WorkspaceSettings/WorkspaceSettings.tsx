@@ -11,10 +11,10 @@ import DangerContentTab from "./DangerContentTab";
 type OptionTypes = "general" | "members" | "teamproject" | "danger";
 
 const options: { label: string; value: OptionTypes }[] = [
-  { label: "General", value: "general" },
+  // { label: "General", value: "general" },
   { label: "Members", value: "members" },
-  { label: "Teams & Projects", value: "teamproject" },
-  { label: "Danger Zone", value: "danger" },
+  // { label: "Teams & Projects", value: "teamproject" },
+  // { label: "Danger Zone", value: "danger" },
 ];
 
 const WorkspaceSettings = () => {
@@ -58,15 +58,15 @@ const WorkspaceSettings = () => {
         </div>
 
         <div className="mt-6">
-          {option === "general" && <div>General Settings Content</div>}
+          {/* {option === "general" && <div>General Settings Content</div>} */}
           {option === "members" && (
             <MembersTabContent
               workspaceMembers={workspaceMembers}
               currentUser={user?.id}
             />
           )}
-          {option === "teamproject" && <TeamsProjectsTabContent />}
-          {option === "danger" && <DangerContentTab />}
+          {/* {option === "teamproject" && <TeamsProjectsTabContent />} */}
+          {/* {option === "danger" && <DangerContentTab />} */}
         </div>
       </div>
     </div>

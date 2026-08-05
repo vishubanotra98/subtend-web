@@ -24,7 +24,7 @@ const InviteButton = () => {
   );
 };
 
-export default function DashboardButton() {
+export default function DashboardButton({ workspaceId }: any) {
   const [teamModal, setTeamModal] = useState(false);
   const [userModal, setUserModal] = useState(false);
   return (
