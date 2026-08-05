@@ -62,6 +62,7 @@ export const projectNameSchema = z.object({
     .string()
     .min(3, "Project name must be at least 3 characters")
     .max(50, "Project name must not exceed 50 characters."),
+  projectOverview: z.string().optional(),
 });
 
 export const emailSchema = z.object({

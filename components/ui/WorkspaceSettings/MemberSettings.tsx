@@ -31,7 +31,7 @@ const options = [
 const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
   const dispatch = useAppDispatch();
   const [userModal, setUserModal] = useState(false);
-  const { workspaceId } = useParams();
+  const params = useParams();
 
   const handleRoleChange = async (
     workspaceId: string,
@@ -70,6 +70,7 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
       <div className="flex justify-end">
         <Modal
           buttonClassName=""
+          modalWidth="600px"
           buttonInnerText={
             <span className="flex items-center justify-center gap-1.5">
               <UserPlus size={14} />
@@ -79,14 +80,7 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
           open={userModal}
           setOpen={() => setUserModal((prev) => !prev)}
           title="Invite New Member"
-          body={
-            <>
-              <InviteMemberForm
-                workspaceId={workspaceId}
-                setModal={setUserModal}
-              />
-            </>
-          }
+          body={<InviteMemberForm setModal={setUserModal} />}
         />
       </div>
 

@@ -4,7 +4,7 @@ import { BASE_URL_API } from "@/apiConstant/apiConstant";
 import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Spinner } from "../Spinner/spinner";
+import { Button } from "../button";
 
 export default function GoogleAuthButton() {
   const [loading, setLoading] = useState(false);
@@ -20,11 +20,12 @@ export default function GoogleAuthButton() {
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleGoogleLogin}
       disabled={loading}
-      className="google-auth-btn cursor-pointer"
+      variant="secondary"
+      className="gap-1.5"
     >
       <Image
         src="/assets/Google_Logo.png"
@@ -33,6 +34,6 @@ export default function GoogleAuthButton() {
         height={16}
       />
       {loading ? "Redirecting..." : "Continue with Google"}
-    </button>
+    </Button>
   );
 }

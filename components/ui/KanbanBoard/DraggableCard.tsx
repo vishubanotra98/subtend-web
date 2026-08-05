@@ -4,8 +4,7 @@ import { useDraggable } from "@dnd-kit/react";
 import { getTeamPrefix, priorityList } from "@/utils/constants";
 
 const DraggableCard = ({ issueData }: any) => {
-  const issue = issueData?.issue;
-
+  const { issue } = issueData;
   const { ref } = useDraggable({
     id: issue?.id,
   });
@@ -16,52 +15,46 @@ const DraggableCard = ({ issueData }: any) => {
     .join("");
 
   const team = issueData?.team;
-
   const currentPriority = priorityList?.find(
     (p) => p.value === issue?.priority?.toUpperCase(),
   );
-
   const PriorityIcon = currentPriority?.icon;
 
   return (
-    <div ref={ref} className="p-3 flex flex-col gap-3">
-      <div
-        className="w-full p-4 rounded-md bg-[#1F2937]           
-        border border-[#374151] hover:border-[#6B7280] shadow-sm hover:shadow-md transition-all duration-200 group cursor-grab
-      "
-      >
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-[10px] font-mono text-gray-400">
-            {getTeamPrefix(team, issueData?.issue)}
+    <div ref={ref} className="p-3">
+      <div className="group  w-full cursor-grab rounded-xl border border-default bg-card p-4 shadow-sm transition-fast hover:border-brand hover:shadow-card active:cursor-grabbing">
+        <div className="mb-3 flex items-start justify-between">
+          <span className="font-mono text-[11px] text-secondary">
+            {getTeamPrefix(team, issue)}
           </span>
 
-          <div className="flex -space-x-1.5">
-            <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center ring-2 ring-[#1F2937]">
-              <span className="text-[8px] font-bold text-white">
+          <div className="flex -space-x-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand ring-2 ring-card">
+              <span className="text-[9px] font-semibold text-inverse">
                 {nameInitials}
               </span>
             </div>
           </div>
         </div>
 
-        <h4 className="text-[13px] font-medium text-gray-100 leading-snug">
+        <h4 className="text-sm font-medium leading-6 text-primary">
           {issue?.title}
         </h4>
 
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-4 flex items-center gap-2">
           {PriorityIcon && (
             <div
-              className="flex items-center gap-1 px-1.5 py-0.5 bg-[#111827] border border-[#374151] rounded"
+              className="flex items-center gap-1.5 rounded-md bg-secondary px-2 py-1"
               title={`Priority: ${currentPriority?.label}`}
             >
               <PriorityIcon size={12} color={currentPriority?.color} />
-              <span className="text-[10px] text-gray-400 font-medium">
+              <span className="text-[11px] font-medium text-secondary">
                 {currentPriority?.label}
               </span>
             </div>
           )}
 
-          <span className="px-1.5 py-0.5 bg-[#111827] border border-[#374151] rounded text-[10px] text-gray-400">
+          <span className="rounded-md bg-secondary px-2 py-1 text-[11px] font-medium text-secondary">
             {team?.name}
           </span>
         </div>

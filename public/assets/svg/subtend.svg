@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+<!--Fully transparent background-->
+  <defs>
+    <!-- This acts exactly like your viewBox shift, slicing off the sharp left spikes cleanly at X=30 -->
+    <clipPath id="crop-left-spikes">
+      <rect x="30" y="0" width="170" height="200" />
+    </clipPath>
+  </defs>
+  
+  <g id="subtend-logo-mark" clip-path="url(#crop-left-spikes)">
+<!--CUSTOMIZATION GUIDE:
+      1. Color: Change stroke="#104D55" to your desired hex color.
+      2. Thickness: Change stroke-width="11" to make the lines thicker or thinner.-->
+    <path d="M 40 50 
+         L 160 100 
+         L 40 150 
+         L 90 100 
+         Z" fill="none" stroke="#0f766e" stroke-width="11" stroke-linecap="miter" stroke-linejoin="miter" stroke-miterlimit="10"/>
+  </g>
+</svg>

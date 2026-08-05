@@ -1,147 +1,82 @@
 "use client";
 
 import { DragDropProvider } from "@dnd-kit/react";
+import { useRouter } from "next/navigation";
 import KanbanDroppable from "@/components/ui/KanbanBoard/KanbanDroppable";
-import { useEffect, useState } from "react";
 import DraggableCard from "@/components/ui/KanbanBoard/DraggableCard";
-import { useParams, useRouter } from "next/navigation";
-import { socket } from "@/lib/socket";
-import { useAppDispatch, useAppSelector } from "@/Store/hooks";
-import {
-  fetchIssuesByProjectAction,
-  fetchWorkspaceMambersAction,
-  fetchWorkspaceStatusAction,
-  moveCardAction,
-} from "@/Store/actions/workspace.action";
 
-const KanbanClient = () => {
-  const dispatch = useAppDispatch();
-  const {
-    workspaceData: {
-      workspaceMembers,
-      workspaceStatus,
-      teamsData,
-      projectIssues,
-    },
-  } = useAppSelector((store: any) => store);
-
-  const [issues, setIssues] = useState<any>([]);
-  const params = useParams();
-  const workspaceId = params.workspaceId as string;
-  const teamId = params?.teamId;
-  const projectId = params?.projectId as string;
+const KanbanClient = ({ data, handleDragOver }: any) => {
   const router = useRouter();
 
-  useEffect(() => {
-    if (!projectId || !workspaceId) return;
+  const {
+    projectId,
+    workspaceMembers,
+    workspaceStatus,
+    setIssues,
+    issues,
+    team,
+    workspaceId,
+    teamId,
+  } = data;
 
-    let isMounted = true;
+  const issuesByStatus = issues.reduce((acc: any, issue: any) => {
+    if (!acc[issue.statusId]) {
+      acc[issue.statusId] = [];
+    }
 
-    const init = async () => {
-      const [issuesRes] = await Promise.all([
-        dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
-        dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
-        dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId })),
-      ]);
+    acc[issue.statusId].push(issue);
 
-      if (isMounted) {
-        setIssues(issuesRes?.data?.issues ?? []);
-      }
-    };
-
-    init();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [dispatch, projectId, workspaceId]);
-
-  const team = teamsData?.teamData?.find((team: any) => team?.id === teamId);
-
-  const handleDragOver = async (event: any) => {
-    const sourceId = event.operation.source?.id as string;
-    const targetId = event.operation.target?.id as string;
-
-    if (!targetId || sourceId === targetId) return;
-
-    const updatedIssues = issues.map((issue: any) => {
-      if (issue.id === sourceId) {
-        return { ...issue, statusId: targetId };
-      }
-      return issue;
-    });
-
-    setIssues(updatedIssues);
-
-    const payload = {
-      sourceId,
-      targetId,
-      workspaceId,
-      teamId,
-    };
-
-    await dispatch(moveCardAction(payload));
-    const issuesRes = await dispatch(
-      fetchIssuesByProjectAction(projectId),
-    ).unwrap();
-    setIssues(issuesRes?.data?.issues ?? []);
-    await dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId }));
-  };
-
-  if (!projectIssues) return "LOADING...";
+    return acc;
+  }, {});
 
   return (
     <DragDropProvider onDragEnd={handleDragOver}>
-      <div className="flex items-center gap-4">
-        {workspaceStatus?.map((status: any, id: any) => {
-          return (
-            <KanbanDroppable
-              workspaceMembers={workspaceMembers}
-              statusList={workspaceStatus}
-              status={status}
-              key={status?.id}
-              id={status?.id}
-              projectId={projectId}
-              setIssues={setIssues}
-            >
-              {issues
-                ?.filter((issue: any) => issue?.statusId === status?.id)
-                ?.map((issue: any) => {
-                  const findUser = workspaceMembers?.find(
-                    (mem: any) => issue?.assigneeId === mem?.user?.id,
+      <section className="h-full overflow-hidden">
+        <div className="h-full">
+          <div className="flex h-full items-start gap-6 overflow-x-auto overflow-y-hidden pb-4[scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]">
+            {workspaceStatus?.map((status: any) => (
+              <KanbanDroppable
+                key={status.id}
+                id={status.id}
+                projectId={projectId}
+                status={status}
+                statusList={workspaceStatus}
+                workspaceMembers={workspaceMembers}
+                setIssues={setIssues}
+              >
+                {(issuesByStatus[status.id] ?? []).map((issue: any) => {
+                  const member = workspaceMembers?.find(
+                    (mem: any) => mem.user?.id === issue.assigneeId,
                   );
-                  const user = findUser?.user;
-                  const userName = !user?.name
-                    ? user?.firstName + " " + user?.lastName
-                    : user?.name;
-
-                  const issueDataProp = {
-                    name: userName,
-                    issue,
-                    team,
-                  };
+                  const user = member?.user;
+                  const userName =
+                    user?.name ??
+                    `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
                   return (
-                    status?.id === issue?.statusId && (
-                      <span
-                        key={issue?.id}
-                        onClick={() =>
-                          router.push(
-                            `/${workspaceId}/team/${teamId}/project/${projectId}/issue/${issue?.id}`,
-                          )
-                        }
-                      >
-                        <DraggableCard
-                          key={issue?.id}
-                          issueData={issueDataProp}
-                        />
-                      </span>
-                    )
+                    <div
+                      key={issue.id}
+                      className="w-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+                      onClick={() =>
+                        router.push(
+                          `/${workspaceId}/team/${teamId}/project/${projectId}/issue/${issue.id}`,
+                        )
+                      }
+                    >
+                      <DraggableCard
+                        issueData={{
+                          issue,
+                          name: userName,
+                          team,
+                        }}
+                      />
+                    </div>
                   );
                 })}
-            </KanbanDroppable>
-          );
-        })}
-      </div>
+              </KanbanDroppable>
+            ))}
+          </div>
+        </div>
+      </section>
     </DragDropProvider>
   );
 };

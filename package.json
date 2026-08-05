@@ -1,5 +1,5 @@
 {
-  "name": "taskflow",
+  "name": "Subtend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -32,13 +32,16 @@
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
+    "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-chartjs-2": "^5.3.1",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.2.3",
     "react-email": "^5.2.8",
     "react-hook-form": "^7.71.1",

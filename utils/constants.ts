@@ -15,6 +15,7 @@ import {
   Flag,
   UserPlus,
   Pencil,
+  CircleSlash,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -50,6 +51,13 @@ export const DEFAULT_STATUSES = [
     order: 4,
     isDefault: false,
     icon: XCircle,
+  },
+  {
+    name: "Blocked",
+    color: "#ef4444",
+    order: 5,
+    isDefault: false,
+    icon: CircleSlash,
   },
 ];
 

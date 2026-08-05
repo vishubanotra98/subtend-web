@@ -9,70 +9,110 @@ import {
 
 export function SidebarLoading() {
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <Skeleton className="mt-2 mb-3 h-6 w-24 bg-white/10" />
+    <Sidebar collapsible="icon" className="border-r border-default bg-card">
+      <SidebarHeader className="border-b border-default p-0">
+        <div className="flex h-14 items-center justify-between px-3">
+          <Skeleton className="size-9 rounded-lg" />
 
-        <div className="rounded-md p-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-4 bg-white/10" />
-            <Skeleton className="h-4 w-24 bg-white/10" />
-          </div>
-          <Skeleton className="h-4 w-4 bg-white/10" />
+          <Skeleton className="size-8 rounded-lg" />
         </div>
 
-        <div className="mt-2 space-y-1">
-          <Skeleton className="h-8 w-full rounded-md bg-white/10" />
-          <Skeleton className="h-8 w-4/5 rounded-md bg-white/10" />
+        <div className="px-2 pb-3">
+          <div className="flex min-h-10 items-center gap-2.5 px-2 py-1.5">
+            <Skeleton className="size-7 shrink-0 rounded-md" />
+
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-3.5 w-24 rounded" />
+              <Skeleton className="h-2.5 w-14 rounded" />
+            </div>
+          </div>
         </div>
       </SidebarHeader>
 
-      <div className="h-px bg-[#1f2937] my-2" />
-
-      <SidebarContent className="gap-0 flex flex-col justify-between">
-        <SidebarGroup>
-          <Skeleton className="mb-2 h-9 w-full rounded-md bg-white/10" />
-
-          <div className="mt-2 rounded-md p-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-4 w-4 bg-white/10" />
-              <Skeleton className="h-4 w-14 bg-white/10" />
-            </div>
-            <Skeleton className="h-4 w-4 bg-white/10" />
-          </div>
-
-          <div className="mt-2 space-y-2 px-4">
-            {[0, 1, 2].map((item) => (
-              <div key={item} className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-1.5 w-1.5 rounded-full bg-indigo-500/50" />
-                  <Skeleton className="h-4 w-28 bg-white/10" />
-                </div>
-                <div className="ml-4 space-y-1 border-l border-[#1f2937] pl-3">
-                  <Skeleton className="h-3 w-24 bg-white/10" />
-                  <Skeleton className="h-3 w-20 bg-white/10" />
-                </div>
-              </div>
-            ))}
+      <SidebarContent className="overflow-x-hidden">
+        <SidebarGroup className="px-2 pt-3 pb-0">
+          <div className="flex h-9 items-center gap-2 px-2">
+            <Skeleton className="size-4 shrink-0 rounded-sm" />
+            <Skeleton className="h-3.5 w-20 rounded" />
           </div>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <Skeleton className="h-9 w-full rounded-md bg-white/10" />
+        <SidebarGroup className="px-2 pt-5">
+          <div className="mb-1.5 flex h-7 items-center justify-between px-2">
+            <Skeleton className="h-2.5 w-10 rounded" />
+            <Skeleton className="size-7 rounded-md" />
+          </div>
+
+          <div className="space-y-3">
+            <TeamSkeleton teamWidth="w-20" projectWidths={["w-24", "w-16"]} />
+
+            <TeamSkeleton teamWidth="w-16" projectWidths={["w-20"]} />
+          </div>
         </SidebarGroup>
       </SidebarContent>
 
-      <div className="h-px bg-[#1f2937] my-2 opacity-50" />
+      <SidebarFooter className="border-t border-default p-2">
+        <div className="flex h-9 items-center gap-2 px-2">
+          <Skeleton className="size-4 shrink-0 rounded-sm" />
+          <Skeleton className="h-3.5 w-28 rounded" />
+        </div>
 
-      <SidebarFooter className="pb-3">
-        <div className="flex items-center gap-3 w-full rounded-lg">
-          <Skeleton className="h-8 w-8 rounded-full bg-white/10" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-full bg-white/10" />
-            <Skeleton className="h-3 w-16 bg-white/10" />
+        <div className="mt-1 flex items-center gap-3 px-2 py-2">
+          <Skeleton className="size-8 shrink-0 rounded-full" />
+
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <Skeleton className="h-3.5 w-24 rounded" />
+            <Skeleton className="h-2.5 w-32 rounded" />
           </div>
+
+          <Skeleton className="size-4 shrink-0 rounded-sm" />
         </div>
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+type TeamSkeletonProps = {
+  teamWidth: string;
+  projectWidths: string[];
+};
+
+function TeamSkeleton({ teamWidth, projectWidths }: TeamSkeletonProps) {
+  return (
+    <div>
+      <div className="flex h-9 items-center gap-2 px-2">
+        <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+
+        <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+
+        <Skeleton className={`h-3.5 rounded ${teamWidth}`} />
+
+        <Skeleton className="ml-auto h-3 w-4 rounded" />
+      </div>
+
+      <div className="relative ml-[15px] mt-0.5 pl-[18px]">
+        <div className="absolute bottom-2 left-0 top-1 w-px bg-border" />
+
+        <div className="space-y-0.5">
+          {projectWidths.map((width, index) => (
+            <div
+              key={index}
+              className="relative flex h-8 items-center gap-2 px-2"
+            >
+              <span className="absolute -left-[18px] top-1/2 h-px w-[10px] bg-border" />
+
+              <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+
+              <Skeleton className={`h-3 rounded ${width}`} />
+            </div>
+          ))}
+
+          <div className="mt-1 flex h-8 items-center gap-2 px-2">
+            <Skeleton className="size-3.5 shrink-0 rounded-sm" />
+            <Skeleton className="h-3 w-16 rounded" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

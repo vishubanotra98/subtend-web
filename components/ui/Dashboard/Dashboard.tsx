@@ -1,6 +1,5 @@
 "use client";
 
-import AdminDashboard from "@/components/ui/Dshboard/AdminDashboard";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
 import { useEffect, useState } from "react";
 import {
@@ -13,6 +12,7 @@ import {
 import MemberDashboard from "./Memberdashboard";
 import DashboardLoading from "./DashboardLoading";
 import { Issue, Status, TeamsData, WorkspaceListData } from "@/types/types";
+import AdminDashboard from "./AdminDashboard";
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
@@ -29,7 +29,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       teamsWorkspaceId,
     },
     userData,
-  } = useAppSelector((store) => store);
+  } = useAppSelector((store: any) => store);
 
   const workspaceListData = workspaceData as WorkspaceListData | null;
   const workspaceList = workspaceListData?.workspaces ?? [];
@@ -51,6 +51,8 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
     };
     init();
   }, [dispatch]);
+
+  console.log("Workspcae Activites: ", workspaceActivities);
 
   useEffect(() => {
     if (selectedWorkspace) return;
@@ -90,37 +92,30 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
 
   if (isAdmin) {
     return (
-      <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
-        <AdminDashboard
-          selectedWorkspace={selectedWorkspace}
-          workspaceId={workspaceId}
-          totalTeamCount={teams?.length ?? "No team found"}
-          totalProjectsCount={projects?.length ?? "No project found"}
-          totalMembers={workspaceMembers ?? []}
-          totalMembersCount={workspaceMembers?.length ?? 0}
-          totalIssuesCount={issues.length}
-          activities={workspaceActivities}
-          workspaceStatus={statuses}
-          completedTaskStatus={completedTaskStatus}
-        />
-      </div>
+      <AdminDashboard
+        selectedWorkspace={selectedWorkspace}
+        workspaceId={workspaceId}
+        totalTeamCount={teams?.length ?? "No team found"}
+        totalProjectsCount={projects?.length ?? "No project found"}
+        totalMembers={workspaceMembers ?? []}
+        totalMembersCount={workspaceMembers?.length ?? 0}
+        totalIssuesCount={issues.length}
+        activities={workspaceActivities}
+        workspaceStatus={statuses}
+        completedTaskStatus={completedTaskStatus}
+      />
     );
-  } else {
-    return (
-      <div className="min-h-screen bg-[#111827] px-6 pb-10 text-[#e5e7eb]">
-        <MemberDashboard
-          workspaceId={workspaceId}
-          totalIssuesCount={issues.length}
-          myIssues={memberIssues}
-          myIssuesCount={memberIssues.length}
-          urgentTasks={myUrgentIssues}
-          urgentIssuesCount={myUrgentIssues.length}
-          completedIssuesCount={myCompletedIssues.length}
-          totalProjects={projects}
-          teamData={teams}
-          workspaceStatusList={statuses}
-        />
-      </div>
-    );
-  }
+  } else
+    <MemberDashboard
+      workspaceId={workspaceId}
+      totalIssuesCount={issues.length}
+      myIssues={memberIssues}
+      myIssuesCount={memberIssues.length}
+      urgentTasks={myUrgentIssues}
+      urgentIssuesCount={myUrgentIssues.length}
+      completedIssuesCount={myCompletedIssues.length}
+      totalProjects={projects}
+      teamData={teams}
+      workspaceStatusList={statuses}
+    />;
 }

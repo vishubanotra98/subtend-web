@@ -1,21 +1,26 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+"use client";
+
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/ui/AppSideBar/AppSidebar";
+import { PageContainer } from "@/components/Layout/PageContainer";
+import { useParams } from "next/navigation";
 
-export default async function MainLayout({
+export default function WorkspaceLayout({
   children,
-  params,
-}: Readonly<{ children: React.ReactNode; params: any }>) {
-  const wsParams = await params;
-
+}: {
+  children: React.ReactNode;
+}) {
+  const params = useParams();
+  const workspaceId = params.workspaceId as string;
   return (
-    <div>
-      <SidebarProvider>
-        <AppSidebar workspaceId={wsParams?.workspaceId} />
-        <main className="py-3 px-4 w-full bg-primary-2">
-          <SidebarTrigger className=" cursor-pointer bg-transparent hover:bg-[#1f2937]" />
-          {children}
+    <SidebarProvider defaultOpen>
+      <div className="flex h-screen w-full overflow-hidden bg-background">
+        <AppSidebar workspaceId={workspaceId} />
+
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <PageContainer>{children}</PageContainer>
         </main>
-      </SidebarProvider>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 }
