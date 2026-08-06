@@ -116,14 +116,16 @@ export type Params = {
 };
 
 export type IssueType = {
-  assigneeId: string;
-  description: string;
-  id: null;
-  priority: string;
-  projectId: string;
+  assigneeId?: string;
+  description?: string;
+  id?: null;
+  priority?: string;
+  projectId?: string;
   statusId: string;
-  ticket_num: null;
-  title: string;
+  ticket_num?: null;
+  title?: string;
+  targetDate?: string;
+  blockedReason?: string;
 };
 
 export type ProjectItem = {

@@ -26,13 +26,6 @@ const KanbanDroppable = ({
   setIssues,
 }: KanbanDroppableInterface) => {
   const [open, setOpen] = useState(false);
-  const [issueState, setIssueState] = useState({
-    title: "",
-    description: "",
-    userId: "",
-    priority: "",
-    status: "",
-  });
 
   const { ref } = useDroppable({
     id,
@@ -40,25 +33,12 @@ const KanbanDroppable = ({
 
   const issueCount = status?._count?.issues;
 
-  const handleClose = () => {
-    setIssueState({
-      title: "",
-      description: "",
-      userId: "",
-      priority: "",
-      status: "",
-    });
-    setOpen(false);
-  };
-
   const issueFormPropObj = {
-    issueState,
-    setIssueState,
     open,
     setOpen,
+    selectedStatus: status,
     workspaceMembers,
     statusList,
-    handleClose,
     setIssues,
   };
 
@@ -73,27 +53,27 @@ const KanbanDroppable = ({
         </div>
       </header>
 
-      <div className="flex-1 min-h-[68vh] overflow-y-auto rounded-xl border border-default/60 bg-secondary/15 p-2 transition-colors duration-200 transition-colors duration-200 hover:bg-secondary/8">
+      <div className="flex-1 min-h-[68vh] overflow-y-auto rounded-xl border border-default/60 bg-secondary/15 p-3 transition-colors duration-200 transition-colors duration-200 hover:bg-secondary/20">
         <Modal
           open={open}
           setOpen={setOpen}
-          title="Create team"
-          buttonVariant="default"
+          title="Create Issue"
+          buttonVariant="secondary"
           buttonSize="icon"
-          modalWidth="1080"
-          buttonClassName="w-full bg-brand/30 hover:bg-primary active:bg-primary text-primary"
+          modalWidth="1080px"
+          buttonClassName="w-full flex items-center justify-center gap-1 mb-2 "
           buttonInnerText={
             <>
-              Add Issue
               <Plus
                 size={15}
                 strokeWidth={2.2}
                 className="transition-transform duration-200 group-hover:rotate-90"
               />
+              Create Issue
             </>
           }
           subHeading={
-            "Teams help organize people and projects within your workspace."
+            "Provide the issue details to help your team track and resolve it."
           }
 
           body={<IssueForm issueFormProp={issueFormPropObj} />}

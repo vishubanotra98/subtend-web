@@ -21,7 +21,7 @@ const DraggableCard = ({ issueData }: any) => {
   const PriorityIcon = currentPriority?.icon;
 
   return (
-    <div ref={ref} className="p-3">
+    <div ref={ref} className="pt-2.5">
       <div className="group  w-full cursor-grab rounded-xl border border-default bg-card p-4 shadow-sm transition-fast hover:border-brand hover:shadow-card active:cursor-grabbing">
         <div className="mb-3 flex items-start justify-between">
           <span className="font-mono text-[11px] text-secondary">
@@ -29,7 +29,7 @@ const DraggableCard = ({ issueData }: any) => {
           </span>
 
           <div className="flex -space-x-1">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand ring-2 ring-card">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand">
               <span className="text-[9px] font-semibold text-inverse">
                 {nameInitials}
               </span>
