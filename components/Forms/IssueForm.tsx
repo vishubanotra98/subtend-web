@@ -28,25 +28,44 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 
+interface IssueInterface {
+  title: string | null;
+  description: string | null;
+  userId: string | null;
+  priority: string | null;
+  status: string | null;
+  targetDate: Date | null;
+  blockedReason: string | null;
+}
+
 export const IssueForm = ({ issueFormProp }: any) => {
   const params = useParams();
   const dispatch = useAppDispatch();
-  const {
-    workspaceMembers,
-    statusList,
-    issueState,
-    setIssueState,
-    handleClose,
-    setIssues,
-  } = issueFormProp;
+  const { workspaceMembers, statusList, setIssues, setOpen, selectedStatus } =
+    issueFormProp;
 
   const [loading, setLoading] = useState(false);
   const { projectId, workspaceId, teamId } = params;
-  const { title, description, userId, priority, status, blockedReason } =
-    issueState;
+  const [issueState, setIssueState] = useState<IssueInterface>({
+    title: null,
+    description: null,
+    userId: null,
+    priority: null,
+    status: selectedStatus?.id || null,
+    targetDate: null,
+    blockedReason: null,
+  });
+  const {
+    title,
+    description,
+    userId,
+    priority,
+    status,
+    blockedReason,
+    targetDate,
+  } = issueState;
 
-  const [date, setDate] = useState<Date>();
-  const [open, setOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
 
   const members = workspaceMembers?.map((mem: any) => {
     const name = !mem?.name
@@ -60,8 +79,28 @@ export const IssueForm = ({ issueFormProp }: any) => {
     };
   });
 
+  const handleClose = () => {
+    setIssueState({
+      title: null,
+      description: null,
+      userId: null,
+      priority: null,
+      status: null,
+      targetDate: null,
+      blockedReason: null,
+    });
+    setOpen(false);
+  };
+
+  const blocked =
+    statusList.find((st: any) => st.id === status)?.name === "Blocked";
+
   const submitHandler = async (e: any) => {
     e.preventDefault();
+    if (!title || typeof title !== "string" || !title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
     if (typeof workspaceId !== "string") {
       return toast?.error("Error Creating Issue.");
     }
@@ -77,7 +116,8 @@ export const IssueForm = ({ issueFormProp }: any) => {
         workspaceId,
         teamId,
         blockedReason,
-        targetDate: date,
+        targetDate,
+        blockedAt: blocked ? new Date() : null,
       };
       const res = await dispatch(createIssueAction(payload)).unwrap();
       const issuesRes = await dispatch(
@@ -100,11 +140,8 @@ export const IssueForm = ({ issueFormProp }: any) => {
     }
   };
 
-  const blocked =
-    statusList.find((st: any) => st.id === status)?.name === "Blocked";
-
   return (
-    <form onSubmit={submitHandler} className="flex flex-col gap-4 mt-8 ">
+    <form onSubmit={submitHandler} className="flex flex-col gap-4 mt-4 ">
       <div>
         <label className="text-sm font-medium text-primary">Issue Title</label>
         <Textarea
@@ -112,6 +149,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
           placeholder="Issue Title"
           rows={1}
           autoFocus
+          value={title ?? ""}
           onChange={(e) => {
             setIssueState((prev: any) => ({
               ...prev,
@@ -139,11 +177,11 @@ export const IssueForm = ({ issueFormProp }: any) => {
             className="mt-1.5"
             placeholder="Blocked Reason..."
             name="blockedReason"
-            value={blockedReason}
+            value={blockedReason ?? ""}
             onChange={(e) => {
               setIssueState((prev: any) => ({
                 ...prev,
-                title: e.target.value,
+                blockedReason: e.target.value,
               }));
             }}
           />
@@ -184,13 +222,21 @@ export const IssueForm = ({ issueFormProp }: any) => {
           <Select
             className="mt-1.5"
             options={statusList}
-            defaultValue={statusList.find((item: any) => item?.isDefault)}
-            onChange={(val: any) =>
+            defaultValue={statusList.find(
+              (item: any) => item?.id === selectedStatus?.id,
+            )}
+            onChange={(val: any) => {
               setIssueState((prev: any) => ({
                 ...prev,
                 status: val?.id,
-              }))
-            }
+              }));
+              if (!blocked) {
+                setIssueState((prev: any) => ({
+                  ...prev,
+                  blockedReason: "",
+                }));
+              }
+            }}
             value={
               statusList?.find((st: any) => st.id === issueState.status) || null
             }
@@ -211,7 +257,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
           <label className="text-sm font-medium text-primary">
             Target Date
           </label>
-          <Popover open={open} onOpenChange={setOpen}>
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger asChild>
               <Button
                 type="button"
@@ -220,8 +266,8 @@ export const IssueForm = ({ issueFormProp }: any) => {
               >
                 <CalendarIcon className="mr-2 h-4 w-4 text-secondary" />
 
-                {date ? (
-                  <span>{format(date, "dd MMM yyyy")}</span>
+                {targetDate ? (
+                  <span>{format(targetDate, "dd MMM yyyy")}</span>
                 ) : (
                   <span className="text-secondary">No target date</span>
                 )}
@@ -234,12 +280,15 @@ export const IssueForm = ({ issueFormProp }: any) => {
             >
               <Calendar
                 mode="single"
-                selected={date}
+                selected={targetDate ?? undefined}
                 onSelect={(selectedDate) => {
-                  setDate(selectedDate);
+                  setIssueState((prev: any) => ({
+                    ...prev,
+                    targetDate: selectedDate,
+                  }));
 
                   if (selectedDate) {
-                    setOpen(false);
+                    setDateOpen(false);
                   }
                 }}
                 captionLayout="label"
@@ -250,8 +299,11 @@ export const IssueForm = ({ issueFormProp }: any) => {
                   type="button"
                   variant="ghost"
                   onClick={() => {
-                    setDate(undefined);
-                    setOpen(false);
+                    setIssueState((prev: any) => ({
+                      ...prev,
+                      targetDate: null,
+                    }));
+                    setDateOpen(false);
                   }}
                 >
                   Clear

@@ -54,7 +54,7 @@ export const DEFAULT_STATUSES = [
   },
   {
     name: "Blocked",
-    color: "#ef4444",
+    color: "#f59e0b",
     order: 5,
     isDefault: false,
     icon: CircleSlash,

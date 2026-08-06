@@ -17,7 +17,7 @@ interface ModalTypes {
   buttonClassName?: string;
   title: string;
   body: React.ReactNode;
-  buttonVariant?: string;
+  buttonVariant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
   buttonSize?: "lg" | "default" | "sm" | "icon";
   subHeading?: string;
   modalWidth?: string;
@@ -33,28 +33,32 @@ export function Modal({
   buttonSize,
   buttonVariant = "default",
   subHeading,
-  modalWidth = "600px",
+  modalWidth = "670px",
 }: ModalTypes) {
-  console.log(modalWidth);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className={buttonClassName} size={buttonSize}>
+        <Button
+          className={buttonClassName}
+          variant={buttonVariant}
+          size={buttonSize}
+        >
           {buttonInnerText}
         </Button>
       </DialogTrigger>
 
       <DialogContent
-        className={`border-default bg-card text-primary shadow-card   sm:max-w-[${modalWidth}]`}
+        style={{ maxWidth: modalWidth }}
+        className="border-default bg-card text-primary shadow-card max-h-[95vh] flex flex-col"
       >
-        <DialogHeader className="space-y-1 ">
+        <DialogHeader className="gap-0.5 px-2">
           <DialogTitle className="text-lg font-semibold tracking-tight text-primary">
             {title}
           </DialogTitle>
+          <p className="text-sm leading-5 mb-2 text-secondary">{subHeading}</p>
         </DialogHeader>
-        <p className="text-sm leading-5 mb-2 text-secondary">{subHeading}</p>
 
-        <div className="py-2">{body}</div>
+        <div className="py-2 overflow-y-auto px-2">{body}</div>
       </DialogContent>
     </Dialog>
   );

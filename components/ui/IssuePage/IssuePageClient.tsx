@@ -40,13 +40,23 @@ export const IssuePageClient = () => {
     statusId: "",
     ticket_num: null,
     title: "",
+    blockedReason: "",
+    targetDate: "",
   });
   const [members, setMembers] = useState<any>(null);
   const [statusList, setStatusList] = useState<any>(null);
   const [isLoadingIssue, setIsLoadingIssue] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const { title, description, priority, statusId, assigneeId } = issueState;
+  const {
+    title,
+    description,
+    priority,
+    statusId,
+    assigneeId,
+    blockedReason,
+    targetDate,
+  } = issueState;
 
   useEffect(() => {
     if (!workspaceId || !projectId || !issueId) return;
