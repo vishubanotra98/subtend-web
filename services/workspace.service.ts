@@ -168,3 +168,12 @@ export const deletedIssueService = async (payload: any) => {
     throw error;
   }
 };
+
+export const fetchProjectByIdService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.PROJECT}/${projectId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

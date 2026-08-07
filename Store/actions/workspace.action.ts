@@ -9,6 +9,7 @@ import {
   fetchActivitiesService,
   fetchIssuesByProjectService,
   fetchIssuesService,
+  fetchProjectByIdService,
   fetchTeamsDataService,
   fetchUserService,
   fetchWorkspaceMambersService,
@@ -220,6 +221,18 @@ export const deleteIssueAction = createAsyncThunk<any, any>(
   async (payload, { rejectWithValue }) => {
     try {
       const res = await deletedIssueService(payload);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchProjectByIdAction = createAsyncThunk<any, string>(
+  "fetchProjectById",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await fetchProjectByIdService(projectId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);
