@@ -3,6 +3,7 @@
 import KanbanClient from "@/components/ui/KanbanBoard/KanbanClient";
 import {
   fetchIssuesByProjectAction,
+  fetchProjectByIdAction,
   fetchWorkspaceMambersAction,
   fetchWorkspaceStatusAction,
   moveCardAction,
@@ -23,6 +24,7 @@ export default function ProjectIssue() {
   } = useAppSelector((store: any) => store);
 
   const [issues, setIssues] = useState<any>([]);
+  const [project, setProject] = useState<any>(null);
   const params = useParams();
   const workspaceId = params.workspaceId as string;
   const teamId = params?.teamId;
@@ -34,14 +36,19 @@ export default function ProjectIssue() {
     let isMounted = true;
 
     const init = async () => {
-      const [issuesRes] = await Promise.all([
-        dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
-        dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
-        dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId })),
-      ]);
+      const [issuesRes, memberActionRes, workspaceStatusRes, projectRes] =
+        await Promise.all([
+          dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
+          dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
+          dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId })),
+          dispatch(fetchProjectByIdAction(projectId)),
+        ]);
+
+      const projectData = projectRes?.payload?.data?.project;
 
       if (isMounted) {
         setIssues(issuesRes?.data?.issues ?? []);
+        setProject(projectData ?? null);
       }
     };
 
@@ -101,18 +108,15 @@ export default function ProjectIssue() {
   if (!projectIssues) return "LOADING...";
   return (
     <main className="flex h-full flex-col bg-background">
-      {/* Project Header */}
       <header className="border-b border-default">
         <div className="mx-auto flex w-full flex-col gap-6 px-8 py-6">
-          {/* Project Info */}
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight text-primary">
-              Authentication System
+              {project?.name}
             </h1>
 
             <p className="max-w-3xl text-sm leading-6 text-secondary">
-              OAuth, JWT authentication, refresh token rotation and user
-              management.
+              {project?.projectOverview}
             </p>
           </div>
 
@@ -121,19 +125,19 @@ export default function ProjectIssue() {
             {/* Left Section */}
             <div className="flex flex-1 items-center gap-3">
               {/* Search */}
-              <div className="h-11 w-full max-w-sm rounded-lg border border-default bg-card" />
+              {/* <div className="h-11 w-full max-w-sm rounded-lg border border-default bg-card" /> */}
 
               {/* Filters */}
-              <div className="h-11 w-28 rounded-lg border border-default bg-card" />
+              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
 
-              <div className="h-11 w-28 rounded-lg border border-default bg-card" />
+              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
 
-              <div className="h-11 w-28 rounded-lg border border-default bg-card" />
+              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
             </div>
 
             {/* Right Section */}
 
-            <div className="h-11 w-36 rounded-lg bg-brand" />
+            {/* <div className="h-11 w-36 rounded-lg bg-brand" /> */}
           </div>
         </div>
       </header>
