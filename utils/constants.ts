@@ -5,9 +5,7 @@ import {
   ArrowUp,
   CheckCircle2,
   Circle,
-  Inbox,
   Loader,
-  PauseCircle,
   XCircle,
   PlusCircle,
   Trash2,
@@ -16,6 +14,7 @@ import {
   UserPlus,
   Pencil,
   CircleSlash,
+  Eye,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -30,33 +29,81 @@ export const NAV_ITEMS = [
 ];
 
 export const DEFAULT_STATUSES = [
-  { name: "Todo", color: "#6b7280", order: 1, isDefault: true, icon: Circle },
+  {
+    name: "Todo",
+    color: "#6b7280",
+    order: 1,
+    isInitial: true,
+    isDefault: false,
+    isInProgress: false,
+    isBlocked: false,
+    isCompleted: false,
+    isCancelled: false,
+    isInReview: false,
+    icon: Circle,
+  },
   {
     name: "In Progress",
     color: "#2563eb",
     order: 2,
+    isInitial: false,
+    isInProgress: true,
     isDefault: false,
+    isBlocked: false,
+    isCompleted: false,
+    isCancelled: false,
+    isInReview: false,
     icon: Loader,
+  },
+  {
+    name: "In Review",
+    color: "#8b5cf6",
+    order: 3,
+    isInitial: false,
+    isInProgress: false,
+    isBlocked: false,
+    isCompleted: false,
+    isCancelled: false,
+    isInReview: true,
+    icon: Eye,
   },
   {
     name: "Done",
     color: "#16a34a",
-    order: 3,
+    order: 4,
+    isInProgress: false,
+    isBlocked: false,
+    isCompleted: true,
     isDefault: false,
+    isInitial: false,
+    isCancelled: false,
+    isInReview: false,
     icon: CheckCircle2,
   },
   {
-    name: "Canceled",
+    name: "Cancelled",
     color: "#ef4444",
-    order: 4,
+    order: 5,
+    isBlocked: false,
+    isCompleted: false,
     isDefault: false,
+    isInitial: false,
+    isInProgress: false,
+    isCancelled: true,
+    isInReview: false,
     icon: XCircle,
   },
   {
     name: "Blocked",
     color: "#f59e0b",
-    order: 5,
+    order: 6,
+    isBlocked: true,
+    isCompleted: false,
     isDefault: false,
+    isInitial: false,
+    isInProgress: false,
+    isCancelled: false,
+    isInReview: false,
     icon: CircleSlash,
   },
 ];
@@ -115,4 +162,27 @@ export const nameInitials = (user: any) => {
         .map((item: any) => item[0])
         .join("")
     : user?.firstName[0] + user?.lastName[0];
+};
+
+export const badgeVariants: Record<string, string> = {
+  BLOCKED: "text-red-400",
+  TARGET_REACHED: "text-amber-400",
+  URGENT: "text-orange-400",
+  UNASSIGNED: "text-sky-400",
+  NO_UPDATES: "text-secondary",
+
+  OVERDUE: "text-red-500",
+  DUE_DAY: "text-yellow-400",
+  STALE: "text-zinc-400",
+  HIGH: "text-orange-500",
+};
+
+export const badgeLabels: Record<string, string> = {
+  BLOCKED: "Blocked",
+  TARGET_REACHED: "Target Reached",
+  URGENT: "Urgent",
+  UNASSIGNED: "Unassigned",
+  NO_UPDATES: "No Updates",
+  OVERDUE: "Overdue",
+  STALE: "Stale",
 };

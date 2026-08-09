@@ -2,59 +2,110 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { Paragraph } from "@/components/Common/Paragraph";
+import { useParams } from "next/navigation";
+import { badgeLabels, badgeVariants } from "@/utils/constants";
 
-const badgeVariants: Record<string, string> = {
-  BLOCKED: "text-red-400",
-  TARGET_REACHED: "text-amber-400",
-  URGENT: "text-orange-400",
-  UNASSIGNED: "text-sky-400",
-  NO_UPDATES: "text-secondary",
-};
+export default function ActionRequiredItem({ attentionIssueData }: any) {
+  const { attentionReason, issue } = attentionIssueData;
+  const { workspaceId } = useParams();
 
-const badgeLabels: Record<string, string> = {
-  BLOCKED: "Blocked",
-  TARGET_REACHED: "Target Reached",
-  URGENT: "Urgent",
-  UNASSIGNED: "Unassigned",
-  NO_UPDATES: "No Updates",
-};
+  const getSupportingText = () => {
+    if (attentionReason?.status === "BLOCKED") {
+      const blockedAt = attentionReason.blockedAt;
 
-type Props = {
-  issue: {
-    id: string;
-    reason: string;
-    title: string;
-    team: string;
-    project: string;
-    supportingText: string;
+      const assigneeName =
+        issue?.assignee?.name ||
+        [issue?.assignee?.firstName, issue?.assignee?.lastName]
+          .filter(Boolean)
+          .join(" ");
+
+      if (blockedAt && assigneeName) {
+        return `Blocked ${blockedAt} • Assigned to ${assigneeName}`;
+      }
+
+      if (blockedAt) {
+        return `Blocked ${blockedAt}`;
+      }
+
+      if (assigneeName) {
+        return `Assigned to ${assigneeName}`;
+      }
+
+      return "Issue is blocked";
+    }
+
+    if (attentionReason?.checkStale) {
+      return `No updates for ${attentionReason.checkStale.by}`;
+    }
+
+    if (attentionReason?.checkDue) {
+      if (attentionReason.checkDue.overdue) {
+        return `Overdue by ${attentionReason.checkDue.by}`;
+      }
+
+      if (attentionReason.checkDue.dueDay) {
+        return `Due in ${attentionReason.checkDue.by}`;
+      }
+    }
+
+    if (attentionReason?.priority === "HIGH") {
+      return "High priority issue";
+    }
+
+    return "";
   };
 
-  isLast: boolean;
-};
+  const redirectUrl = `/${workspaceId}/team/${issue?.project?.team?.id}/project/${issue?.project?.id}/issue/${issue?.id}?dashboard`;
 
-export default function ActionRequiredItem({ issue }: Props) {
   return (
     <Link
-      href="/"
-      className="group flex items-center justify-between gap-4 px-6 py-4 transition-normal hover-card"
+      href={redirectUrl}
+      className="border-b group flex items-center justify-between gap-4 px-6 py-4 transition-normal hover-card"
     >
       <div className="min-w-0 flex-1">
-        <p
-          className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${badgeVariants[issue.reason]}`}
-        >
-          {badgeLabels[issue.reason]}
-        </p>
+        <span className="">
+          <span className="flex items-center gap-2">
+            {attentionReason.status && (
+              <Paragraph
+                className={badgeVariants[attentionReason.status]}
+                innerText={badgeLabels[attentionReason.status]}
+              />
+            )}
+
+            {attentionReason?.priority && (
+              <Paragraph
+                className={badgeVariants[attentionReason.priority]}
+                innerText={badgeLabels[attentionReason.priority]}
+              />
+            )}
+
+            {attentionReason?.checkDue && (
+              <Paragraph
+                className={badgeVariants[attentionReason.checkDue.overdue]}
+                innerText={badgeLabels[attentionReason.checkDue.overdue]}
+              />
+            )}
+
+            {attentionReason?.checkStale && (
+              <Paragraph
+                className={badgeVariants[attentionReason.checkStale.stale]}
+                innerText={badgeLabels[attentionReason.checkDue.stale]}
+              />
+            )}
+          </span>
+        </span>
 
         <h3 className=" mt-1.5 truncate text-sm font-semibold leading-5 text-primary transition-normal group-hover:text-brand">
           {issue.title}
         </h3>
 
         <p className="mt-1.5 truncate text-xs text-secondary">
-          {issue.team}
+          {issue?.project?.team?.name}
           <span className="mx-2 text-border">•</span>
-          {issue.project}
+          {issue?.project?.name}
           <span className="mx-2 text-border">•</span>
-          {issue.supportingText}
+          {getSupportingText()}
         </p>
       </div>
 

@@ -13,10 +13,12 @@ import MemberDashboard from "./Memberdashboard";
 import DashboardLoading from "./DashboardLoading";
 import { Issue, Status, TeamsData, WorkspaceListData } from "@/types/types";
 import AdminDashboard from "./AdminDashboard";
+import { dashboardAttentionAction } from "@/Store/actions/dashboard.action";
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
   const [dashboardLoad, setdashboardLoad] = useState(true);
+  const [attentionList, setAttentionList] = useState(null);
 
   const {
     workspaceData: {
@@ -46,13 +48,18 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       requests.push(dispatch(fetchWorkspaceStatusAction({ workspaceId })));
       requests.push(dispatch(fetchWorkspaceMambersAction(workspaceId)));
       requests.push(dispatch(fetchActivitiesAction(workspaceId)));
+      const attentionRes = await dispatch(
+        dashboardAttentionAction(workspaceId),
+      ).unwrap();
+
+      const attentionListData = attentionRes?.data?.attentionIssues;
+      setAttentionList(attentionListData ?? []);
+
       await Promise.all(requests);
       setdashboardLoad(false);
     };
     init();
   }, [dispatch]);
-
-  console.log("Workspcae Activites: ", workspaceActivities);
 
   useEffect(() => {
     if (selectedWorkspace) return;
@@ -66,56 +73,19 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
 
   const isAdmin = workspaceListData?.adminList?.includes(workspaceId);
 
-  const issues = Array.isArray(issuesData) ? (issuesData as Issue[]) : [];
-  const statuses = Array.isArray(workspaceStatus)
-    ? (workspaceStatus as Status[])
-    : [];
-  const teamsListData = teamsData as TeamsData | null;
-  const teams =
-    teamsWorkspaceId === workspaceId && Array.isArray(teamsListData?.teamData)
-      ? teamsListData.teamData
-      : [];
-  const projects = teams?.flatMap((team) => team?.projects ?? []);
-  const completedTaskStatus = statuses?.find(
-    (status) => status?.name === "Done",
-  );
-
-  const memberIssues = issues.filter(
-    (issue) => issue?.assigneeId === userData?.user?.id,
-  );
-  const myUrgentIssues = memberIssues.filter(
-    (issue) => issue?.priority === "URGENT",
-  );
-  const myCompletedIssues = memberIssues.filter(
-    (issue) => issue?.statusId === completedTaskStatus?.id,
-  );
-
   if (isAdmin) {
-    return (
-      <AdminDashboard
-        selectedWorkspace={selectedWorkspace}
-        workspaceId={workspaceId}
-        totalTeamCount={teams?.length ?? "No team found"}
-        totalProjectsCount={projects?.length ?? "No project found"}
-        totalMembers={workspaceMembers ?? []}
-        totalMembersCount={workspaceMembers?.length ?? 0}
-        totalIssuesCount={issues.length}
-        activities={workspaceActivities}
-        workspaceStatus={statuses}
-        completedTaskStatus={completedTaskStatus}
-      />
-    );
+    return <AdminDashboard attentionListData={attentionList} />;
   } else
     <MemberDashboard
-      workspaceId={workspaceId}
-      totalIssuesCount={issues.length}
-      myIssues={memberIssues}
-      myIssuesCount={memberIssues.length}
-      urgentTasks={myUrgentIssues}
-      urgentIssuesCount={myUrgentIssues.length}
-      completedIssuesCount={myCompletedIssues.length}
-      totalProjects={projects}
-      teamData={teams}
-      workspaceStatusList={statuses}
+    // workspaceId={workspaceId}
+    // totalIssuesCount={issues.length}
+    // myIssues={memberIssues}
+    // myIssuesCount={memberIssues.length}
+    // urgentTasks={myUrgentIssues}
+    // urgentIssuesCount={myUrgentIssues.length}
+    // completedIssuesCount={myCompletedIssues.length}
+    // totalProjects={projects}
+    // teamData={teams}
+    // workspaceStatusList={statuses}
     />;
 }
