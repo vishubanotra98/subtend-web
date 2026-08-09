@@ -56,7 +56,7 @@ export default function ActionRequiredItem({ attentionIssueData }: any) {
     return "";
   };
 
-  const redirectUrl = `/${workspaceId}/team/${issue?.project?.team?.id}/project/${issue?.project?.id}/issue/${issue?.id}?dashboard`;
+  const redirectUrl = `/${workspaceId}/team/${issue?.project?.team?.id}/project/${issue?.project?.id}/issue/${issue?.id}?dashboard=true`;
 
   return (
     <Link

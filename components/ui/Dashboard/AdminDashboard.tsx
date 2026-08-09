@@ -14,6 +14,7 @@ export default function AdminDashboard({
   statusCountList,
   userData,
   countData,
+  workspaceActivities,
 }: any) {
   const params = useParams();
   const wsId = params?.workspaceId as string;
@@ -43,7 +44,7 @@ export default function AdminDashboard({
       </div>
 
       <CompletionTrend completedTaskId={completedIssueId} workspaceId={wsId} />
-      <RecentActivity />
+      <RecentActivity workspaceActivities={workspaceActivities} />
     </>
   );
 }

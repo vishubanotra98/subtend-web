@@ -15,6 +15,10 @@ import {
   Pencil,
   CircleSlash,
   Eye,
+  UserMinus,
+  CirclePlus,
+  CircleCheckBig,
+  CalendarDays,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -185,4 +189,28 @@ export const badgeLabels: Record<string, string> = {
   NO_UPDATES: "No Updates",
   OVERDUE: "Overdue",
   STALE: "Stale",
+};
+
+export const icons = {
+  STATUS_CHANGED: ArrowRight,
+  ASSIGNED: UserPlus,
+  UNASSIGNED: UserMinus,
+  PRIORITY_CHANGED: Flag,
+  CREATED: CirclePlus,
+  COMPLETED: CircleCheckBig,
+  DETAILS_UPDATED: Pencil,
+  TARGET_DATE_CHANGED: CalendarDays,
+  DELETED: Trash2,
+};
+
+export const colors = {
+  STATUS_CHANGED: "text-brand",
+  ASSIGNED: "text-brand",
+  UNASSIGNED: "text-secondary",
+  PRIORITY_CHANGED: "text-orange-500",
+  CREATED: "text-brand",
+  COMPLETED: "text-green-500",
+  DETAILS_UPDATED: "text-brand",
+  TARGET_DATE_CHANGED: "text-brand",
+  DELETED: "text-red-500",
 };

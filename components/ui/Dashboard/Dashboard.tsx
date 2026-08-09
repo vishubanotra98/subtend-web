@@ -101,6 +101,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
         statusCountList={statusCount}
         userData={userData}
         countData={countData}
+        workspaceActivities={workspaceActivities}
       />
     );
   } else
