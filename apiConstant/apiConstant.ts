@@ -24,6 +24,7 @@ export const API = {
     VERIFY_INVITE: "/api/v1/verify-invite",
     CHANGE_ROLE: "/api/v1/change-role",
     REMOVE_USER: "/api/v1/remove-user",
+    ATTENTION: "/api/v1/attention",
   },
 };
 

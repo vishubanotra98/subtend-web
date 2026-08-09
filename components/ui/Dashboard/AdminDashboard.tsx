@@ -8,9 +8,10 @@ import CompletionTrend from "../Dashboard/CompletionTrend/CompletionTrend";
 import RecentActivity from "../Dashboard/RecentActivity/RecentActivity";
 import { useParams } from "next/navigation";
 
-export default function AdminDashboard({ props }: any) {
+export default function AdminDashboard({ attentionListData }: any) {
   const params = useParams();
   const wsId = params?.workspaceId as string;
+
   return (
     <>
       <DashboardHeader workspaceId="" workspaceName="Google" />
@@ -18,7 +19,7 @@ export default function AdminDashboard({ props }: any) {
 
       <div className="mt-10 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="h-[360px]">
-          <ActionRequiredSection />
+          <ActionRequiredSection attentionListData={attentionListData} />
         </div>
 
         <div className="h-[360px]">
