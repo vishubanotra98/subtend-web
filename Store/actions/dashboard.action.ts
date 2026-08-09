@@ -1,4 +1,7 @@
-import { dashboardAttentionService } from "@/services/dashboard.service";
+import {
+  dashboardAttentionService,
+  dashboardCountService,
+} from "@/services/dashboard.service";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const dashboardAttentionAction = createAsyncThunk<any, string>(
@@ -6,6 +9,18 @@ export const dashboardAttentionAction = createAsyncThunk<any, string>(
   async (workspaceId, { rejectWithValue }) => {
     try {
       const res = await dashboardAttentionService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const dashboardCountAction = createAsyncThunk<any, string>(
+  "dashboardCount",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await dashboardCountService(workspaceId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

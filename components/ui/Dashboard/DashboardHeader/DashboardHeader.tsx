@@ -3,14 +3,11 @@
 import DashboardButton from "@/components/Common/TeamDashboardButton";
 import { Sun } from "lucide-react";
 
-export default function DashboardHeader({
-  workspaceName = "Engineering",
-  workspaceId,
-}: {
-  workspaceName?: string;
-  workspaceId: string;
-}) {
+export default function DashboardHeader({ selectedWorkspace, userData }: any) {
   const hour = new Date().getHours();
+  const userName =
+    userData?.user?.name ??
+    `${userData?.user?.firstName ?? ""} ${userData?.user?.lastName ?? ""}`.trim();
 
   const greeting =
     hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -24,18 +21,20 @@ export default function DashboardHeader({
           </div>
 
           <h1 className="text-2xl font-semibold tracking-tight text-primary">
-            {greeting}, Vishu
+            {greeting}, {userName?.split(" ")[0]}
           </h1>
         </div>
 
         <p className="text-sm text-secondary">
           Here's what's happening in{" "}
-          <span className="font-medium text-primary">{workspaceName}</span>{" "}
+          <span className="font-medium text-primary">
+            {selectedWorkspace?.name}
+          </span>{" "}
           today.
         </p>
       </div>
 
-      <DashboardButton workspaceId={workspaceId} />
+      <DashboardButton />
     </header>
   );
 }

@@ -45,16 +45,6 @@ export default function CompletionTrend({
     };
   }, [workspaceId, completedTaskId, dispatch]);
 
-  const mockDashboardCount = [
-    { day: "Mon", count: 18 },
-    { day: "Tue", count: 21 },
-    { day: "Wed", count: 19 },
-    { day: "Thu", count: 26 },
-    { day: "Fri", count: 30 },
-    { day: "Sat", count: 11 },
-    { day: "Sun", count: 5 },
-  ];
-
   return (
     <section className="mt-10 space-y-4">
       <div className="flex items-center justify-between">
@@ -75,7 +65,7 @@ export default function CompletionTrend({
             <p className="text-sm text-secondary">Loading completion data...</p>
           </div>
         ) : (
-          <CompletionChart data={mockDashboardCount} />
+          <CompletionChart data={dashboardCount} />
         )}
       </div>
     </section>
