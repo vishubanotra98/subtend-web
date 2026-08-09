@@ -8,7 +8,7 @@ export default function RecentActivity({ workspaceActivities }: any) {
   const activities = workspaceActivities;
 
   return (
-    <section>
+    <section className="mt-10">
       <div className="mb-4 flex items-end justify-between">
         <div>
           <h2 className="text-base font-semibold text-primary">
