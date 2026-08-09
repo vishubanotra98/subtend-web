@@ -13,12 +13,18 @@ import MemberDashboard from "./Memberdashboard";
 import DashboardLoading from "./DashboardLoading";
 import { Issue, Status, TeamsData, WorkspaceListData } from "@/types/types";
 import AdminDashboard from "./AdminDashboard";
-import { dashboardAttentionAction } from "@/Store/actions/dashboard.action";
+import {
+  dashboardAttentionAction,
+  dashboardCountAction,
+} from "@/Store/actions/dashboard.action";
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
   const [dashboardLoad, setdashboardLoad] = useState(true);
   const [attentionList, setAttentionList] = useState(null);
+  const [count, setCount] = useState(null);
+  const [statusCount, setStatusCount] = useState(null);
+  const [countData, setCountData] = useState(null);
 
   const {
     workspaceData: {
@@ -48,14 +54,28 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       requests.push(dispatch(fetchWorkspaceStatusAction({ workspaceId })));
       requests.push(dispatch(fetchWorkspaceMambersAction(workspaceId)));
       requests.push(dispatch(fetchActivitiesAction(workspaceId)));
+
+      const countRes = await dispatch(
+        dashboardCountAction(workspaceId),
+      ).unwrap();
+      const countsData = countRes?.data;
+      const statusCountData = countRes?.data?.statusCount;
+      const data: any = {
+        memberCount: countsData?.memberCount,
+        projectCount: countsData?.projectCount,
+        teamCount: countsData?.teamCount,
+      };
+
       const attentionRes = await dispatch(
         dashboardAttentionAction(workspaceId),
       ).unwrap();
-
       const attentionListData = attentionRes?.data?.attentionIssues;
-      setAttentionList(attentionListData ?? []);
 
       await Promise.all(requests);
+
+      setCountData(data);
+      setAttentionList(attentionListData ?? []);
+      setStatusCount(statusCountData);
       setdashboardLoad(false);
     };
     init();
@@ -74,7 +94,15 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const isAdmin = workspaceListData?.adminList?.includes(workspaceId);
 
   if (isAdmin) {
-    return <AdminDashboard attentionListData={attentionList} />;
+    return (
+      <AdminDashboard
+        selectedWorkspace={selectedWorkspace}
+        attentionListData={attentionList}
+        statusCountList={statusCount}
+        userData={userData}
+        countData={countData}
+      />
+    );
   } else
     <MemberDashboard
     // workspaceId={workspaceId}

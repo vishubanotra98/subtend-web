@@ -8,3 +8,12 @@ export const dashboardAttentionService = async (workspaceId: string) => {
     throw error;
   }
 };
+
+export const dashboardCountService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.COUNT}/${workspaceId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
