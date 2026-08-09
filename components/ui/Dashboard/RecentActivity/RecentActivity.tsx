@@ -1,58 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import ActivityItem from "./ActivityTeam";
 
-const activities = [
-  {
-    id: "1",
-    type: "STATUS_CHANGED",
-    user: "John Doe",
-    issue: "Authentication API",
-    subtitle: "Todo → In Progress",
-    time: "5 min ago",
-  },
-  {
-    id: "2",
-    type: "ASSIGNED",
-    user: "Sarah",
-    issue: "OAuth Login",
-    subtitle: "Assigned to Alex Johnson",
-    time: "18 min ago",
-  },
-  {
-    id: "3",
-    type: "PRIORITY_CHANGED",
-    user: "Mike",
-    issue: "Payment Gateway",
-    subtitle: "High → Urgent",
-    time: "1 hour ago",
-  },
-  {
-    id: "4",
-    type: "CREATED",
-    user: "Emily",
-    issue: "Payment Gateway",
-    subtitle: "Platform • Payments",
-    time: "Yesterday",
-  },
-  {
-    id: "5",
-    type: "COMPLETED",
-    user: "David",
-    issue: "User Profile",
-    subtitle: "Moved to Done",
-    time: "2 days ago",
-  },
-];
+export default function RecentActivity({ workspaceActivities }: any) {
+  // const activities = workspaceActivities?.slice(0, 5) ?? [];
+  const activities = workspaceActivities;
 
-export default function RecentActivity() {
   return (
-    <section className="mt-10 space-y-4">
-      <div className="flex items-end justify-between">
+    <section className="mt-10">
+      <div className="mb-4 flex items-end justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-primary">
+          <h2 className="text-base font-semibold text-primary">
             Recent Activity
           </h2>
 
@@ -61,7 +20,7 @@ export default function RecentActivity() {
           </p>
         </div>
 
-        <Link
+        {/* <Link
           href="/dashboard/activity"
           className="group inline-flex items-center gap-1 text-sm font-medium text-secondary transition-normal hover:text-brand"
         >
@@ -70,7 +29,7 @@ export default function RecentActivity() {
             size={16}
             className="transition-normal group-hover:translate-x-0.5"
           />
-        </Link>
+        </Link> */}
       </div>
 
       <div className="overflow-hidden rounded-card border border-default bg-card shadow-card">
@@ -87,12 +46,12 @@ export default function RecentActivity() {
             </div>
           </div>
         ) : (
-          <div className="divide-y divide-default">
-            {activities.slice(0, 5).map((activity, index) => (
+          <div className="max-h-[360px] overflow-y-auto">
+            {activities.map((activity: any, idx: number) => (
               <ActivityItem
                 key={activity.id}
                 activity={activity}
-                isLast={index === activities.length - 1}
+                isLast={idx === activities.length - 1}
               />
             ))}
           </div>

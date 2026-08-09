@@ -25,11 +25,14 @@ import {
 } from "../Common";
 import IssueLoading from "./IssueLoading";
 import { IssueType, Params } from "@/types/types";
+import { useSearchParams } from "next/navigation";
 
 export const IssuePageClient = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { workspaceId, teamId, projectId, issueId } = useParams<Params>();
+  const searchParams = useSearchParams();
+  const fromDashboard = Boolean(searchParams.get("dashboard"));
 
   const [issueState, setIssueState] = useState<IssueType>({
     assigneeId: "",
@@ -151,9 +154,15 @@ export const IssuePageClient = () => {
     <div className="w-[90%] mx-auto">
       <div className="flex justify-end ">
         <button
-          onClick={() =>
-            router.push(`/${workspaceId}/team/${teamId}/project/${projectId}`)
-          }
+          onClick={() => {
+            if (fromDashboard) {
+              router.push(`/${workspaceId}/dashboard`);
+            } else {
+              router.push(
+                `/${workspaceId}/team/${teamId}/project/${projectId}`,
+              );
+            }
+          }}
           className="flex items-center gap-1 button-primary !px-6 !py-2"
         >
           <ArrowLeft size={14} />
