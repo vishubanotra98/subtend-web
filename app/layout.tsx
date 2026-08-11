@@ -5,10 +5,17 @@ import { Toaster } from "react-hot-toast";
 import { StoreProvider } from "@/Store/StoreProvider";
 import AppProvider from "@/components/Provider/AppProvider";
 import { ThemeProvider } from "@/components/Provider/theme/ThemeProvider";
+import { Poppins } from "next/font/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 const geistMono = Geist_Mono({
@@ -29,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-primary antialiased`}
+        className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} min-h-screen bg-background text-primary antialiased`}
       >
         <ThemeProvider>
           <StoreProvider>
