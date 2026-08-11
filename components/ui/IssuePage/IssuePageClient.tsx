@@ -2,20 +2,35 @@
 
 import DescriptionEditor from "@/components/Common/TextEditor";
 import { priorityList } from "@/utils/constants";
-import { commonSelectStyles } from "@/utils/styles";
-import { ArrowLeft } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { commonSelectStyles2 } from "@/utils/styles";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CalendarIcon,
+  Check,
+  CircleDot,
+  Flag,
+  Loader2,
+  Trash2,
+  UserRound,
+} from "lucide-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import Select from "react-select";
+
 import { DeleteModal } from "./DeleteModal";
 import { useAppDispatch } from "@/Store/hooks";
+
 import {
   editIssueAction,
   fetchIssuesByProjectAction,
   fetchWorkspaceMambersAction,
   fetchWorkspaceStatusAction,
 } from "@/Store/actions/workspace.action";
+
 import IssueNotFound from "./IssueNotFound";
+import IssueLoading from "./IssueLoading";
+
 import {
   AssigneeControl,
   CustomOption,
@@ -23,9 +38,49 @@ import {
   PriorityPlaceholder,
   StatusPlaceholder,
 } from "../Common";
-import IssueLoading from "./IssueLoading";
+
 import { IssueType, Params } from "@/types/types";
-import { useSearchParams } from "next/navigation";
+import { Button } from "../button";
+import { Popover, PopoverContent, PopoverTrigger } from "../popover";
+import { Calendar } from "../calendar";
+import { format } from "date-fns";
+import { Textarea } from "../textarea";
+
+type SaveState = "idle" | "saving" | "saved" | "error";
+
+const SaveIndicator = ({ state }: { state: SaveState }) => {
+  if (state === "saving") {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-secondary">
+        <Loader2 size={12} className="animate-spin" />
+        <span>Saving...</span>
+      </div>
+    );
+  }
+
+  if (state === "error") {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-destructive">
+        <AlertCircle size={12} />
+        <span>Couldn't save</span>
+      </div>
+    );
+  }
+
+  if (state === "saved") {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-secondary">
+        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success/10">
+          <Check size={10} className="text-success" />
+        </span>
+
+        <span>Saved</span>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export const IssuePageClient = () => {
   const dispatch = useAppDispatch();
@@ -34,7 +89,7 @@ export const IssuePageClient = () => {
   const searchParams = useSearchParams();
   const fromDashboard = Boolean(searchParams.get("dashboard"));
 
-  const [issueState, setIssueState] = useState<IssueType>({
+  const [issueState, setIssueState] = useState({
     assigneeId: "",
     description: "",
     id: null,
@@ -44,12 +99,15 @@ export const IssuePageClient = () => {
     ticket_num: null,
     title: "",
     blockedReason: "",
-    targetDate: "",
+    targetDate: undefined,
   });
   const [members, setMembers] = useState<any>(null);
   const [statusList, setStatusList] = useState<any>(null);
   const [isLoadingIssue, setIsLoadingIssue] = useState(true);
   const [open, setOpen] = useState(false);
+  const [dateOpen, setDateOpen] = useState(false);
+
+  const [saveState, setSaveState] = useState<SaveState>("idle");
 
   const {
     title,
@@ -61,33 +119,42 @@ export const IssuePageClient = () => {
     targetDate,
   } = issueState;
 
+  const selectedStatus = useMemo(() => {
+    return statusList?.find((status: any) => status?.id === statusId);
+  }, [statusList, statusId]);
+
+  const isBlocked = Boolean(selectedStatus?.isBlocked);
+
   useEffect(() => {
-    if (!workspaceId || !projectId || !issueId) return;
+    if (!workspaceId || !projectId || !issueId) {
+      return;
+    }
 
     const init = async () => {
-      setIsLoadingIssue(true);
+      try {
+        setIsLoadingIssue(true);
 
-      const issuesRes: any = await dispatch(
-        fetchIssuesByProjectAction(projectId),
-      ).unwrap();
+        const [issuesRes, workspaceStatusRes, membersRes] = await Promise.all([
+          dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
 
-      const workspaceStatusRes: any = await dispatch(
-        fetchWorkspaceStatusAction({ workspaceId, projectId }),
-      ).unwrap();
+          dispatch(
+            fetchWorkspaceStatusAction({
+              workspaceId,
+              projectId,
+            }),
+          ).unwrap(),
 
-      const membersRes = await dispatch(
-        fetchWorkspaceMambersAction(workspaceId),
-      ).unwrap();
+          dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
+        ]);
 
-      const issuesData = issuesRes?.data?.issues;
-      const membersList = membersRes?.data?.members;
-      const statusRes = workspaceStatusRes?.data?.status;
+        const issuesData = issuesRes?.data?.issues ?? [];
+        const membersList = membersRes?.data?.members ?? [];
+        const statusRes = workspaceStatusRes?.data?.status ?? [];
 
-      const selectedIssue =
-        issuesData?.find((issue: any) => issue?.id === issueId) ?? null;
+        const selectedIssue =
+          issuesData?.find((issue: any) => issue?.id === issueId) ?? null;
 
-      const membersData =
-        membersList?.map((mem: any) => {
+        const membersData = membersList?.map((mem: any) => {
           const name =
             mem?.user?.name ||
             [mem?.user?.firstName, mem?.user?.lastName]
@@ -95,52 +162,89 @@ export const IssuePageClient = () => {
               .join(" ");
 
           return {
-            userId: mem.user?.id,
+            userId: mem?.user?.id,
             role: mem?.role,
             name,
-            email: mem.user?.email,
+            email: mem?.user?.email,
           };
-        }) ?? [];
+        });
 
-      setIssueState(selectedIssue);
-      setMembers(membersData);
-      setStatusList(statusRes);
-      setIsLoadingIssue(false);
+        if (selectedIssue) {
+          setIssueState({
+            ...selectedIssue,
+          });
+        }
+
+        setMembers(membersData);
+        setStatusList(statusRes);
+      } catch (error) {
+        console.error("Failed to load issue:", error);
+      } finally {
+        setIsLoadingIssue(false);
+      }
     };
 
     init();
   }, [dispatch, workspaceId, projectId, issueId]);
 
   useEffect(() => {
-    if (!issueState.id) {
+    if (!issueState?.id) {
       return;
     }
 
-    const delayDebounce = setTimeout(async () => {
-      const payload = {
-        workspaceId,
-        teamId,
-        projectId,
-        issueId,
-        title,
-        description,
-        assigneeId,
-        priority,
-        statusId,
-      };
-      await dispatch(editIssueAction(payload));
-    }, 1000);
+    setSaveState("saving");
 
-    return () => clearTimeout(delayDebounce);
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const payload = {
+          workspaceId,
+          teamId,
+          projectId,
+          issueId,
+          title: title || null,
+          description: description || null,
+          assigneeId: assigneeId || null,
+          priority: priority || null,
+          statusId: statusId || null,
+          targetDate: targetDate || null,
+          blockedReason: blockedReason || null,
+        };
+
+        await dispatch(editIssueAction(payload)).unwrap();
+
+        setSaveState("saved");
+      } catch (error) {
+        console.error("Failed to save issue:", error);
+        setSaveState("error");
+      }
+    }, 800);
+
+    return () => {
+      clearTimeout(delayDebounce);
+    };
   }, [
-    assigneeId,
-    description,
+    workspaceId,
+    teamId,
+    projectId,
+    issueId,
     dispatch,
     issueState?.id,
+    title,
+    description,
+    assigneeId,
     priority,
     statusId,
-    title,
+    targetDate,
+    blockedReason,
   ]);
+
+  const handleBack = () => {
+    if (fromDashboard) {
+      router.push(`/${workspaceId}/dashboard`);
+      return;
+    }
+    router.push(`/${workspaceId}/team/${teamId}/project/${projectId}`);
+  };
 
   if (isLoadingIssue) {
     return <IssueLoading />;
@@ -151,141 +255,332 @@ export const IssuePageClient = () => {
   }
 
   return (
-    <div className="w-[90%] mx-auto">
-      <div className="flex justify-end ">
-        <button
-          onClick={() => {
-            if (fromDashboard) {
-              router.push(`/${workspaceId}/dashboard`);
-            } else {
-              router.push(
-                `/${workspaceId}/team/${teamId}/project/${projectId}`,
-              );
-            }
-          }}
-          className="flex items-center gap-1 button-primary !px-6 !py-2"
-        >
-          <ArrowLeft size={14} />
-          Back
-        </button>
-      </div>
-      <div className="mt-5   h-screen rounded-md bg-[#1F2937] border border-[#374151] shadow-sm flex overflow-hidden">
-        <div className="p-6 border-r border-[#374151] flex-1 flex flex-col">
-          <textarea
-            className="w-full bg-transparent text-3xl font-bold text-gray-100 placeholder:text-gray-500 outline-none overflow-hidden resize-none mb-2"
-            placeholder="Issue Title"
-            rows={1}
-            autoFocus
-            value={issueState?.title ?? ""}
-            onChange={(e) => {
-              const newVal = e.target.value;
-              setIssueState((prev: any) => ({
-                ...prev,
-                title: newVal,
-              }));
-            }}
-          />
+    <div className="min-h-screen w-full bg-background">
+      <header className="sticky top-0 z-20 border-b border-default bg-background/95 backdrop-blur">
+        <div className="flex h-14 items-center justify-between px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <Button
+              variant={"secondary"}
+              className="flex items-center justify-center gap-2"
+              onClick={handleBack}
+            >
+              <ArrowLeft
+                size={15}
+                strokeWidth={1.8}
+                className="
+                  transition-transform
+                  duration-150
+                  group-hover:-translate-x-0.5
+                "
+              />
+              Back
+            </Button>
 
-          <hr className="border-[#374151] mb-6 mt-2" />
+            <span className="hidden text-secondary/30 sm:block">/</span>
 
-          <div className="flex-1 overflow-y-auto pr-2">
-            <DescriptionEditor
-              state={issueState}
-              setState={setIssueState}
-              isEditing={true}
+            <span className="hidden truncate text-xs font-medium text-secondary sm:block">
+              {issueState?.ticket_num ? `#${issueState.ticket_num}` : "Issue"}
+            </span>
+
+            <SaveIndicator state={saveState} />
+          </div>
+
+          <Button variant={"delete"} onClick={() => setOpen(true)}>
+            <Trash2
+              size={13}
+              strokeWidth={1.8}
+              className="transition-transform duration-150 group-hover:scale-105"
             />
-          </div>
+            Delete
+          </Button>
         </div>
+      </header>
 
-        <div className="p-6 w-[300px] shrink-0 bg-[#111827]/30">
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-gray-400 tracking-wider mb-1.5">
-                Assignee
-              </label>
-              <Select
-                options={members}
-                onChange={(val: any) => {
-                  setIssueState((prev: any) => ({
-                    ...prev,
-                    assigneeId: val?.userId,
-                  }));
-                }}
-                value={
-                  members?.find(
-                    (mem: any) => mem?.userId === issueState?.assigneeId,
-                  ) || null
-                }
-                getOptionValue={(val: any) => val.userId}
-                getOptionLabel={(val: any) => val.name}
-                placeholder="Assignee"
-                styles={commonSelectStyles}
-                components={{ Control: AssigneeControl }}
-              />
+      <main className="w-full">
+        <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-10 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14 lg:px-8 lg:py-10">
+          <section className="min-w-0">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                Issue
+              </span>
+
+              {issueState?.ticket_num && (
+                <>
+                  <span className="text-xs text-secondary/30">•</span>
+
+                  <span className="text-xs font-medium text-secondary">
+                    {issueState.ticket_num}
+                  </span>
+                </>
+              )}
             </div>
 
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-gray-400 tracking-wider mb-1.5">
-                Status
-              </label>
-              <Select
-                options={statusList}
-                onChange={(val: any) => {
-                  setIssueState((prev: any) => ({
-                    ...prev,
-                    statusId: val?.id,
-                  }));
-                }}
-                value={
-                  statusList?.find(
-                    (st: any) => st.id === issueState.statusId,
-                  ) || null
-                }
-                getOptionValue={(val: any) => val.id}
-                getOptionLabel={(val: any) => val.name}
-                placeholder="Status"
-                styles={commonSelectStyles}
-                components={{
-                  Option: CustomOption,
-                  SingleValue: CustomSingleValue,
-                  Placeholder: StatusPlaceholder,
-                }}
-              />
-            </div>
+            <textarea
+              value={issueState?.title ?? ""}
+              onChange={(event) => {
+                const newValue = event.target.value;
 
-            <div className="flex flex-col">
-              <label className="text-xs font-semibold text-gray-400 tracking-wider mb-1.5">
-                Priority
-              </label>
-              <Select
-                options={priorityList}
-                onChange={(val: any) => {
-                  setIssueState((prev: any) => ({
-                    ...prev,
-                    priority: val?.value,
-                  }));
-                }}
-                value={
-                  priorityList.find(
-                    (p: any) => p.value === issueState.priority,
-                  ) || null
-                }
-                getOptionValue={(val: any) => val.value}
-                getOptionLabel={(val: any) => val.label}
-                placeholder="Priority"
-                styles={commonSelectStyles}
-                components={{
-                  Option: CustomOption,
-                  SingleValue: CustomSingleValue,
-                  Placeholder: PriorityPlaceholder,
-                }}
-              />
-            </div>
+                setIssueState((prev: any) => ({
+                  ...prev,
+                  title: newValue,
+                }));
+              }}
+              rows={1}
+              autoFocus
+              placeholder="Give this issue a title..."
+              aria-label="Issue title"
+              className="block min-h-[52px] w-full resize-none overflow-hidden rounded-lg border border-transparent bg-transparent px-2 py-1 text-3xl font-semibold leading-tight tracking-tight text-primary outline-none transition-all duration-150 hover:border-default hover:bg-card/40 focus:border-default focus:bg-card"
+            />
 
-            <DeleteModal open={open} setOpen={setOpen} />
-          </div>
+            <div className="mt-10">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-secondary">
+                    Description
+                  </h2>
+
+                  <p className="mt-1 text-xs text-secondary/60">
+                    Add context, requirements, or notes for your team.
+                  </p>
+                </div>
+              </div>
+
+              <div className="min-h-[320px] rounded-xl border border-default bg-card/40 px-5 py-4 transition-all duration-150 hover:bg-card/60 focus-within:border-brand/60 focus-within:bg-card focus-within:ring-2 focus-within:ring-brand/10">
+                <DescriptionEditor
+                  state={issueState}
+                  setState={setIssueState}
+                  isEditing={true}
+                />
+              </div>
+            </div>
+          </section>
+
+          <aside className="min-w-0">
+            <div className="sticky top-[78px]">
+              <div className=" overflow-hidden rounded-xl border border-default bg-card/60 shadow-md">
+                <div className="border-b border-default px-5 py-4">
+                  <h2 className="text-sm font-semibold text-primary">
+                    Details
+                  </h2>
+
+                  <p className="mt-1 text-xs text-secondary">
+                    Manage issue properties
+                  </p>
+                </div>
+
+                <div className="space-y-5 p-5">
+                  <div>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-medium text-secondary">
+                      <UserRound size={13} strokeWidth={1.8} />
+                      Assignee
+                    </label>
+
+                    <Select
+                      options={members}
+                      onChange={(value: any) => {
+                        setIssueState((prev: any) => ({
+                          ...prev,
+                          assigneeId: value?.userId ?? "",
+                        }));
+                      }}
+                      value={
+                        members?.find(
+                          (member: any) =>
+                            member?.userId === issueState?.assigneeId,
+                        ) || null
+                      }
+                      getOptionValue={(value: any) => value.userId}
+                      getOptionLabel={(value: any) => value.name}
+                      placeholder="Assign to someone"
+                      styles={commonSelectStyles2}
+                      components={{
+                        Control: AssigneeControl,
+                      }}
+                      isClearable
+                      isSearchable={false}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-medium text-secondary">
+                      <CircleDot size={13} strokeWidth={1.8} />
+                      Status
+                    </label>
+
+                    <Select
+                      options={statusList}
+                      onChange={(value: any) => {
+                        setIssueState((prev: any) => ({
+                          ...prev,
+                          statusId: value?.id ?? "",
+                        }));
+                      }}
+                      value={
+                        statusList?.find(
+                          (status: any) => status?.id === issueState?.statusId,
+                        ) || null
+                      }
+                      getOptionValue={(value: any) => value.id}
+                      getOptionLabel={(value: any) => value.name}
+                      placeholder="Select status"
+                      styles={commonSelectStyles2}
+                      components={{
+                        Option: CustomOption,
+                        SingleValue: CustomSingleValue,
+                        Placeholder: StatusPlaceholder,
+                      }}
+                      isClearable={false}
+                      isSearchable={false}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-medium text-secondary">
+                      <Flag size={13} strokeWidth={1.8} />
+                      Priority
+                    </label>
+
+                    <Select
+                      options={priorityList}
+                      onChange={(value: any) => {
+                        setIssueState((prev: any) => ({
+                          ...prev,
+                          priority: value?.value ?? "",
+                        }));
+                      }}
+                      value={
+                        priorityList.find(
+                          (item: any) => item?.value === issueState?.priority,
+                        ) || null
+                      }
+                      getOptionValue={(value: any) => value.value}
+                      getOptionLabel={(value: any) => value.label}
+                      placeholder="Set priority"
+                      styles={commonSelectStyles2}
+                      components={{
+                        Option: CustomOption,
+                        SingleValue: CustomSingleValue,
+                        Placeholder: PriorityPlaceholder,
+                      }}
+                      isClearable
+                      isSearchable
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-primary">
+                      Target Date
+                    </label>
+                    <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-12 w-full justify-start font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4 text-secondary" />
+
+                          {targetDate ? (
+                            <span>{format(targetDate, "dd MMM yyyy")}</span>
+                          ) : (
+                            <span className="text-secondary">
+                              No target date
+                            </span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent
+                        align="start"
+                        className="w-auto rounded-lg border border-default bg-card p-3 shadow-card"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={targetDate ?? undefined}
+                          onSelect={(selectedDate) => {
+                            setIssueState((prev: any) => ({
+                              ...prev,
+                              targetDate: selectedDate,
+                            }));
+
+                            if (selectedDate) {
+                              setDateOpen(false);
+                            }
+                          }}
+                          captionLayout="label"
+                        />
+
+                        <div className="mt-3 flex items-center justify-between border-t border-default pt-3">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => {
+                              setIssueState((prev) => ({
+                                ...prev,
+                                targetDate: undefined,
+                              }));
+                              setDateOpen(false);
+                            }}
+                          >
+                            Clear
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {isBlocked && (
+                    <div className="border-t border-default pt-5">
+                      <div className="mb-2">
+                        <label className="flex items-center gap-2 text-xs font-medium text-secondary">
+                          <AlertCircle
+                            size={13}
+                            strokeWidth={1.8}
+                            className="text-warning"
+                          />
+                          Blocked reason
+                        </label>
+
+                        <p className="mt-1 text-[11px] leading-4 text-secondary/60">
+                          Explain what is preventing this issue from moving
+                          forward.
+                        </p>
+                      </div>
+
+                      <Textarea
+                        value={blockedReason ?? ""}
+                        onChange={(event) => {
+                          setIssueState((prev: any) => ({
+                            ...prev,
+                            blockedReason: event.target.value,
+                          }));
+                        }}
+                        rows={5}
+                        placeholder="e.g. Waiting for API credentials from the client..."
+                        aria-label="Blocked reason"
+                      />
+
+                      <p className="mt-1.5 text-[11px] text-secondary/60">
+                        This will help your team understand the blocker from the
+                        dashboard.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 px-1">
+                <p className="text-[11px] leading-4 text-secondary/60">
+                  Changes are saved automatically. You don't need to manually
+                  save this issue.
+                </p>
+              </div>
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
+
+      <DeleteModal open={open} setOpen={setOpen} />
     </div>
   );
 };

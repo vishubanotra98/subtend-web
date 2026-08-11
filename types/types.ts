@@ -124,7 +124,7 @@ export type IssueType = {
   statusId: string;
   ticket_num?: null;
   title?: string;
-  targetDate?: string;
+  targetDate?: string | undefined;
   blockedReason?: string;
 };
 

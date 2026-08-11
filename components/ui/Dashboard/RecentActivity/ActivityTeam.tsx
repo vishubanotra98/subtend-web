@@ -30,30 +30,37 @@ function ChangeValue({ before, after, colored = false }: ChangeValueProps) {
   const afterValue = after?.name ?? after ?? "None";
 
   return (
-    <span className="flex min-w-0 items-center gap-1.5">
-      <span
-        className="min-w-0 truncate"
-        style={colored && before?.color ? { color: before.color } : undefined}
-      >
-        {beforeValue}
+    <span className="flex min-w-0 items-center gap-2">
+      <span className="flex min-w-0 items-center gap-1.5">
+        {colored && before?.color && (
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: before.color }}
+          />
+        )}
+
+        <span className="truncate text-secondary">{beforeValue}</span>
       </span>
 
       <ArrowRight
-        size={12}
-        strokeWidth={2}
-        className="shrink-0 text-secondary"
+        size={11}
+        strokeWidth={1.8}
+        className="shrink-0 text-secondary/50"
       />
 
-      <span
-        className="min-w-0 truncate"
-        style={colored && after?.color ? { color: after.color } : undefined}
-      >
-        {afterValue}
+      <span className="flex min-w-0 items-center gap-1.5">
+        {colored && after?.color && (
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: after.color }}
+          />
+        )}
+
+        <span className="truncate text-secondary">{afterValue}</span>
       </span>
     </span>
   );
 }
-
 function getActivityContent(activity: any) {
   switch (activity.action) {
     case "STATUS_CHANGED":
@@ -207,9 +214,6 @@ export default function ActivityItem({
 
   const Icon = icons[activity.action as keyof typeof icons] ?? CirclePlus;
 
-  const iconColor =
-    colors[activity.action as keyof typeof colors] ?? "text-secondary";
-
   const { verb, subtitle } = getActivityContent(activity);
 
   const handleClick = () => {
@@ -236,44 +240,38 @@ export default function ActivityItem({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className={`group flex h-[72px] w-full items-center gap-4 px-6 py-3 transition-normal ${
-        !isDeleted ? "cursor-pointer" : "cursor-default"
-      } hover-card ${!isLast ? "border-b border-default" : ""}`}
+      className={` group flex min-h-[68px] w-full items-center gap-4 px-5 py-3 transition-colors duration-150 ${!isDeleted ? "cursor-pointer" : "cursor-default"} ${!isLast ? "border-b border-default" : ""} hover:bg-secondary/10`}
     >
-      <div className="flex h-6 w-5 shrink-0 items-center justify-center">
+      <div className=" flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-brand transition-colors duration-150 group-hover:bg-brand/10">
         <Icon
           size={15}
-          strokeWidth={2}
-          className={`${iconColor} transition-normal ${
-            !isDeleted ? "group-hover:scale-105" : ""
-          }`}
+          strokeWidth={2.2}
+          className="text-brand transition-transform duration-150 group-hover:scale-105"
         />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="flex h-5 min-w-0 items-center truncate text-sm leading-5">
+        <div className="flex min-w-0 items-center text-sm leading-5">
           <span className="shrink-0 font-medium text-primary">
             {activity.actor?.name}
           </span>
 
           <span className="mx-1.5 shrink-0 text-secondary">{verb}</span>
 
-          <span className="min-w-0 truncate font-medium text-primary transition-normal group-hover:text-brand">
+          <span className=" min-w-0 truncate font-medium text-primary transition-colors duration-150 group-hover:text-brand">
             {activity.issue?.title}
           </span>
-        </p>
+        </div>
 
-        {subtitle ? (
-          <div className="mt-1 flex h-4 min-w-0 items-center truncate text-xs leading-4 text-secondary">
+        {subtitle && (
+          <div className="mt-1 flex min-w-0 items-center truncate text-xs text-secondary">
             {subtitle}
           </div>
-        ) : (
-          <div className="mt-1 h-4" aria-hidden="true" />
         )}
       </div>
 
       <time
-        className="w-[90px] shrink-0 truncate pt-0.5 text-right text-xs tabular-nums text-secondary"
+        className=" shrink-0 text-xs tabular-nums text-secondary"
         title={dayjs(activity.created_at).format("MMM D, YYYY h:mm A")}
       >
         {dayjs(activity.created_at).fromNow()}
