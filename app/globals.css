@@ -15,7 +15,7 @@
   --color-secondary: var(--muted-foreground);
   --color-background: var(--background);
 
-  --color-border: var(--border);
+  /* --color-border: var(--border); */
   --color-accent: var(--accent);
 
   --color-button-border: var(--border);
@@ -155,10 +155,6 @@ body {
   color: var(--foreground);
 }
 
-* {
-  border-color: var(--border);
-}
-
 button,
 input,
 textarea,
@@ -189,6 +185,12 @@ select {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #6b6b6b;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 @layer components {
@@ -471,13 +473,9 @@ select {
 
   /* Border */
 
-  .border-default {
+  /* .border-default {
     border-color: var(--border);
-  }
-
-  .border-brand {
-    border-color: var(--primary);
-  }
+  } */
 
   /* Radius */
 

@@ -23,6 +23,9 @@ const buttonVariants = cva(
 
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 cursor-pointer",
+
+        delete:
+          "border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10 hover:border-destructive/50 cursor-pointer",
       },
 
       size: {

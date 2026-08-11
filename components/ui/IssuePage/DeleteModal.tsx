@@ -54,13 +54,6 @@ export function DeleteModal({ open, setOpen }: ModalTypes) {
   };
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="w-full flex items-center justify-center gap-2 p-2 rounded text-xs font-medium text-white bg-red-500 hover:bg-red-600 transition-all duration-200 group cursor-pointer">
-          <Trash2 size={14} />
-          <span>Delete Issue</span>
-        </button>
-      </DialogTrigger>
-
       <DialogContent className="sm:max-w-[400px] bg-[#1f2937] text-white border-white/10 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold tracking-tight text-gray-100">

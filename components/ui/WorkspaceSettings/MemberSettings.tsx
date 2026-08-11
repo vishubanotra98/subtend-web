@@ -7,7 +7,7 @@ import { nameInitials } from "@/utils/constants";
 import { Modal } from "@/components/Common/Modal";
 import { InviteMemberForm } from "@/components/Forms/InviteMember";
 import Select from "react-select";
-import { commonSelectStyles } from "@/utils/styles";
+import { commonSelectStyles, commonSelectStyles2 } from "@/utils/styles";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
@@ -39,23 +39,26 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
     role: any,
   ) => {
     const payload = { workspaceId, userId, role };
+
     const res = await dispatch(changRoleAction(payload)).unwrap();
+
     if (res?.success) {
       await dispatch(fetchWorkspaceMambersAction(workspaceId));
       toast.success(res?.message);
     }
+
     if (!res?.success) {
-      toast?.error("Something went wrong.");
+      toast.error("Something went wrong.");
     }
   };
 
   const handleRemoveUser = async (workspaceId: string, userId: string) => {
     try {
-      const params = {
+      const payload = {
         workspaceId,
         userId,
       };
-      const res = await dispatch(removeUsersAction(params)).unwrap();
+      const res = await dispatch(removeUsersAction(payload)).unwrap();
       if (res?.success) {
         await dispatch(fetchWorkspaceMambersAction(workspaceId));
         toast.success(res?.message);
@@ -66,15 +69,25 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
   };
 
   return (
-    <div className="space-y-10">
-      <div className="flex justify-end">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-primary">
+            Workspace members
+          </h2>
+
+          <p className="mt-1 text-xs text-secondary">
+            Manage workspace access and member roles.
+          </p>
+        </div>
+
         <Modal
-          buttonClassName=""
+          buttonClassName="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer active:bg-card"
           modalWidth="600px"
           buttonInnerText={
-            <span className="flex items-center justify-center gap-1.5">
-              <UserPlus size={14} />
-              Invite Member
+            <span className="flex items-center justify-center gap-2">
+              <UserPlus size={15} strokeWidth={2} />
+              <span>Invite member</span>
             </span>
           }
           open={userModal}
@@ -84,118 +97,170 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
         />
       </div>
 
-      <div className="bg-[#11131f] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-gray-400 uppercase bg-[#0d0f17] border-b border-gray-800">
+      <div className="overflow-hidden rounded-xl border border-default bg-card">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-default bg-secondary/20">
             <tr>
-              <th scope="col" className="px-6 py-4 font-medium tracking-wider">
+              <th className="px-5 py-3.5 text-[11px] font-medium uppercase tracking-wide text-secondary">
                 Member
               </th>
-              <th scope="col" className="px-6 py-4 font-medium tracking-wider">
+
+              <th className="px-5 py-3.5 text-[11px] font-medium uppercase tracking-wide text-secondary">
                 Email
               </th>
-              <th scope="col" className="px-6 py-4 font-medium tracking-wider">
+
+              <th className="px-5 py-3.5 text-[11px] font-medium uppercase tracking-wide text-secondary">
                 Role
               </th>
-              <th scope="col" className="px-6 py-4 font-medium tracking-wider">
+
+              <th className="px-5 py-3.5 text-[11px] font-medium uppercase tracking-wide text-secondary">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800">
-            {workspaceMembers?.map((member: any) => (
-              <tr
-                key={member?.user?.id}
-                className="hover:bg-[#161826]/50 transition-colors"
-              >
-                <td className="px-6 py-5 flex items-center gap-4">
-                  <Avatar className="h-8 w-8 rounded-full border border-[#1f2937] bg-[#111827] shrink-0">
-                    <AvatarImage
-                      src={member?.user?.image}
-                      className="object-cover rounded-full"
-                    />
-                    <AvatarFallback className="rounded-full flex items-center justify-center my-auto h-full  text-[#e5e7eb]">
-                      {nameInitials(member?.user)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-gray-100">
-                      {member?.user?.name ||
-                        member?.user?.firstName + " " + member?.user?.lastName}
+
+          <tbody className="divide-y divide-default">
+            {workspaceMembers?.map((member: any) => {
+              const user = member?.user;
+
+              const userName =
+                user?.name ||
+                `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim();
+
+              const isCurrentUser = user?.id === currentUser;
+
+              return (
+                <tr
+                  key={user?.id}
+                  className="transition-colors duration-150 hover:bg-secondary/10"
+                >
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8 shrink-0 rounded-full border border-default bg-secondary">
+                        <AvatarImage
+                          src={user?.image}
+                          className="rounded-full object-cover"
+                        />
+
+                        <AvatarFallback className="rounded-full h-full flex justify-center items-center bg-secondary text-xs font-medium text-primary">
+                          {nameInitials(user)}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium text-primary">
+                            {userName}
+                          </span>
+
+                          {isCurrentUser && (
+                            <span className="rounded-md border border-brand/60 bg-brand/5  px-1.5 py-0.5 text-[10px] font-medium text-brand">
+                              You
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td className="px-5 py-4">
+                    <span className="text-sm text-secondary">
+                      {user?.email}
                     </span>
-                    {member?.user?.id === currentUser && (
-                      <span className="text-xs text-purple-400 font-medium">
-                        (You)
-                      </span>
+                  </td>
+
+                  <td className="px-5 py-4">
+                    <div className="w-32">
+                      <Select
+                        options={options}
+
+                        onChange={(val: any) => {
+                          handleRoleChange(
+                            member?.workspaceId,
+                            user?.id,
+                            val?.value,
+                          );
+                        }}
+                        value={options.find(
+                          (val: any) => val?.value === member?.role,
+                        )}
+                        getOptionValue={(val: any) => val.value}
+                        getOptionLabel={(val: any) => val.label}
+                        placeholder="Change role"
+                        styles={commonSelectStyles2}
+                        menuPortalTarget={document?.body}
+                        isDisabled={isCurrentUser}
+                        isClearable={false}
+                      />
+                    </div>
+                  </td>
+
+                  <td className="px-5 py-4">
+                    {isCurrentUser ? (
+                      <button
+                        disabled
+                        className="
+                          flex items-center gap-2
+                          rounded-lg
+                          border border-default
+                          bg-secondary/30
+                          px-3 py-2
+                          text-xs font-medium
+                          text-secondary
+                          opacity-60
+                          cursor-not-allowed
+                        "
+                      >
+                        <UserMinus size={14} />
+                        Remove
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRemoveUser(member?.workspaceId, user?.id)
+                        }
+                        className="
+                          group
+                          flex items-center gap-2
+                          rounded-lg
+                          border border-red-500/20
+                          bg-red-500/[0.04]
+                          px-3 py-2
+                          text-xs font-medium
+                          text-red-400
+                          transition-colors duration-150
+                          hover:border-red-500/30
+                          hover:bg-red-500/[0.08]
+                          hover:text-red-300
+                          cursor-pointer
+                        "
+                      >
+                        <UserMinus
+                          size={14}
+                          className="transition-transform duration-150 group-hover:scale-105"
+                        />
+                        Remove
+                      </button>
                     )}
-                  </div>
-                </td>
-
-                <td className="px-6 py-5 text-gray-300 font-mono">
-                  {member?.user?.email}
-                </td>
-
-                <td className="px-6 py-5">
-                  <div className="relative w-32">
-                    <Select
-                      options={options}
-                      onChange={(val) => {
-                        handleRoleChange(
-                          member?.workspaceId,
-                          member?.user?.id,
-                          val?.value,
-                        );
-                      }}
-                      value={options.find(
-                        (val: any) => val?.value === member?.role,
-                      )}
-                      getOptionValue={(val: any) => val.value}
-                      getOptionLabel={(val: any) => val.label}
-                      placeholder="Change Role"
-                      styles={commonSelectStyles}
-                      menuPortalTarget={document?.body}
-                      isDisabled={member?.user?.id === currentUser}
-                      isClearable={false}
-                    />
-                  </div>
-                </td>
-
-                <td className="px-6 py-5 relative">
-                  {member?.user?.id === currentUser ? (
-                    <button
-                      disabled
-                      className="px-4 py-2 bg-gray-800/60 text-gray-500 font-medium rounded-lg text-xs flex items-center gap-2 cursor-not-allowed border border-gray-700/50"
-                    >
-                      <UserMinus size={14} className="transition-transform" />
-                      Remove
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        handleRemoveUser(member?.workspaceId, member?.user?.id)
-                      }
-                      className="cursor-pointer px-4 py-2 border border-red-900 bg-red-950/20 text-red-400 hover:bg-red-950/40 font-medium rounded-lg text-xs flex items-center gap-2 transition-colors group"
-                    >
-                      <UserMinus size={14} className="transition-transform" />
-                      Remove
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      <div className="max-w-2xl text-gray-400 space-y-3">
-        <h3 className="text-lg font-semibold text-gray-200">
-          Members Deletion Settings
-        </h3>
-        <p className="text-sm leading-relaxed">
-          Once you delete a member, they lose all access immediately. However,
-          your workspace data will be scheduled for permanent deletion only if
-          the entire workspace is deleted.
-        </p>
+      <div className="max-w-2xl">
+        <div className="border-t border-default pt-6">
+          <h3 className="text-sm font-semibold text-primary">
+            Members deletion settings
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-secondary">
+            Once you delete a member, they lose all access immediately.
+          </p>
+        </div>
       </div>
     </div>
   );

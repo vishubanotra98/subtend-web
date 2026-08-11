@@ -31,49 +31,75 @@ const TeamsProjectsTabContent = () => {
 
   return (
     <div className="space-y-12">
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
+      <section className="space-y-5">
+        <div className="flex items-center justify-between gap-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-100 flex items-center gap-2">
-              <Users size={20} className="text-purple-400" />
-              Manage Teams
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+                <Users size={16} className="text-brand" />
+              </div>
+
+              <h2 className="text-base font-semibold text-primary">
+                Manage Teams
+              </h2>
+            </div>
+
+            <p className="mt-1.5 text-sm text-secondary">
               Teams group members together for easier assignment.
             </p>
           </div>
-          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg text-sm flex items-center gap-2 transition-colors">
-            <Plus size={16} />
+
+          <button
+            type="button"
+            className=" group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
+          >
+            <Plus
+              size={15}
+              strokeWidth={2}
+              className="transition-transform duration-200 group-hover:rotate-90"
+            />
             Create Team
           </button>
         </div>
 
-        <div className="bg-[#11131f] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+        <div className="overflow-hidden rounded-xl border border-default bg-card shadow-card">
           {teams.length === 0 ? (
-            <div className="p-6 text-center text-gray-500 text-sm">
+            <div className="flex min-h-28 items-center justify-center px-6 text-sm text-secondary">
               No teams found in this workspace.
             </div>
           ) : (
-            <ul className="divide-y divide-gray-800">
+            <ul className="divide-y divide-default">
               {teams.map((team) => (
                 <li
                   key={team.id}
-                  className="flex items-center justify-between p-5 hover:bg-[#161826]/50 transition-colors"
+                  className=" group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/40"
                 >
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-gray-200">
-                      {team.name}
-                    </span>
-                    <span className="text-xs text-gray-500 mt-0.5">
-                      {team.memberCount} members
-                    </span>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-default bg-secondary/40">
+                      <Users size={15} className="text-secondary" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-primary">
+                        {team.name}
+                      </p>
+
+                      <p className="mt-0.5 text-xs text-secondary">
+                        {team.memberCount}{" "}
+                        {team.memberCount === 1 ? "member" : "members"}
+                      </p>
+                    </div>
                   </div>
-                  <button className="px-4 py-2 border border-red-900/50 hover:bg-red-950/40 text-red-400 font-medium rounded-lg text-xs flex items-center gap-2 transition-colors group">
+
+                  <button
+                    type="button"
+                    className=" group/delete inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive transition-all duration-150 hover:bg-destructive/10 hover:border-destructive/30 active:scale-[0.98] cursor-pointer"
+                  >
                     <Trash2
-                      size={14}
-                      className="group-hover:scale-110 transition-transform"
+                      size={13}
+                      className="transition-transform duration-150 group-hover/delete:scale-105"
                     />
-                    Delete Team
+                    Delete
                   </button>
                 </li>
               ))}
@@ -82,50 +108,85 @@ const TeamsProjectsTabContent = () => {
         </div>
       </section>
 
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
+      <section className="space-y-5">
+        <div className="flex items-center justify-between gap-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-100 flex items-center gap-2">
-              <FolderGit2 size={20} className="text-purple-400" />
-              Manage Projects
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              Projects contain all your workflows, columns, and tasks.
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+                <FolderGit2 size={16} className="text-brand" />
+              </div>
+
+              <h2 className="text-base font-semibold text-primary">
+                Manage Projects
+              </h2>
+            </div>
+
+            <p className="mt-1.5 text-sm text-secondary">
+              Projects contain your workflows, columns, and tasks.
             </p>
           </div>
-          <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg text-sm flex items-center gap-2 transition-colors">
-            <Plus size={16} />
+
+          <button
+            type="button"
+            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
+          >
+            <Plus
+              size={15}
+              strokeWidth={2}
+              className="transition-transform duration-200 group-hover:rotate-90"
+            />
             Create Project
           </button>
         </div>
 
-        <div className="bg-[#11131f] border border-gray-800 rounded-xl overflow-hidden shadow-xl">
+        <div className="overflow-hidden rounded-xl border border-default bg-card shadow-card">
           {projects.length === 0 ? (
-            <div className="p-6 text-center text-gray-500 text-sm">
+            <div className="flex min-h-28 items-center justify-center px-6 text-sm text-secondary">
               No projects found in this workspace.
             </div>
           ) : (
-            <ul className="divide-y divide-gray-800">
+            <ul className="divide-y divide-default">
               {projects.map((project) => (
                 <li
                   key={project.id}
-                  className="flex items-center justify-between p-5 hover:bg-[#161826]/50 transition-colors"
+                  className="group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/40"
                 >
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-gray-200">
-                      {project.name}
-                    </span>
-                    <span className="text-xs mt-0.5 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="text-gray-500">{project.status}</span>
-                    </span>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-default bg-secondary/40">
+                      <FolderGit2 size={15} className="text-secondary" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-primary">
+                        {project.name}
+                      </p>
+
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            project.status === "Active"
+                              ? "bg-success"
+                              : "bg-secondary"
+                          }`}
+                        />
+
+                        <span className="text-xs text-secondary">
+                          {project.status}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <button className="px-4 py-2 border border-red-900/50 hover:bg-red-950/40 text-red-400 font-medium rounded-lg text-xs flex items-center gap-2 transition-colors group">
+
+                  <button
+                    type="button"
+                    className=" group/delete inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive transition-all duration-150 hover:bg-destructive/10 hover:border-destructive/30 active:scale-[0.98] cursor-pointer
+                    "
+                  >
                     <Trash2
-                      size={14}
-                      className="group-hover:scale-110 transition-transform"
+                      size={13}
+                      className="transition-transform duration-150 group-hover/delete:scale-105"
                     />
-                    Delete Project
+                    Delete
                   </button>
                 </li>
               ))}
@@ -134,13 +195,19 @@ const TeamsProjectsTabContent = () => {
         </div>
       </section>
 
-      <div className="mt-8 pt-6 border-t border-gray-800/50">
-        <p className="text-sm text-gray-500 leading-relaxed max-w-2xl">
-          <strong className="text-gray-400">Note on deletions:</strong> Deleting
-          a team or project removes it from view immediately. The data is held
-          in a soft-deleted state and will be permanently purged according to
-          your workspace data retention policy (default 30 days).
-        </p>
+      <div className="border-t border-default pt-6">
+        <div className="flex max-w-2xl gap-3">
+          <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-secondary" />
+
+          <p className="text-sm leading-relaxed text-secondary">
+            <strong className="font-medium text-primary">
+              Note on deletions:
+            </strong>{" "}
+            Deleting a team or project removes it from view immediately. The
+            data is held in a soft-deleted state and will be permanently purged
+            according to your workspace data retention policy (default 30 days).
+          </p>
+        </div>
       </div>
     </div>
   );
