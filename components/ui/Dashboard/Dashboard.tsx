@@ -17,6 +17,7 @@ import {
   dashboardAttentionAction,
   dashboardCountAction,
 } from "@/Store/actions/dashboard.action";
+import SubtendLoader from "@/components/Loader/SubtendLoader";
 
 export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const dispatch = useAppDispatch();
@@ -42,7 +43,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   const workspaceListData = workspaceData as WorkspaceListData | null;
   const workspaceList = workspaceListData?.workspaces ?? [];
 
-  const selectedWorkspace = workspaceList.find(
+  const selectedWorkspace = workspaceList?.find(
     (ws) => ws?.workspace?.id === workspaceId,
   )?.workspace;
 
@@ -88,7 +89,11 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
   }, [dispatch, selectedWorkspace, workspaceId]);
 
   if (dashboardLoad) {
-    return <DashboardLoading />;
+    return (
+      <div className="w-full h-[84vh] flex items-center justify-center">
+        <SubtendLoader />
+      </div>
+    );
   }
 
   const isAdmin = workspaceListData?.adminList?.includes(workspaceId);
@@ -105,16 +110,10 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       />
     );
   } else
-    <MemberDashboard
-    // workspaceId={workspaceId}
-    // totalIssuesCount={issues.length}
-    // myIssues={memberIssues}
-    // myIssuesCount={memberIssues.length}
-    // urgentTasks={myUrgentIssues}
-    // urgentIssuesCount={myUrgentIssues.length}
-    // completedIssuesCount={myCompletedIssues.length}
-    // totalProjects={projects}
-    // teamData={teams}
-    // workspaceStatusList={statuses}
-    />;
+    return (
+      <MemberDashboard
+        selectedWorkspace={selectedWorkspace}
+        userData={userData}
+      />
+    );
 }

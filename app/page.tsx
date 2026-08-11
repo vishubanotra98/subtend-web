@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from "@/Store/hooks";
-import RootPageLoading from "@/components/ui/AppLoading/RootPageLoading";
+import SubtendLoader from "@/components/Loader/SubtendLoader";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -43,5 +43,5 @@ export default function RootPage() {
     router,
   ]);
 
-  return <RootPageLoading />;
+  return <SubtendLoader />;
 }
