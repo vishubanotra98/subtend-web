@@ -27,6 +27,7 @@ export default function AdminDashboard({
       <DashboardHeader
         selectedWorkspace={selectedWorkspace}
         userData={userData}
+        isAdmin={true}
       />
       <OverviewSection
         countData={countData}

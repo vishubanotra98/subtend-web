@@ -10,111 +10,76 @@ import {
   fetchIssuesAction,
 } from "@/Store/actions/workspace.action";
 import { useAppDispatch } from "@/Store/hooks";
+import DashboardHeader from "./DashboardHeader/DashboardHeader";
 
 export default function MemberDashboard({
-  myIssues,
-  myIssuesCount,
-  urgentTasks,
-  completedIssuesCount,
-  totalIssuesCount,
-  teamData,
-  totalProjects,
-  workspaceId,
-  workspaceStatusList,
+  selectedWorkspace,
+  userData,
+  isAdmin,
 }: any) {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
-  const safeMyIssues = Array.isArray(myIssues) ? myIssues : [];
-  const safeUrgentTasks = Array.isArray(urgentTasks) ? urgentTasks : [];
-  const safeTeamData = Array.isArray(teamData) ? teamData : [];
-  const safeProjects = Array.isArray(totalProjects) ? totalProjects : [];
-  const safeWorkspaceStatusList = Array.isArray(workspaceStatusList)
-    ? workspaceStatusList
-    : [];
+  // const router = useRouter();
+  // const dispatch = useAppDispatch();
+  // const safeMyIssues = Array.isArray(myIssues) ? myIssues : [];
+  // const safeUrgentTasks = Array.isArray(urgentTasks) ? urgentTasks : [];
+  // const safeTeamData = Array.isArray(teamData) ? teamData : [];
+  // const safeProjects = Array.isArray(totalProjects) ? totalProjects : [];
+  // const safeWorkspaceStatusList = Array.isArray(workspaceStatusList)
+  //   ? workspaceStatusList
+  //   : [];
 
-  const getTeamData = (projectId: string) => {
-    const project = safeProjects.find(
-      (project: any) => project?.id === projectId,
-    );
+  // const getTeamData = (projectId: string) => {
+  //   const project = safeProjects.find(
+  //     (project: any) => project?.id === projectId,
+  //   );
 
-    const team = safeTeamData.find((team: any) => team?.id === project?.teamId);
-    return team;
-  };
+  //   const team = safeTeamData.find((team: any) => team?.id === project?.teamId);
+  //   return team;
+  // };
 
-  const doneTaskStatus = safeWorkspaceStatusList.find(
-    (task: any) => task.name === "Done",
-  );
+  // const doneTaskStatus = safeWorkspaceStatusList.find(
+  //   (task: any) => task.name === "Done",
+  // );
 
-  const incompleteTasksUrg = safeUrgentTasks.filter(
-    (task: any) => task?.statusId !== doneTaskStatus?.id,
-  );
+  // const incompleteTasksUrg = safeUrgentTasks.filter(
+  //   (task: any) => task?.statusId !== doneTaskStatus?.id,
+  // );
 
-  const incompleteTasksNormal = safeMyIssues.filter(
-    (task: any) =>
-      task?.statusId !== doneTaskStatus?.id && task.priority !== "URGENT",
-  );
+  // const incompleteTasksNormal = safeMyIssues.filter(
+  //   (task: any) =>
+  //     task?.statusId !== doneTaskStatus?.id && task.priority !== "URGENT",
+  // );
 
-  const handleComplete = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-    task: any,
-  ) => {
-    e.stopPropagation();
-    const payload = {
-      workspaceId,
-      teamId: getTeamData(task?.projectId)?.id,
-      projectId: task?.projectId,
-      issueId: task?.id,
-      statusId: doneTaskStatus?.id,
-    };
-    const res = await dispatch(editIssueAction(payload)).unwrap();
-    await dispatch(fetchIssuesAction(workspaceId));
-    if (res?.success) {
-      toast.success("Marked as completed.");
-    }
-  };
+  // const handleComplete = async (
+  //   e: React.MouseEvent<HTMLButtonElement>,
+  //   task: any,
+  // ) => {
+  //   e.stopPropagation();
+  //   const payload = {
+  //     workspaceId,
+  //     teamId: getTeamData(task?.projectId)?.id,
+  //     projectId: task?.projectId,
+  //     issueId: task?.id,
+  //     statusId: doneTaskStatus?.id,
+  //   };
+  //   const res = await dispatch(editIssueAction(payload)).unwrap();
+  //   await dispatch(fetchIssuesAction(workspaceId));
+  //   if (res?.success) {
+  //     toast.success("Marked as completed.");
+  //   }
+  // };
 
-  const totalPendingIssuesCount =
-    incompleteTasksNormal?.length + incompleteTasksUrg?.length;
+  // const totalPendingIssuesCount =
+  //   incompleteTasksNormal?.length + incompleteTasksUrg?.length;
 
   return (
     <div>
-      <section>
-        <h4 className="font-semibold mb-4 text-white">Issues Overview</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card
-            title="Total Issues"
-            data={totalIssuesCount}
-            className="bg-[#1f2937] border-white/5"
-            desc="All tickets in workspace"
-          />
+      <DashboardHeader
+        selectedWorkspace={selectedWorkspace}
+        userData={userData}
+        isAdmin={false}
+      />
 
-          <Card
-            title="My Tasks"
-            data={myIssuesCount}
-            className="bg-[#1f2937] border-indigo-500/20"
-            desc="Assigned to you"
-          />
-
-          <Card
-            title="Urgent Fires"
-            data={incompleteTasksUrg?.length}
-            className="bg-[#1f2937] border-red-500/20"
-            desc={
-              incompleteTasksUrg?.length > 0
-                ? "Requires attention"
-                : "No urgent issues"
-            }
-          />
-
-          <Card
-            title="Completed"
-            data={completedIssuesCount}
-            className="bg-[#1f2937] border-green-500/20"
-            desc="Successfully resolved"
-          />
-        </div>
-      </section>
-      <div className="mt-10 bg-[#1f2937] h-full border border-white/5 rounded-xl p-6 h-full flex flex-col gap-6">
+      {/* <div className="mt-10 bg-[#1f2937] h-full border border-white/5 rounded-xl p-6 h-full flex flex-col gap-6">
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <h3 className="text-lg font-semibold text-white">My Work</h3>
           <span className="text-sm text-gray-400 font-medium bg-[#111827] px-3 py-1 rounded-full border border-white/5">
@@ -230,7 +195,7 @@ export default function MemberDashboard({
             You're all caught up!
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

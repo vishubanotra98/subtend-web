@@ -3,7 +3,11 @@
 import DashboardButton from "@/components/Common/TeamDashboardButton";
 import { Sun } from "lucide-react";
 
-export default function DashboardHeader({ selectedWorkspace, userData }: any) {
+export default function DashboardHeader({
+  selectedWorkspace,
+  userData,
+  isAdmin = false,
+}: any) {
   const hour = new Date().getHours();
   const userName =
     userData?.user?.name ??
@@ -34,7 +38,7 @@ export default function DashboardHeader({ selectedWorkspace, userData }: any) {
         </p>
       </div>
 
-      <DashboardButton />
+      {isAdmin && <DashboardButton />}
     </header>
   );
 }

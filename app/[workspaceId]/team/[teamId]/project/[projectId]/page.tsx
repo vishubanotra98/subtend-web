@@ -1,5 +1,6 @@
 "use client";
 
+import SubtendLoader from "@/components/Loader/SubtendLoader";
 import KanbanClient from "@/components/ui/KanbanBoard/KanbanClient";
 import {
   fetchIssuesByProjectAction,
@@ -29,6 +30,7 @@ export default function ProjectIssue() {
   const workspaceId = params.workspaceId as string;
   const teamId = params?.teamId;
   const projectId = params?.projectId as string;
+  const [load, setLoad] = useState(false);
 
   useEffect(() => {
     if (!projectId || !workspaceId) return;
@@ -36,6 +38,7 @@ export default function ProjectIssue() {
     let isMounted = true;
 
     const init = async () => {
+      setLoad(true);
       const [issuesRes, memberActionRes, workspaceStatusRes, projectRes] =
         await Promise.all([
           dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
@@ -50,6 +53,7 @@ export default function ProjectIssue() {
         setIssues(issuesRes?.data?.issues ?? []);
         setProject(projectData ?? null);
       }
+      setLoad(false);
     };
 
     init();
@@ -64,9 +68,6 @@ export default function ProjectIssue() {
   const handleDragOver = async (event: any) => {
     const sourceId = event.operation.source?.id as string;
     const targetId = event.operation.target?.id as string;
-
-    console.log("Source Id: ", sourceId);
-    console.log("Target Id", targetId);
 
     if (!targetId || sourceId === targetId) return;
 
@@ -105,19 +106,29 @@ export default function ProjectIssue() {
     teamId,
   };
 
-  if (!projectIssues) return "LOADING...";
+  if (load) {
+    return (
+      <div className="w-full h-[84vh] flex items-center justify-center">
+        <SubtendLoader />
+      </div>
+    );
+  }
+
+  console.log("Project", project);
   return (
     <main className="flex h-full flex-col bg-background">
       <header className="border-b border-default">
-        <div className="mx-auto flex w-full flex-col gap-6 px-8 py-6">
+        <div className="mx-auto flex w-full flex-col gap-6 px-8 pt-6 pb-2">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight text-primary">
               {project?.name}
             </h1>
 
-            <p className="max-w-3xl text-sm leading-6 text-secondary">
-              {project?.projectOverview}
-            </p>
+            {project?.projectOverview && (
+              <p className="max-w-3xl text-sm leading-6 text-secondary">
+                {project?.projectOverview}
+              </p>
+            )}
           </div>
 
           {/* Toolbar */}
