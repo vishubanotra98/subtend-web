@@ -43,5 +43,14 @@ export default function RootPage() {
     router,
   ]);
 
-  return <SubtendLoader />;
+  return (
+    <div className="w-full h-[84vh] flex justify-center items-center">
+      <div className="flex flex-col items-center">
+        <SubtendLoader />
+        <span className="font-[Poppins] text-secondary text-[42px] font-semibold tracking-wide">
+          subtend
+        </span>
+      </div>
+    </div>
+  );
 }
