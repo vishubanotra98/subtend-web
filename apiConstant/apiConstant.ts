@@ -16,6 +16,7 @@ export const API = {
     INVITE: "/api/v1/member-invite",
     LAST_ACTIVE_WORKSPACE: "/api/v1/last-active-workspace",
     PROJECT: "/api/v1/project",
+    PROJECTS: "/api/v1/projects",
     STATUS: "/api/v1/status",
     ISSUE: "/api/v1/issue",
     MOVE_ISSE: "/api/v1/issue-move",
