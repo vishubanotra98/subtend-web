@@ -1,6 +1,9 @@
 "use client";
 
-import { fetchWorkspaceMambersAction } from "@/Store/actions/workspace.action";
+import {
+  fetchProjectsAction,
+  fetchWorkspaceMambersAction,
+} from "@/Store/actions/workspace.action";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,13 +11,14 @@ import { useEffect, useState } from "react";
 import MembersTabContent from "./MemberSettings";
 import TeamsProjectsTabContent from "./TeamsProjectsTabContent";
 import DangerContentTab from "./DangerContentTab";
+import SubtendLoader from "@/components/Loader/SubtendLoader";
 
 type OptionTypes = "general" | "members" | "teamproject" | "danger";
 
 const options: { label: string; value: OptionTypes }[] = [
   // { label: "General", value: "general" },
   { label: "Members", value: "members" },
-  // { label: "Teams & Projects", value: "teamproject" },
+  { label: "Teams & Projects", value: "teamproject" },
   // { label: "Danger Zone", value: "danger" },
 ];
 
@@ -24,16 +28,41 @@ const WorkspaceSettings = () => {
 
   const {
     userData: { user },
-    workspaceData: { workspaceMembers },
+    workspaceData: { workspaceMembers, teamsData, teamsWorkspaceId },
   } = useAppSelector((store: any) => store);
 
   const [option, setOption] = useState<OptionTypes>("members");
+  const [projects, setProjects] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!workspaceId) return;
 
-    dispatch(fetchWorkspaceMambersAction(workspaceId as string));
+    const init = async () => {
+      try {
+        setLoading(true);
+        await dispatch(fetchWorkspaceMambersAction(workspaceId as string));
+        const res = await dispatch(
+          fetchProjectsAction(workspaceId as string),
+        )?.unwrap();
+        const projectList = res?.data?.projects ?? [];
+        setProjects(projectList);
+      } catch (err: any) {
+        if (err?.code === "NO_PROJECTS_FOUND") setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
   }, [dispatch, workspaceId]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-[90vh] flex justify-center items-center">
+        <SubtendLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[100vh] min-h-full w-full overflow-hidden bg-background">
@@ -74,7 +103,7 @@ const WorkspaceSettings = () => {
             </h1>
 
             <p className="mt-1.5 text-sm text-secondary">
-              Manage your workspace preferences, members, and access.
+              Manage your workspace teams, projects, and tasks.
             </p>
           </header>
 
@@ -92,7 +121,13 @@ const WorkspaceSettings = () => {
               />
             )}
 
-            {option === "teamproject" && <TeamsProjectsTabContent />}
+            {option === "teamproject" && (
+              <TeamsProjectsTabContent
+                projects={projects}
+                setProjects={setProjects}
+                teams={teamsData}
+              />
+            )}
 
             {option === "danger" && <DangerContentTab />}
           </div>

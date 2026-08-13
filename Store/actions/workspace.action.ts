@@ -10,12 +10,15 @@ import {
   fetchIssuesByProjectService,
   fetchIssuesService,
   fetchProjectByIdService,
+  fetchProjectsService,
   fetchTeamsDataService,
   fetchUserService,
   fetchWorkspaceMambersService,
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
   moveCardService,
+  projectSoftDeleteService,
+  teamSoftDeleteService,
 } from "@/services/workspace.service";
 import {
   ProjectPayloadType,
@@ -233,6 +236,42 @@ export const fetchProjectByIdAction = createAsyncThunk<any, string>(
   async (projectId, { rejectWithValue }) => {
     try {
       const res = await fetchProjectByIdService(projectId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchProjectsAction = createAsyncThunk<any, string>(
+  "fetchProjects",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchProjectsService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const teamSoftDeleteAction = createAsyncThunk<any, string>(
+  "softDeleteTeam",
+  async (teamId, { rejectWithValue }) => {
+    try {
+      const res = await teamSoftDeleteService(teamId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const projectSoftDeleteAction = createAsyncThunk<any, string>(
+  "softDeleteProject",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await projectSoftDeleteService(projectId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

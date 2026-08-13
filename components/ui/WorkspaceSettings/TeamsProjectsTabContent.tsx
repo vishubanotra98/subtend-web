@@ -1,33 +1,97 @@
 "use client";
 
-import { useState } from "react";
 import { Users, FolderGit2, Trash2, Plus } from "lucide-react";
+import { useAppDispatch } from "@/Store/hooks";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { Modal } from "@/components/Common/Modal";
+import { AddTeamForm } from "@/components/Forms/AddTeamForm";
+import { CreateProjectModal } from "@/components/Forms/ProjectForm";
+import {
+  fetchActivitiesAction,
+  fetchProjectsAction,
+  fetchTeamsDataAction,
+  projectSoftDeleteAction,
+  teamSoftDeleteAction,
+} from "@/Store/actions/workspace.action";
+import toast from "react-hot-toast";
+import { DeleteModal } from "../IssuePage/DeleteModal";
+import { NewDeleteModal } from "@/components/Common/DeleteModal";
 
-interface Team {
-  id: string;
-  name: string;
-  memberCount: number;
-}
+const TeamsProjectsTabContent = ({ projects, teams, setProjects }: any) => {
+  const dispatch = useAppDispatch();
+  const [open, setOpen] = useState(false);
+  const [projectOpen, setProjectOpen] = useState(false);
+  const [load, setLoad] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [projectDeleteModal, setProjectDeleteMoal] = useState(false);
+  const [deleteSpin, setDeleteSpin] = useState(false);
 
-interface Project {
-  id: string;
-  name: string;
-  status: "Active" | "Archived";
-}
+  const params = useParams();
+  const workspaceId = params.workspaceId as string;
 
-const initialTeams: Team[] = [
-  { id: "t1", name: "Backend-1", memberCount: 4 },
-  { id: "t2", name: "Frontend Core", memberCount: 3 },
-];
+  const deleteModalhandler = (teamId: string) => {
+    setSelectedTeam(teamId);
+    setDeleteModal(true);
+  };
 
-const initialProjects: Project[] = [
-  { id: "p1", name: "Demo-Project", status: "Active" },
-  { id: "p2", name: "Subtend MVP", status: "Active" },
-];
+  const handleSoftDelete = async () => {
+    if (!selectedTeam) return;
+    try {
+      setDeleteSpin(true);
 
-const TeamsProjectsTabContent = () => {
-  const [teams, setTeams] = useState<Team[]>(initialTeams);
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+      const res = await dispatch(
+        teamSoftDeleteAction(selectedTeam as string),
+      ).unwrap();
+      if (res?.success) {
+        toast.success("Team moved to trash.");
+      }
+      const projectRes = await dispatch(
+        fetchProjectsAction(workspaceId as string),
+      )?.unwrap();
+      await dispatch(fetchTeamsDataAction(workspaceId));
+      await dispatch(fetchActivitiesAction(workspaceId));
+
+      const projectList = projectRes?.data?.projects ?? [];
+      setProjects(projectList);
+    } catch (err) {
+      toast.error("Error removing team.");
+    } finally {
+      setDeleteSpin(false);
+      setDeleteModal(false);
+    }
+  };
+
+  const handleProjectSoftDelete = async () => {
+    if (!selectedProject) return;
+
+    try {
+      setDeleteSpin(true);
+
+      const res = await dispatch(
+        projectSoftDeleteAction(selectedProject as string),
+      ).unwrap();
+      if (res?.success) {
+        toast.success("Project moved to trash.");
+      }
+      await dispatch(fetchTeamsDataAction(workspaceId));
+      await dispatch(fetchActivitiesAction(workspaceId));
+
+      const projectRes = await dispatch(
+        fetchProjectsAction(workspaceId as string),
+      )?.unwrap();
+
+      const projectList = projectRes?.data?.projects ?? [];
+      setProjects(projectList);
+    } catch (err) {
+      toast.error("Error removing project.");
+    } finally {
+      setDeleteSpin(false);
+      setProjectDeleteMoal(false);
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -45,34 +109,44 @@ const TeamsProjectsTabContent = () => {
             </div>
 
             <p className="mt-1.5 text-sm text-secondary">
-              Teams group members together for easier assignment.
+              Manage your teams and their settings.
             </p>
           </div>
 
-          <button
-            type="button"
-            className=" group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
-          >
-            <Plus
-              size={15}
-              strokeWidth={2}
-              className="transition-transform duration-200 group-hover:rotate-90"
-            />
-            Create Team
-          </button>
+          <Modal
+            buttonClassName="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
+            modalWidth="600px"
+            buttonInnerText={
+              <span className="flex items-center justify-center gap-2">
+                <Plus
+                  size={15}
+                  strokeWidth={2}
+                  className="transition-transform duration-200 group-hover:rotate-90"
+                />
+                Create Team
+              </span>
+            }
+            open={open}
+            subHeading={
+              "Teams help organize people and projects within your workspace."
+            }
+            setOpen={() => setOpen((prev) => !prev)}
+            title="Create Team"
+            body={<AddTeamForm setModal={setOpen} />}
+          />
         </div>
 
         <div className="overflow-hidden rounded-xl border border-default bg-card shadow-card">
-          {teams.length === 0 ? (
+          {teams?.teamData?.length === 0 ? (
             <div className="flex min-h-28 items-center justify-center px-6 text-sm text-secondary">
               No teams found in this workspace.
             </div>
           ) : (
             <ul className="divide-y divide-default">
-              {teams.map((team) => (
+              {teams?.teamData?.map((team: any) => (
                 <li
-                  key={team.id}
-                  className=" group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/40"
+                  key={team?.id}
+                  className=" group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/5"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-default bg-secondary/40">
@@ -81,17 +155,19 @@ const TeamsProjectsTabContent = () => {
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-primary">
-                        {team.name}
+                        {team?.name}
                       </p>
 
                       <p className="mt-0.5 text-xs text-secondary">
-                        {team.memberCount}{" "}
-                        {team.memberCount === 1 ? "member" : "members"}
+                        {team?.projects?.length}{" "}
+                        {team?.projects?.length === 1 ? "project" : "projects"}
                       </p>
                     </div>
                   </div>
 
                   <button
+                    onClick={() => deleteModalhandler(team?.id)}
+
                     type="button"
                     className=" group/delete inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive transition-all duration-150 hover:bg-destructive/10 hover:border-destructive/30 active:scale-[0.98] cursor-pointer"
                   >
@@ -99,7 +175,7 @@ const TeamsProjectsTabContent = () => {
                       size={13}
                       className="transition-transform duration-150 group-hover/delete:scale-105"
                     />
-                    Delete
+                    Move to trash
                   </button>
                 </li>
               ))}
@@ -122,34 +198,43 @@ const TeamsProjectsTabContent = () => {
             </div>
 
             <p className="mt-1.5 text-sm text-secondary">
-              Projects contain your workflows, columns, and tasks.
+              Manage your projects and their settings.
             </p>
           </div>
 
-          <button
-            type="button"
-            className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
-          >
-            <Plus
-              size={15}
-              strokeWidth={2}
-              className="transition-transform duration-200 group-hover:rotate-90"
-            />
-            Create Project
-          </button>
+          <Modal
+            open={projectOpen}
+            setOpen={setProjectOpen}
+            title="Create project"
+            body={
+              <CreateProjectModal setIsModalOpen={setProjectOpen} teamId={""} />
+            }
+            buttonClassName="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-default bg-card px-3.5 py-2 text-sm font-medium text-primary shadow-sm transition-all duration-200 hover:border-brand hover:bg-accent hover:text-brand active:scale-[0.98] cursor-pointer"
+            buttonInnerText={
+              <span className="flex items-center justify-center gap-2">
+                <Plus
+                  size={15}
+                  strokeWidth={2}
+                  className="transition-transform duration-200 group-hover:rotate-90"
+                />
+                Create Project
+              </span>
+            }
+            subHeading="Organize work, track progress and collaborate."
+          />
         </div>
 
         <div className="overflow-hidden rounded-xl border border-default bg-card shadow-card">
-          {projects.length === 0 ? (
+          {projects?.length === 0 ? (
             <div className="flex min-h-28 items-center justify-center px-6 text-sm text-secondary">
               No projects found in this workspace.
             </div>
           ) : (
             <ul className="divide-y divide-default">
-              {projects.map((project) => (
+              {projects?.map((project: any) => (
                 <li
-                  key={project.id}
-                  className="group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/40"
+                  key={project?.id}
+                  className="group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150 hover:bg-secondary/5"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-default bg-secondary/40">
@@ -158,26 +243,30 @@ const TeamsProjectsTabContent = () => {
 
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-primary">
-                        {project.name}
+                        {project?.name}
                       </p>
 
                       <div className="mt-1 flex items-center gap-1.5">
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            project.status === "Active"
-                              ? "bg-success"
-                              : "bg-secondary"
+                            project?.deletedAt === null
+                              ? "bg-green-300"
+                              : "bg-gray-500"
                           }`}
                         />
 
                         <span className="text-xs text-secondary">
-                          {project.status}
+                          {project?.deletedAt === null ? "Active" : "Archived"}
                         </span>
                       </div>
                     </div>
                   </div>
 
                   <button
+                    onClick={() => {
+                      setSelectedProject(project?.id);
+                      setProjectDeleteMoal(true);
+                    }}
                     type="button"
                     className=" group/delete inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive transition-all duration-150 hover:bg-destructive/10 hover:border-destructive/30 active:scale-[0.98] cursor-pointer
                     "
@@ -186,7 +275,7 @@ const TeamsProjectsTabContent = () => {
                       size={13}
                       className="transition-transform duration-150 group-hover/delete:scale-105"
                     />
-                    Delete
+                    Move to trash
                   </button>
                 </li>
               ))}
@@ -209,6 +298,40 @@ const TeamsProjectsTabContent = () => {
           </p>
         </div>
       </div>
+
+      {deleteModal && (
+        <NewDeleteModal
+          open={deleteModal}
+          setOpen={() => {
+            setDeleteModal((prev) => !prev);
+            setSelectedTeam(null);
+          }}
+          spin={deleteSpin}
+          title="Move team to trash"
+          subHeading="This team will be moved to trash."
+          bodyText="You can restore it later, or permanently delete it after the retention period."
+          handlerButtonText="Move to trash"
+          disabledText="Moving to trash..."
+          deleteHandler={handleSoftDelete}
+        />
+      )}
+
+      {projectDeleteModal && (
+        <NewDeleteModal
+          open={projectDeleteModal}
+          setOpen={() => {
+            setProjectDeleteMoal((prev) => !prev);
+            setSelectedProject(null);
+          }}
+          spin={deleteSpin}
+          title="Move project to trash"
+          subHeading="This project will be moved to trash."
+          bodyText="You can restore it later, or permanently delete it after the retention period."
+          handlerButtonText="Move to trash"
+          disabledText="Moving to trash..."
+          deleteHandler={handleProjectSoftDelete}
+        />
+      )}
     </div>
   );
 };

@@ -177,3 +177,32 @@ export const fetchProjectByIdService = async (projectId: string) => {
     throw error;
   }
 };
+
+export const fetchProjectsService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.PROJECTS}/${workspaceId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const teamSoftDeleteService = async (teamId: string) => {
+  try {
+    const res = await axiosClient.patch(`${API.V1.TEAM}/${teamId}/delete`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const projectSoftDeleteService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.patch(
+      `${API.V1.PROJECT}/${projectId}/delete`,
+    );
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
