@@ -12,13 +12,15 @@ import MembersTabContent from "./MemberSettings";
 import TeamsProjectsTabContent from "./TeamsProjectsTabContent";
 import DangerContentTab from "./DangerContentTab";
 import SubtendLoader from "@/components/Loader/SubtendLoader";
+import TrashContentTab from "./TrashContent";
 
-type OptionTypes = "general" | "members" | "teamproject" | "danger";
+type OptionTypes = "general" | "members" | "teamproject" | "trash" | "danger";
 
 const options: { label: string; value: OptionTypes }[] = [
   // { label: "General", value: "general" },
   { label: "Members", value: "members" },
   { label: "Teams & Projects", value: "teamproject" },
+  { label: "Trash", value: "trash" },
   // { label: "Danger Zone", value: "danger" },
 ];
 
@@ -129,6 +131,7 @@ const WorkspaceSettings = () => {
               />
             )}
 
+            {option === "trash" && <TrashContentTab />}
             {option === "danger" && <DangerContentTab />}
           </div>
         </div>
