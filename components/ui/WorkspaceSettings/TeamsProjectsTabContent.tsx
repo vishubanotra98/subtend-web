@@ -9,16 +9,14 @@ import { AddTeamForm } from "@/components/Forms/AddTeamForm";
 import { CreateProjectModal } from "@/components/Forms/ProjectForm";
 import {
   fetchActivitiesAction,
-  fetchProjectsAction,
   fetchTeamsDataAction,
   projectSoftDeleteAction,
   teamSoftDeleteAction,
 } from "@/Store/actions/workspace.action";
 import toast from "react-hot-toast";
-import { DeleteModal } from "../IssuePage/DeleteModal";
 import { NewDeleteModal } from "@/components/Common/DeleteModal";
 
-const TeamsProjectsTabContent = ({ projects, teams, setProjects }: any) => {
+const TeamsProjectsTabContent = ({ projects, teams, fetchData }: any) => {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const [projectOpen, setProjectOpen] = useState(false);
@@ -48,14 +46,10 @@ const TeamsProjectsTabContent = ({ projects, teams, setProjects }: any) => {
       if (res?.success) {
         toast.success("Team moved to trash.");
       }
-      const projectRes = await dispatch(
-        fetchProjectsAction(workspaceId as string),
-      )?.unwrap();
+
       await dispatch(fetchTeamsDataAction(workspaceId));
       await dispatch(fetchActivitiesAction(workspaceId));
-
-      const projectList = projectRes?.data?.projects ?? [];
-      setProjects(projectList);
+      await fetchData();
     } catch (err) {
       toast.error("Error removing team.");
     } finally {
@@ -78,13 +72,7 @@ const TeamsProjectsTabContent = ({ projects, teams, setProjects }: any) => {
       }
       await dispatch(fetchTeamsDataAction(workspaceId));
       await dispatch(fetchActivitiesAction(workspaceId));
-
-      const projectRes = await dispatch(
-        fetchProjectsAction(workspaceId as string),
-      )?.unwrap();
-
-      const projectList = projectRes?.data?.projects ?? [];
-      setProjects(projectList);
+      await fetchData();
     } catch (err) {
       toast.error("Error removing project.");
     } finally {
