@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  fetchDeletedProjectsAction,
+  fetchDeletedTeamsAction,
   fetchProjectsAction,
   fetchWorkspaceMambersAction,
 } from "@/Store/actions/workspace.action";
@@ -26,7 +28,8 @@ const options: { label: string; value: OptionTypes }[] = [
 
 const WorkspaceSettings = () => {
   const dispatch = useAppDispatch();
-  const { workspaceId } = useParams();
+  const params = useParams();
+  const workspaceId = params?.workspaceId as string;
 
   const {
     userData: { user },
@@ -36,21 +39,39 @@ const WorkspaceSettings = () => {
   const [option, setOption] = useState<OptionTypes>("members");
   const [projects, setProjects] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [deletedProjects, setDeletedProjects] = useState<any | null>(null);
+  const [deletedTeams, setDeletedTeams] = useState<any | null>(null);
+
+  const fetchData = async () => {
+    const res = await dispatch(fetchProjectsAction(workspaceId))?.unwrap();
+    const projectList = res?.data?.projects ?? [];
+    setProjects(projectList);
+
+    const deletedProjectListRes = await dispatch(
+      fetchDeletedProjectsAction(workspaceId),
+    ).unwrap();
+    const deletedProjectList = deletedProjectListRes?.data?.projects;
+    setDeletedProjects(deletedProjectList ?? []);
+
+    const deletedTeamListRes = await dispatch(
+      fetchDeletedTeamsAction(workspaceId),
+    ).unwrap();
+    const deletedTeamList = deletedTeamListRes?.data?.teams;
+    setDeletedTeams(deletedTeamList ?? []);
+  };
 
   useEffect(() => {
     if (!workspaceId) return;
 
     const init = async () => {
+      await fetchData();
       try {
         setLoading(true);
-        await dispatch(fetchWorkspaceMambersAction(workspaceId as string));
-        const res = await dispatch(
-          fetchProjectsAction(workspaceId as string),
-        )?.unwrap();
-        const projectList = res?.data?.projects ?? [];
-        setProjects(projectList);
+        await dispatch(fetchWorkspaceMambersAction(workspaceId));
       } catch (err: any) {
         if (err?.code === "NO_PROJECTS_FOUND") setProjects([]);
+        if (err?.code === "DELETED_PROJECT_NOT_FOUND") setDeletedProjects([]);
+        if (err?.code === "DELETED_TEAMS_NOT_FOUND") setDeletedTeams([]);
       } finally {
         setLoading(false);
       }
@@ -128,10 +149,18 @@ const WorkspaceSettings = () => {
                 projects={projects}
                 setProjects={setProjects}
                 teams={teamsData}
+                fetchData={fetchData}
               />
             )}
 
-            {option === "trash" && <TrashContentTab />}
+            {option === "trash" && (
+              <TrashContentTab
+                deletedProjects={deletedProjects}
+                deletedTeams={deletedTeams}
+                projectList={projects}
+                fetchData={fetchData}
+              />
+            )}
             {option === "danger" && <DangerContentTab />}
           </div>
         </div>

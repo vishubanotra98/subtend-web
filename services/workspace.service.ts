@@ -206,3 +206,59 @@ export const projectSoftDeleteService = async (projectId: string) => {
     throw error;
   }
 };
+
+export const fetchDeletedProjectsService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.PROJECT}/${projectId}/delete`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchDeletedTeamsService = async (teamId: string) => {
+  try {
+    const res = await axiosClient.get(`${API.V1.TEAM}/${teamId}/delete`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const restoreProjectService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.patch(
+      `${API.V1.PROJECT}/${projectId}/restore`,
+    );
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const restoreTeamService = async (teamId: string) => {
+  try {
+    const res = await axiosClient.patch(`${API.V1.TEAM}/${teamId}/restore`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const permanentDeleteProjectService = async (projectId: string) => {
+  try {
+    const res = await axiosClient.delete(`${API.V1.PROJECT}/${projectId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const permanentDeleteTeamService = async (teamId: string) => {
+  try {
+    const res = await axiosClient.delete(`${API.V1.TEAM}/${teamId}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

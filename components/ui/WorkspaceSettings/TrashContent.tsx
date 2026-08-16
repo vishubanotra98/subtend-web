@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  permanentDeleteProjectAction,
+  permanentDeleteTeamAction,
+  restoreProjectAction,
+  restoreTeamAction,
+} from "@/Store/actions/workspace.action";
+import { useAppDispatch } from "@/Store/hooks";
+import {
   Archive,
   FolderKanban,
   RotateCcw,
@@ -9,65 +16,95 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-
-interface DeletedTeam {
-  id: string;
-  name: string;
-  deletedAt: string;
-}
-
-interface DeletedProject {
-  id: string;
-  name: string;
-  deletedAt: string;
-  teamName?: string;
-}
-
-interface TrashContentTabProps {
-  teams?: DeletedTeam[];
-  projects?: DeletedProject[];
-  onRestoreTeam?: (teamId: string) => void;
-  onRestoreProject?: (projectId: string) => void;
-  onPermanentDeleteTeam?: (teamId: string) => void;
-  onPermanentDeleteProject?: (projectId: string) => void;
-}
+import toast from "react-hot-toast";
+import { Button } from "../button";
+import { NewDeleteModal } from "@/components/Common/DeleteModal";
+import { Spinner } from "../Spinner/spinner";
 
 const formatDeletedAt = (date: string) => {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(date));
+  })?.format(new Date(date));
 };
 
 export default function TrashContentTab({
-  teams = [],
-  projects = [],
-  onRestoreTeam,
-  onRestoreProject,
-  onPermanentDeleteTeam,
-  onPermanentDeleteProject,
-}: TrashContentTabProps) {
+  deletedProjects,
+  deletedTeams,
+  fetchData,
+}: any) {
+  const dispatch = useAppDispatch();
   const [confirmDelete, setConfirmDelete] = useState<{
     type: "team" | "project";
     id: string;
     name: string;
   } | null>(null);
 
-  const handlePermanentDelete = () => {
+  const [deleteSpin, setDeleteSpin] = useState(false);
+  const [projectSpin, setProjectSpin] = useState(false);
+  const [teamSpin, setTeamSpin] = useState(false);
+
+  const onPermanentDeleteTeam = async (teamId: string) => {
+    const res = await dispatch(permanentDeleteTeamAction(teamId)).unwrap();
+    if (res?.success) {
+      toast.success("Team deleted.");
+    } else {
+      toast.error("Failed to delete the team.");
+    }
+  };
+
+  const onPermanentDeleteProject = async (projectId: string) => {
+    const res = await dispatch(
+      permanentDeleteProjectAction(projectId),
+    ).unwrap();
+    if (res?.success) {
+      toast.success("Project deleted.");
+    } else {
+      toast.error("Failed to delete the project.");
+    }
+  };
+
+  const onRestoreTeam = async (teamId: string) => {
+    setTeamSpin(true);
+    const res = await dispatch(restoreTeamAction(teamId)).unwrap();
+    if (res?.success) {
+      toast.success("Team restored.");
+    } else {
+      toast.error("Failed to restore the team.");
+    }
+    await fetchData();
+    setTeamSpin(false);
+  };
+
+  const onRestoreProject = async (projectId: string) => {
+    setProjectSpin(true);
+    const res = await dispatch(restoreProjectAction(projectId)).unwrap();
+    if (res?.success) {
+      toast.success("Project restored.");
+    } else {
+      toast.error("Failed to restore the project.");
+    }
+    await fetchData();
+    setProjectSpin(false);
+  };
+
+  const handlePermanentDelete = async () => {
     if (!confirmDelete) return;
 
+    setDeleteSpin(true);
     if (confirmDelete.type === "team") {
-      onPermanentDeleteTeam?.(confirmDelete.id);
+      await onPermanentDeleteTeam?.(confirmDelete.id);
     } else {
-      onPermanentDeleteProject?.(confirmDelete.id);
+      await onPermanentDeleteProject?.(confirmDelete.id);
     }
-
+    await fetchData();
+    setDeleteSpin(false);
     setConfirmDelete(null);
   };
 
-  const hasTeams = teams.length > 0;
-  const hasProjects = projects.length > 0;
+  const hasTeams = deletedTeams?.length > 0;
+  const hasProjects = deletedProjects?.length > 0;
   const isEmpty = !hasTeams && !hasProjects;
 
   return (
@@ -120,56 +157,58 @@ export default function TrashContentTab({
           </div>
         )}
 
-        {/* Projects */}
         {hasProjects && (
           <TrashSection
             title="Projects"
             description="Deleted projects from your workspace."
             icon={<FolderKanban size={17} />}
-            count={projects.length}
+            count={deletedProjects?.length}
           >
             <div className="overflow-hidden rounded-card border border-default bg-card shadow-card">
-              {projects.map((project, index) => (
-                <TrashItem
-                  key={project.id}
-                  name={project.name}
-                  metadata={
-                    project.teamName
-                      ? `${project.teamName} • Deleted ${formatDeletedAt(
-                          project.deletedAt,
-                        )}`
-                      : `Deleted ${formatDeletedAt(project.deletedAt)}`
-                  }
-                  isLast={index === projects.length - 1}
-                  onRestore={() => onRestoreProject?.(project.id)}
-                  onDelete={() =>
-                    setConfirmDelete({
-                      type: "project",
-                      id: project.id,
-                      name: project.name,
-                    })
-                  }
-                />
-              ))}
+              {deletedProjects?.map((project: any, index: any) => {
+                return (
+                  <TrashItem
+                    key={project.id}
+                    name={project.name}
+                    metadata={
+                      project.team?.name
+                        ? `${project.team?.name} • Deleted ${formatDeletedAt(
+                            project.deletedAt,
+                          )}`
+                        : `Deleted ${formatDeletedAt(project.deletedAt)}`
+                    }
+
+                    isLast={index === deletedProjects.length - 1}
+                    onRestore={() => onRestoreProject?.(project.id)}
+                    onDelete={() =>
+                      setConfirmDelete({
+                        type: "project",
+                        id: project.id,
+                        name: project.name,
+                      })
+                    }
+                    load={projectSpin}
+                  />
+                );
+              })}
             </div>
           </TrashSection>
         )}
 
-        {/* Teams */}
         {hasTeams && (
           <TrashSection
             title="Teams"
             description="Deleted teams from your workspace."
             icon={<Users size={17} />}
-            count={teams.length}
+            count={deletedTeams?.length}
           >
             <div className="overflow-hidden rounded-card border border-default bg-card shadow-card">
-              {teams.map((team, index) => (
+              {deletedTeams.map((team: any, index: any) => (
                 <TrashItem
                   key={team.id}
                   name={team.name}
                   metadata={`Deleted ${formatDeletedAt(team.deletedAt)}`}
-                  isLast={index === teams.length - 1}
+                  isLast={index === deletedTeams?.length - 1}
                   onRestore={() => onRestoreTeam?.(team.id)}
                   onDelete={() =>
                     setConfirmDelete({
@@ -178,6 +217,7 @@ export default function TrashContentTab({
                       name: team.name,
                     })
                   }
+                  load={teamSpin}
                 />
               ))}
             </div>
@@ -198,42 +238,22 @@ export default function TrashContentTab({
       </div>
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-card border border-default bg-card p-6 shadow-card">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10">
-              <Trash2 size={18} className="text-destructive" />
-            </div>
-
-            <h3 className="mt-4 text-base font-semibold text-primary">
-              Permanently delete {confirmDelete.type}?
-            </h3>
-
-            <p className="mt-2 text-sm leading-relaxed text-secondary">
-              <span className="font-medium text-primary">
-                “{confirmDelete.name}”
-              </span>{" "}
-              will be permanently removed. This action cannot be undone.
-            </p>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(null)}
-                className="rounded-lg border border-default bg-transparent px-4 py-2 text-sm font-medium text-primary transition-fast hover:bg-secondary"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={handlePermanentDelete}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-white transition-fast hover:bg-destructive/90"
-              >
-                Delete permanently
-              </button>
-            </div>
-          </div>
-        </div>
+        <NewDeleteModal
+          open={
+            confirmDelete?.type === "project" || confirmDelete?.type === "team"
+              ? true
+              : false
+          }
+          setOpen={() => {
+            setConfirmDelete(null);
+          }}
+          spin={deleteSpin}
+          title={`Permanently delete ${confirmDelete.type}?`}
+          subHeading={`“${confirmDelete.name}” will be permanently removed. This action cannot be undone.`}
+          handlerButtonText="Delete Permanently"
+          disabledText="Deleting..."
+          deleteHandler={handlePermanentDelete}
+        />
       )}
     </>
   );
@@ -281,16 +301,18 @@ function TrashItem({
   isLast,
   onRestore,
   onDelete,
+  load,
 }: {
   name: string;
   metadata: string;
   isLast: boolean;
   onRestore: () => void;
   onDelete: () => void;
+  load: boolean;
 }) {
   return (
     <div
-      className={`group flex min-h-[72px] items-center justify-between gap-6 px-5 py-4 transition-fast hover:bg-secondary/50 ${
+      className={`group flex min-h-[72px] items-center justify-between gap-6 px-5 py-4 transition-fast hover:bg-secondary/5 ${
         !isLast ? "border-b border-default" : ""
       }`}
     >
@@ -307,23 +329,25 @@ function TrashItem({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <button
+        <Button
           type="button"
           onClick={onRestore}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-default bg-transparent px-3 py-1.5 text-xs font-medium text-primary transition-fast hover:border-brand hover:bg-accent hover:text-brand"
+          disabled={load}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-brand/30 bg-accent/10 px-3 py-1.5 text-xs font-medium text-brand transition-fast hover:border-brand/50 hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <RotateCcw size={13} />
+          {load ? <Spinner color="bg-brand" /> : <RotateCcw size={13} />}
           Restore
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
           onClick={onDelete}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-medium text-secondary transition-fast hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+          variant={"delete"}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5"
         >
           <Trash2 size={13} />
-          Delete
-        </button>
+          Delete Permanently
+        </Button>
       </div>
     </div>
   );

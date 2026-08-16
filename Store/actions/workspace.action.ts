@@ -7,6 +7,8 @@ import {
   deletedIssueService,
   editIssueService,
   fetchActivitiesService,
+  fetchDeletedProjectsService,
+  fetchDeletedTeamsService,
   fetchIssuesByProjectService,
   fetchIssuesService,
   fetchProjectByIdService,
@@ -17,7 +19,11 @@ import {
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
   moveCardService,
+  permanentDeleteProjectService,
+  permanentDeleteTeamService,
   projectSoftDeleteService,
+  restoreProjectService,
+  restoreTeamService,
   teamSoftDeleteService,
 } from "@/services/workspace.service";
 import {
@@ -272,6 +278,78 @@ export const projectSoftDeleteAction = createAsyncThunk<any, string>(
   async (projectId, { rejectWithValue }) => {
     try {
       const res = await projectSoftDeleteService(projectId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchDeletedProjectsAction = createAsyncThunk<any, string>(
+  "fetchDeletedProjectsAction",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchDeletedProjectsService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const fetchDeletedTeamsAction = createAsyncThunk<any, string>(
+  "fetchDeletedTeamsAction",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await fetchDeletedTeamsService(workspaceId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const restoreProjectAction = createAsyncThunk<any, string>(
+  "restoreProjectAction",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await restoreProjectService(projectId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const restoreTeamAction = createAsyncThunk<any, string>(
+  "restoreTeamAction",
+  async (teamId, { rejectWithValue }) => {
+    try {
+      const res = await restoreTeamService(teamId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const permanentDeleteProjectAction = createAsyncThunk<any, string>(
+  "permanentDeleteProjectAction",
+  async (projectId, { rejectWithValue }) => {
+    try {
+      const res = await permanentDeleteProjectService(projectId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const permanentDeleteTeamAction = createAsyncThunk<any, string>(
+  "permanentDeleteTeamAction",
+  async (teamId, { rejectWithValue }) => {
+    try {
+      const res = await permanentDeleteTeamService(teamId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);
