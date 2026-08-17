@@ -1,7 +1,9 @@
 "use client";
 
+import { IssueFilters } from "@/components/Forms/IssueFilters";
 import SubtendLoader from "@/components/Loader/SubtendLoader";
 import KanbanClient from "@/components/ui/KanbanBoard/KanbanClient";
+import { SearchInput } from "@/components/ui/searchBar";
 import {
   fetchIssuesByProjectAction,
   fetchProjectByIdAction,
@@ -10,50 +12,142 @@ import {
   moveCardAction,
 } from "@/Store/actions/workspace.action";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
+import { priorityList } from "@/utils/constants";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type IssueFiltersState = {
+  startDate: Date | null;
+  endDate: Date | null;
+  assignee: string | null;
+  status: string | null;
+  priority: string | null;
+};
 
 export default function ProjectIssue() {
   const dispatch = useAppDispatch();
+
   const {
-    workspaceData: {
-      workspaceMembers,
-      workspaceStatus,
-      teamsData,
-      projectIssues,
-    },
+    workspaceData: { workspaceMembers, workspaceStatus, teamsData },
   } = useAppSelector((store: any) => store);
 
-  const [issues, setIssues] = useState<any>([]);
+  const params = useParams<{
+    workspaceId: string;
+    teamId: string;
+    projectId: string;
+  }>();
+
+  const workspaceId = params.workspaceId;
+  const teamId = params.teamId;
+  const projectId = params.projectId;
+
+  const [issues, setIssues] = useState<any[]>([]);
   const [project, setProject] = useState<any>(null);
-  const params = useParams();
-  const workspaceId = params.workspaceId as string;
-  const teamId = params?.teamId;
-  const projectId = params?.projectId as string;
-  const [load, setLoad] = useState(false);
+
+  const [load, setLoad] = useState(true);
+  const [issuesLoading, setIssuesLoading] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  const [filters, setFilters] = useState<IssueFiltersState>({
+    startDate: null,
+    endDate: null,
+    assignee: null,
+    status: null,
+    priority: null,
+  });
+
+  const buildIssueParams = useCallback(() => {
+    const queryParams: Record<string, string> = {};
+
+    const searchValue = search.trim();
+
+    if (searchValue) {
+      queryParams.search = searchValue;
+    }
+
+    if (filters.startDate) {
+      queryParams.startDate = filters.startDate.toISOString();
+    }
+
+    if (filters.endDate) {
+      queryParams.endDate = filters.endDate.toISOString();
+    }
+
+    if (filters.assignee) {
+      queryParams.assignee = filters.assignee;
+    }
+
+    if (filters.status) {
+      queryParams.status = filters.status;
+    }
+
+    if (filters.priority) {
+      queryParams.priority = filters.priority;
+    }
+
+    return queryParams;
+  }, [
+    search,
+    filters.startDate,
+    filters.endDate,
+    filters.assignee,
+    filters.status,
+    filters.priority,
+  ]);
+
+  const fetchIssues = useCallback(async () => {
+    if (!projectId) return;
+
+    try {
+      setIssuesLoading(true);
+      const queryParams = buildIssueParams();
+
+      const issuesRes = await dispatch(
+        fetchIssuesByProjectAction({
+          projectId,
+          params: queryParams,
+        }),
+      ).unwrap();
+
+      setIssues(issuesRes?.data?.issues ?? []);
+    } catch (error) {
+      console.error("Failed to fetch issues:", error);
+      setIssues([]);
+    } finally {
+      setIssuesLoading(false);
+    }
+  }, [dispatch, projectId, buildIssueParams]);
 
   useEffect(() => {
     if (!projectId || !workspaceId) return;
 
     let isMounted = true;
-
     const init = async () => {
-      setLoad(true);
-      const [issuesRes, memberActionRes, workspaceStatusRes, projectRes] =
-        await Promise.all([
-          dispatch(fetchIssuesByProjectAction(projectId)).unwrap(),
+      try {
+        setLoad(true);
+        const [, , projectRes] = await Promise.all([
           dispatch(fetchWorkspaceMambersAction(workspaceId)).unwrap(),
-          dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId })),
+          dispatch(
+            fetchWorkspaceStatusAction({
+              workspaceId,
+              projectId,
+            }),
+          ),
           dispatch(fetchProjectByIdAction(projectId)),
         ]);
 
-      const projectData = projectRes?.payload?.data?.project;
+        if (!isMounted) return;
 
-      if (isMounted) {
-        setIssues(issuesRes?.data?.issues ?? []);
+        const projectData = projectRes?.payload?.data?.project;
         setProject(projectData ?? null);
+      } catch (error) {
+        console.error("Failed to initialize project:", error);
+      } finally {
+        if (isMounted) {
+          setLoad(false);
+        }
       }
-      setLoad(false);
     };
 
     init();
@@ -63,6 +157,22 @@ export default function ProjectIssue() {
     };
   }, [dispatch, projectId, workspaceId]);
 
+  useEffect(() => {
+    if (!projectId) return;
+
+    const timer = setTimeout(() => {
+      fetchIssues();
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [projectId, fetchIssues]);
+
+  const handleApplyFilters = useCallback((newFilters: IssueFiltersState) => {
+    setFilters(newFilters);
+  }, []);
+
   const team = teamsData?.teamData?.find((team: any) => team?.id === teamId);
 
   const handleDragOver = async (event: any) => {
@@ -71,28 +181,42 @@ export default function ProjectIssue() {
 
     if (!targetId || sourceId === targetId) return;
 
-    const updatedIssues = issues.map((issue: any) => {
-      if (issue.id === sourceId) {
-        return { ...issue, statusId: targetId };
-      }
-      return issue;
-    });
+    setIssues((prevIssues) =>
+      prevIssues.map((issue: any) => {
+        if (issue.id === sourceId) {
+          return {
+            ...issue,
+            statusId: targetId,
+          };
+        }
 
-    setIssues(updatedIssues);
+        return issue;
+      }),
+    );
 
-    const payload = {
-      sourceId,
-      targetId,
-      workspaceId,
-      teamId,
-    };
+    try {
+      await dispatch(
+        moveCardAction({
+          sourceId,
+          targetId,
+          workspaceId,
+          teamId,
+        }),
+      ).unwrap();
 
-    await dispatch(moveCardAction(payload));
-    const issuesRes = await dispatch(
-      fetchIssuesByProjectAction(projectId),
-    ).unwrap();
-    setIssues(issuesRes?.data?.issues ?? []);
-    await dispatch(fetchWorkspaceStatusAction({ workspaceId, projectId }));
+      await fetchIssues();
+
+      await dispatch(
+        fetchWorkspaceStatusAction({
+          workspaceId,
+          projectId,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to move issue:", error);
+
+      await fetchIssues();
+    }
   };
 
   const data = {
@@ -108,17 +232,16 @@ export default function ProjectIssue() {
 
   if (load) {
     return (
-      <div className="w-full h-[84vh] flex items-center justify-center">
+      <div className="flex h-[84vh] w-full items-center justify-center">
         <SubtendLoader />
       </div>
     );
   }
 
-  console.log("Project", project);
   return (
     <main className="flex h-full flex-col bg-background">
       <header className="border-b border-default">
-        <div className="mx-auto flex w-full flex-col gap-6 px-8 pt-6 pb-2">
+        <div className="mx-auto flex w-full flex-col gap-6 px-8 pb-2 pt-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight text-primary">
               {project?.name}
@@ -126,39 +249,43 @@ export default function ProjectIssue() {
 
             {project?.projectOverview && (
               <p className="max-w-3xl text-sm leading-6 text-secondary">
-                {project?.projectOverview}
+                {project.projectOverview}
               </p>
             )}
           </div>
 
-          {/* Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Left Section */}
-            <div className="flex flex-1 items-center gap-3">
-              {/* Search */}
-              {/* <div className="h-11 w-full max-w-sm rounded-lg border border-default bg-card" /> */}
+          <div className="flex items-center justify-end">
+            <div className="flex items-center gap-3">
+              <SearchInput
+                className="w-[350px]"
+                placeholder="Search issue by number or keyword"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
-              {/* Filters */}
-              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
-
-              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
-
-              {/* <div className="h-11 w-28 rounded-lg border border-default bg-card" /> */}
+              <IssueFilters
+                members={workspaceMembers}
+                statusList={workspaceStatus}
+                priorityList={priorityList}
+                filters={filters}
+                issuesLoading={issuesLoading}
+                onApply={handleApplyFilters}
+              />
             </div>
-
-            {/* Right Section */}
-
-            {/* <div className="h-11 w-36 rounded-lg bg-brand" /> */}
           </div>
         </div>
       </header>
 
-      {/* Board */}
-
       <section className="min-h-0 flex-1 overflow-hidden">
-        <div className="h-full px-8 py-6">
+        <div className="relative h-full px-8 py-6">
           <KanbanClient data={data} handleDragOver={handleDragOver} />
         </div>
+
+        {issuesLoading && (
+          <div className="absolute pointer-events-none top-20 right-10">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-default border-t-brand" />
+          </div>
+        )}
       </section>
     </main>
   );

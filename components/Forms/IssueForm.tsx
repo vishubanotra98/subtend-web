@@ -121,7 +121,7 @@ export const IssueForm = ({ issueFormProp }: any) => {
       };
       const res = await dispatch(createIssueAction(payload)).unwrap();
       const issuesRes = await dispatch(
-        fetchIssuesByProjectAction(projectId),
+        fetchIssuesByProjectAction({ projectId }),
       ).unwrap();
       setIssues(issuesRes?.data?.issues ?? []);
       const payload2 = {

@@ -203,9 +203,10 @@ export const completedIssueCountAction = createAsyncThunk<any, any>(
 
 export const fetchIssuesByProjectAction = createAsyncThunk<any, any>(
   "issuesByProject",
-  async (projectId, { rejectWithValue }) => {
+  async ({ projectId, params }, { rejectWithValue }) => {
     try {
-      const res = await fetchIssuesByProjectService(projectId);
+      const res = await fetchIssuesByProjectService(projectId, params);
+
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

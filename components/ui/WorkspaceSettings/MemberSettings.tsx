@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserMinus, UserPlus } from "lucide-react";
+import { UserMinus, UserPlus, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { nameInitials } from "@/utils/constants";
 import { Modal } from "@/components/Common/Modal";
@@ -72,11 +72,17 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-primary">
-            Workspace members
-          </h2>
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+              <Users size={16} className="text-brand" />
+            </div>
 
-          <p className="mt-1 text-xs text-secondary">
+            <h2 className="text-base font-semibold text-primary">
+              Workspace members
+            </h2>
+          </div>
+
+          <p className="mt-1.5 text-sm text-secondary">
             Manage workspace access and member roles.
           </p>
         </div>
@@ -251,8 +257,10 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
         </table>
       </div>
 
+      <div className="border-t border-default" />
+
       <div className="max-w-2xl">
-        <div className="border-t border-default pt-6">
+        <div>
           <h3 className="text-sm font-semibold text-primary">
             Members deletion settings
           </h3>
