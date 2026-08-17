@@ -111,12 +111,12 @@ export default function TrashContentTab({
     <>
       <div className="space-y-8">
         <div>
-          <div className="flex items-center gap-2.5">
-            <Trash2 size={19} className="text-secondary" />
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
+              <Trash2 size={16} className="text-brand" />
+            </div>
 
-            <h2 className="text-lg font-semibold tracking-tight text-primary">
-              Trash
-            </h2>
+            <h2 className="text-base font-semibold text-primary">Trash</h2>
           </div>
 
           <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-secondary">

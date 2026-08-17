@@ -120,16 +120,6 @@ const WorkspaceSettings = () => {
 
       <main className="min-w-0 flex-1 overflow-y-auto">
         <div className="w-full px-10 py-8">
-          <header className="mb-8">
-            <h1 className="text-xl font-semibold tracking-tight text-primary">
-              Workspace settings
-            </h1>
-
-            <p className="mt-1.5 text-sm text-secondary">
-              Manage your workspace teams, projects, and tasks.
-            </p>
-          </header>
-
           <div className="w-full">
             {option === "general" && (
               <div className="text-sm text-secondary">

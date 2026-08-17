@@ -140,10 +140,16 @@ export const completedIssueCountService = async (payload: any) => {
   }
 };
 
-export const fetchIssuesByProjectService = async (projectId: string) => {
+export const fetchIssuesByProjectService = async (
+  projectId: string,
+  params?: Record<string, string>,
+) => {
   try {
-    const res = await axiosClient.get(`${API.V1.ISSUE}/project/${projectId}`);
-    return res?.data;
+    const res = await axiosClient.get(`${API.V1.ISSUE}/project/${projectId}`, {
+      params,
+    });
+
+    return res.data;
   } catch (error) {
     throw error;
   }
