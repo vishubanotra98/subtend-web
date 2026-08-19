@@ -115,6 +115,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
         selectedWorkspace={selectedWorkspace}
         userData={userData}
         isAdmin={isAdmin}
+        attentionListData={attentionList}
       />
     );
 }

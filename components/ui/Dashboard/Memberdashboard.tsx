@@ -1,201 +1,196 @@
 "use client";
 
-import { AlertCircle, Clock, CheckCircle2 } from "lucide-react";
-import Card from "../Card/Card";
-import { useRouter } from "next/navigation";
-import { getTeamPrefix } from "@/utils/constants";
-import toast from "react-hot-toast";
 import {
-  editIssueAction,
-  fetchIssuesAction,
-} from "@/Store/actions/workspace.action";
-import { useAppDispatch } from "@/Store/hooks";
+  AlertCircle,
+  ArrowUpRight,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  ListTodo,
+  PlayCircle,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import DashboardHeader from "./DashboardHeader/DashboardHeader";
+import ActionRequiredSection from "./ActionRequired/ActionRequiredSection";
+import { IssueStatCard } from "./MemberCard/MemberIssueCard";
+import { getMyIssuesAction } from "@/Store/actions/workspace.action";
+import { useAppDispatch } from "@/Store/hooks";
+import { MemberIssue } from "@/types/types";
+import { IssueGroup } from "./MemberCard/IssueGroup";
 
 export default function MemberDashboard({
   selectedWorkspace,
   userData,
   isAdmin,
+  attentionListData,
 }: any) {
-  // const router = useRouter();
-  // const dispatch = useAppDispatch();
-  // const safeMyIssues = Array.isArray(myIssues) ? myIssues : [];
-  // const safeUrgentTasks = Array.isArray(urgentTasks) ? urgentTasks : [];
-  // const safeTeamData = Array.isArray(teamData) ? teamData : [];
-  // const safeProjects = Array.isArray(totalProjects) ? totalProjects : [];
-  // const safeWorkspaceStatusList = Array.isArray(workspaceStatusList)
-  //   ? workspaceStatusList
-  //   : [];
+  const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  // const getTeamData = (projectId: string) => {
-  //   const project = safeProjects.find(
-  //     (project: any) => project?.id === projectId,
-  //   );
+  const workspaceId = selectedWorkspace?.id;
 
-  //   const team = safeTeamData.find((team: any) => team?.id === project?.teamId);
-  //   return team;
-  // };
+  const [myIssues, setMyIssues] = useState<MemberIssue[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // const doneTaskStatus = safeWorkspaceStatusList.find(
-  //   (task: any) => task.name === "Done",
-  // );
+  useEffect(() => {
+    if (!workspaceId) return;
 
-  // const incompleteTasksUrg = safeUrgentTasks.filter(
-  //   (task: any) => task?.statusId !== doneTaskStatus?.id,
-  // );
+    let mounted = true;
 
-  // const incompleteTasksNormal = safeMyIssues.filter(
-  //   (task: any) =>
-  //     task?.statusId !== doneTaskStatus?.id && task.priority !== "URGENT",
-  // );
+    const fetchMyIssues = async () => {
+      setLoading(true);
 
-  // const handleComplete = async (
-  //   e: React.MouseEvent<HTMLButtonElement>,
-  //   task: any,
-  // ) => {
-  //   e.stopPropagation();
-  //   const payload = {
-  //     workspaceId,
-  //     teamId: getTeamData(task?.projectId)?.id,
-  //     projectId: task?.projectId,
-  //     issueId: task?.id,
-  //     statusId: doneTaskStatus?.id,
-  //   };
-  //   const res = await dispatch(editIssueAction(payload)).unwrap();
-  //   await dispatch(fetchIssuesAction(workspaceId));
-  //   if (res?.success) {
-  //     toast.success("Marked as completed.");
-  //   }
-  // };
+      try {
+        const response = await dispatch(
+          getMyIssuesAction(workspaceId),
+        ).unwrap();
 
-  // const totalPendingIssuesCount =
-  //   incompleteTasksNormal?.length + incompleteTasksUrg?.length;
+        if (mounted) {
+          setMyIssues(response?.data?.issues ?? []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch my issues:", error);
+
+        if (mounted) {
+          setMyIssues([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchMyIssues();
+
+    return () => {
+      mounted = false;
+    };
+  }, [workspaceId, dispatch]);
+
+  const openIssues = myIssues.filter(
+    (issue) => !issue.status?.isCompleted && !issue.status?.isCancelled,
+  );
+
+  const inProgressIssues = myIssues.filter(
+    (issue) => issue.status?.isInProgress,
+  );
+
+  const inReviewIssues = myIssues.filter((issue) => issue.status?.isInReview);
+
+  const completedIssues = myIssues.filter((issue) => issue.status?.isCompleted);
+
+  const urgentIssues = myIssues.filter(
+    (issue) => issue.priority === "URGENT" || issue.priority === "HIGH",
+  );
+
+  const normalIssues = myIssues.filter(
+    (issue) => issue.priority !== "URGENT" && issue.priority !== "HIGH",
+  );
+
+  const navigateToIssues = (status?: string) => {
+    if (!workspaceId) return;
+
+    const url = status
+      ? `/${workspaceId}/my-issues?status=${status}`
+      : `/${workspaceId}/my-issues`;
+
+    router.push(url);
+  };
+
+  const navigateToIssue = (issue: MemberIssue) => {
+    const teamId = issue.project?.team?.id;
+    const projectId = issue.project?.id;
+
+    if (!workspaceId || !teamId || !projectId) return;
+
+    router.push(
+      `/${workspaceId}/team/${teamId}/project/${projectId}/issue/${issue.id}?dashboard=true`,
+    );
+  };
 
   return (
-    <div>
+    <div className="space-y-8">
       <DashboardHeader
         selectedWorkspace={selectedWorkspace}
         userData={userData}
-        isAdmin={false}
+        isAdmin={isAdmin}
       />
 
-      {/* <div className="mt-10 bg-[#1f2937] h-full border border-white/5 rounded-xl p-6 h-full flex flex-col gap-6">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <h3 className="text-lg font-semibold text-white">My Work</h3>
-          <span className="text-sm text-gray-400 font-medium bg-[#111827] px-3 py-1 rounded-full border border-white/5">
-            {totalPendingIssuesCount === 0
-              ? "No Tasks Pending"
-              : `${totalPendingIssuesCount} Tasks Pending`}
-          </span>
+      <section>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <IssueStatCard
+            label="Open"
+            value={loading ? "—" : openIssues.length}
+            description="Across your projects"
+            icon={ListTodo}
+            onClick={() => navigateToIssues("OPEN")}
+          />
+
+          <IssueStatCard
+            label="In Progress"
+            value={loading ? "—" : inProgressIssues.length}
+            description="Currently being worked on"
+            icon={PlayCircle}
+            onClick={() => navigateToIssues("IN_PROGRESS")}
+          />
+
+          <IssueStatCard
+            label="In Review"
+            value={loading ? "—" : inReviewIssues.length}
+            description="Awaiting review"
+            icon={Eye}
+            onClick={() => navigateToIssues("IN_REVIEW")}
+          />
+
+          <IssueStatCard
+            label="Completed"
+            value={loading ? "—" : completedIssues.length}
+            description="Completed issues"
+            icon={CheckCircle2}
+            onClick={() => navigateToIssues("COMPLETED")}
+          />
+        </div>
+      </section>
+
+      <div className="h-[360px]">
+        <ActionRequiredSection attentionListData={attentionListData} />
+      </div>
+
+      <section>
+        <div className="mb-4">
+          <h2 className="text-base font-semibold text-primary">My Work</h2>
+
+          <p className="mt-1 text-sm text-secondary">
+            Your assigned issues across the workspace.
+          </p>
         </div>
 
-        {incompleteTasksUrg?.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-1">
-              <AlertCircle size={16} className="text-red-400" />
-              <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider">
-                Requires Attention
-              </h4>
-            </div>
-            <ul className="grid gap-3">
-              {incompleteTasksUrg?.map((task: any) => {
-                const teamData = getTeamData(task?.projectId);
-                const ticketNumber = getTeamPrefix(teamData, task);
-                return (
-                  <li
-                    onClick={() =>
-                      router.push(
-                        `/${workspaceId}/team/${teamData?.id}/project/${task.projectId}/issue/${task.id}`,
-                      )
-                    }
-                    key={task.id}
-                    className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex justify-between items-center group cursor-pointer hover:bg-red-500/20 transition-colors"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <span className="text-sm font-medium text-red-100">
-                        {task.title}
-                      </span>
-                      <div className="flex items-center gap-2 text-xs text-red-300/70 mt-1">
-                        <span className="uppercase">{ticketNumber}</span>
-                        <span>•</span>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <IssueGroup
+            title="Urgent"
+            description="High priority work"
+            icon={AlertCircle}
+            issues={urgentIssues}
+            urgent
+            loading={loading}
+            onIssueClick={navigateToIssue}
+            onViewAll={() => navigateToIssues("URGENT")}
+          />
 
-                        <span className="flex items-center gap-1 text-red-300/70">
-                          <Clock size={12} className="text-red-300/70" />
-                          Due
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-1 rounded">
-                      URGENT
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-
-        {incompleteTasksNormal?.length > 0 && (
-          <div className="space-y-3 flex-1">
-            <div className="flex items-center justify-between px-1">
-              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                Up Next
-              </h4>
-            </div>
-
-            <ul className="grid gap-3">
-              {incompleteTasksNormal?.map((task: any) => {
-                const teamData = getTeamData(task?.projectId);
-                const ticketNumber = getTeamPrefix(teamData, task);
-                return (
-                  <li
-                    key={task.id}
-                    onClick={() =>
-                      router.push(
-                        `/${workspaceId}/team/${teamData?.id}/project/${task.projectId}/issue/${task.id}`,
-                      )
-                    }
-                    className="bg-[#111827] border border-white/5 rounded-lg p-3 flex justify-between items-center group cursor-pointer hover:border-indigo-500/30 transition-all"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
-                          {ticketNumber}
-                        </span>
-                        <span className="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">
-                          {task.title}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                          {task.project}
-                        </span>
-                        <span className="flex items-center gap-1 text-gray-500">
-                          <Clock size={12} />
-                          Due
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => handleComplete(e, task)}
-                      className="text-gray-600 hover:text-green-400 transition-colors p-1"
-                      title="Mark as complete"
-                    >
-                      <CheckCircle2 size={20} />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-        {totalPendingIssuesCount === 0 && (
-          <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-white/10 rounded-lg">
-            You're all caught up!
-          </div>
-        )}
-      </div> */}
+          <IssueGroup
+            title="Normal"
+            description="Other assigned work"
+            icon={ListTodo}
+            issues={normalIssues}
+            loading={loading}
+            onIssueClick={navigateToIssue}
+            onViewAll={() => navigateToIssues()}
+          />
+        </div>
+      </section>
     </div>
   );
 }
