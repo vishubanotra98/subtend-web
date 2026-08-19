@@ -18,6 +18,7 @@ import {
   fetchWorkspaceMambersService,
   fetchWorkspaceService,
   fetchWorkspaceStatusService,
+  getMyIssuesService,
   moveCardService,
   permanentDeleteProjectService,
   permanentDeleteTeamService,
@@ -351,6 +352,18 @@ export const permanentDeleteTeamAction = createAsyncThunk<any, string>(
   async (teamId, { rejectWithValue }) => {
     try {
       const res = await permanentDeleteTeamService(teamId);
+      return res;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data);
+    }
+  },
+);
+
+export const getMyIssuesAction = createAsyncThunk<any, string>(
+  "myIssuesAction",
+  async (workspaceId, { rejectWithValue }) => {
+    try {
+      const res = await getMyIssuesService(workspaceId);
       return res;
     } catch (err: any) {
       return rejectWithValue(err?.response?.data);

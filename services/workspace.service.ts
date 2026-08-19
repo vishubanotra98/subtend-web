@@ -268,3 +268,12 @@ export const permanentDeleteTeamService = async (teamId: string) => {
     throw error;
   }
 };
+
+export const getMyIssuesService = async (workspaceId: string) => {
+  try {
+    const res = await axiosClient.get(`/api/v1/workspace/${workspaceId}/my-issues`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

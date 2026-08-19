@@ -20,25 +20,31 @@ export default function CompletionTrend({
     workspaceData: { dashboardCount },
   } = useAppSelector((store: any) => store);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!workspaceId || !completedTaskId) return;
 
     let mounted = true;
 
-    (async () => {
-      await dispatch(
-        completedIssueCountAction({
-          workspaceId,
-          statusId: completedTaskId,
-        }),
-      );
+    const fetchData = async () => {
+      setLoading(true);
 
-      if (mounted) {
-        setLoading(false);
+      try {
+        await dispatch(
+          completedIssueCountAction({
+            workspaceId,
+            statusId: completedTaskId,
+          }),
+        );
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    })();
+    };
+
+    fetchData();
 
     return () => {
       mounted = false;
@@ -47,22 +53,38 @@ export default function CompletionTrend({
 
   return (
     <section className="mt-10 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-primary">
-            Completion Trend
-          </h2>
+      <div>
+        <h2 className="text-base font-semibold text-primary">
+          Completion Trend
+        </h2>
 
-          <p className="mt-1 text-sm text-secondary">
-            Completed issues over the last 7 days.
-          </p>
-        </div>
+        <p className="mt-1 text-sm text-secondary">
+          Completed issues over the last 7 days.
+        </p>
       </div>
 
-      <div className="rounded-card border border-default bg-card shadow-card p-6 h-[340px]">
+      <div className="h-[340px] rounded-card border border-default bg-card p-5 shadow-card transition-normal hover:border-brand/20">
         {loading ? (
           <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-secondary">Loading completion data...</p>
+            <div className="text-center">
+              <div className="mx-auto size-5 animate-spin rounded-full border-2 border-default border-t-brand" />
+
+              <p className="mt-3 text-xs text-secondary">
+                Loading completion data...
+              </p>
+            </div>
+          </div>
+        ) : !dashboardCount?.length ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+              <p className="text-sm font-medium text-primary">
+                No completion data yet
+              </p>
+
+              <p className="mt-1 text-xs text-secondary">
+                Completed issues will appear here.
+              </p>
+            </div>
           </div>
         ) : (
           <CompletionChart data={dashboardCount} />

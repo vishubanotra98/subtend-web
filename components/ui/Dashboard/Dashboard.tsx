@@ -96,7 +96,7 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
     );
   }
 
-  const isAdmin = workspaceListData?.adminList?.includes(workspaceId);
+  const isAdmin = workspaceListData?.adminList?.includes(workspaceId) ?? false;
 
   if (isAdmin) {
     return (
@@ -114,6 +114,8 @@ export default function Dashboard({ workspaceId }: { workspaceId: string }) {
       <MemberDashboard
         selectedWorkspace={selectedWorkspace}
         userData={userData}
+        isAdmin={isAdmin}
+        attentionListData={attentionList}
       />
     );
 }

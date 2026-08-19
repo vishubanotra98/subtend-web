@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  CalendarDays,
-  CircleCheckBig,
-  CirclePlus,
-  Flag,
-  Pencil,
-  Trash2,
-  UserMinus,
-  UserPlus,
-} from "lucide-react";
+import { ArrowRight, CirclePlus } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/navigation";
@@ -35,33 +25,34 @@ function ChangeValue({ before, after, colored = false }: ChangeValueProps) {
       <span className="flex min-w-0 items-center gap-1.5">
         {colored && before?.color && (
           <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            className="size-1.5 shrink-0 rounded-full"
             style={{ backgroundColor: before.color }}
           />
         )}
 
-        <span className="truncate text-secondary">{beforeValue}</span>
+        <span className="truncate">{beforeValue}</span>
       </span>
 
       <ArrowRight
         size={11}
         strokeWidth={1.8}
-        className="shrink-0 text-secondary/50"
+        className="shrink-0 text-secondary/40"
       />
 
       <span className="flex min-w-0 items-center gap-1.5">
         {colored && after?.color && (
           <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            className="size-1.5 shrink-0 rounded-full"
             style={{ backgroundColor: after.color }}
           />
         )}
 
-        <span className="truncate text-secondary">{afterValue}</span>
+        <span className="truncate">{afterValue}</span>
       </span>
     </span>
   );
 }
+
 function getActivityContent(activity: any) {
   switch (activity.action) {
     case "STATUS_CHANGED":
@@ -186,9 +177,7 @@ function getDetailsUpdatedContent(activity: any) {
 }
 
 function formatDate(date?: string | Date | null) {
-  if (!date) {
-    return "None";
-  }
+  if (!date) return "None";
 
   return dayjs(date).format("MMM D, YYYY");
 }
@@ -215,13 +204,21 @@ export default function ActivityItem({
 
   const Icon = icons[activity.action as keyof typeof icons] ?? CirclePlus;
 
+  const iconColor =
+    colors[activity.action as keyof typeof colors] ?? "text-secondary";
+
   const { verb, subtitle } = getActivityContent(activity);
 
   const handleClick = () => {
     if (isDeleted) {
       toast.custom((t) => (
-        <ErrorToast t={t} title="Error" description="Issue is deleted" />
+        <ErrorToast
+          t={t}
+          title="Issue deleted"
+          description="This issue is no longer available."
+        />
       ));
+
       return;
     }
 
@@ -229,9 +226,7 @@ export default function ActivityItem({
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
+    if (event.key !== "Enter" && event.key !== " ") return;
 
     event.preventDefault();
     handleClick();
@@ -243,38 +238,89 @@ export default function ActivityItem({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className={` group flex min-h-[68px] w-full items-center gap-4 px-5 py-3 transition-colors duration-150 ${!isDeleted ? "cursor-pointer" : "cursor-default"} ${!isLast ? "border-b border-default" : ""} hover:bg-secondary/10`}
+      className={`
+        group
+        flex
+        min-h-[72px]
+        w-full
+        items-center
+        gap-4
+        px-5
+        py-3.5
+        text-left
+        transition-normal
+        ${
+          !isDeleted ? "cursor-pointer hover:bg-secondary/30" : "cursor-default"
+        }
+        ${!isLast ? "border-b border-default" : ""}
+      `}
     >
-      <div className=" flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-brand transition-colors duration-150 group-hover:bg-brand/10">
+      <div
+        className={`
+          flex
+          size-8
+          shrink-0
+          items-center
+          justify-center
+          rounded-lg
+          bg-secondary
+          transition-normal
+          ${!isDeleted ? "group-hover:bg-accent" : "opacity-50"}
+        `}
+      >
         <Icon
           size={15}
-          strokeWidth={2.2}
-          className="text-brand transition-transform duration-150 group-hover:scale-105"
+          strokeWidth={2}
+          className={`
+            transition-normal
+            ${isDeleted ? "text-secondary" : iconColor}
+            ${!isDeleted ? "group-hover:scale-105" : ""}
+          `}
         />
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center text-sm leading-5">
+      <div
+        className={`
+          min-w-0
+          flex-1
+          ${isDeleted ? "opacity-60" : ""}
+        `}
+      >
+        <p className="flex min-w-0 items-center text-sm leading-5">
           <span className="shrink-0 font-medium text-primary">
             {activity.actor?.name}
           </span>
 
           <span className="mx-1.5 shrink-0 text-secondary">{verb}</span>
 
-          <span className=" min-w-0 truncate font-medium text-primary transition-colors duration-150 group-hover:text-brand">
+          <span
+            className="
+              min-w-0
+              truncate
+              font-medium
+              text-primary
+              transition-normal
+              group-hover:text-brand
+            "
+          >
             {activity.issue?.title}
           </span>
-        </div>
+        </p>
 
         {subtitle && (
-          <div className="mt-1 flex min-w-0 items-center truncate text-xs text-secondary">
+          <div className="mt-1 flex min-w-0 items-center truncate text-xs leading-4 text-secondary">
             {subtitle}
           </div>
         )}
       </div>
 
       <time
-        className=" shrink-0 text-xs tabular-nums text-secondary"
+        className="
+          shrink-0
+          text-xs
+          tabular-nums
+          text-secondary
+        "
         title={dayjs(activity.created_at).format("MMM D, YYYY h:mm A")}
       >
         {dayjs(activity.created_at).fromNow()}

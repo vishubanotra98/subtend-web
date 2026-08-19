@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { Paragraph } from "@/components/Common/Paragraph";
 import { useParams } from "next/navigation";
 import { badgeLabels, badgeVariants } from "@/utils/constants";
 
-export default function ActionRequiredItem({ attentionIssueData }: any) {
+export default function ActionRequiredItem({
+  attentionIssueData,
+  isLast,
+}: any) {
   const { attentionReason, issue } = attentionIssueData;
   const { workspaceId } = useParams();
 
@@ -61,57 +64,89 @@ export default function ActionRequiredItem({ attentionIssueData }: any) {
   return (
     <Link
       href={redirectUrl}
-      className="border-b group flex items-center justify-between gap-4 px-6 py-4 transition-normal hover-card"
+      className={`
+        group
+        flex
+        items-center
+        justify-between
+        gap-4
+        px-5
+        py-4
+        transition-normal
+        hover:bg-secondary/40
+        ${!isLast ? "border-b border-default" : ""}
+      `}
     >
       <div className="min-w-0 flex-1">
-        <span className="">
-          <span className="flex items-center gap-2">
-            {attentionReason.status && (
-              <Paragraph
-                className={badgeVariants[attentionReason.status]}
-                innerText={badgeLabels[attentionReason.status]}
-              />
-            )}
+        <div className="flex min-w-0 items-center gap-1.5">
+          {attentionReason?.status && (
+            <Paragraph
+              className={badgeVariants[attentionReason.status]}
+              innerText={badgeLabels[attentionReason.status]}
+            />
+          )}
 
-            {attentionReason?.priority && (
-              <Paragraph
-                className={badgeVariants[attentionReason.priority]}
-                innerText={badgeLabels[attentionReason.priority]}
-              />
-            )}
+          {attentionReason?.priority && (
+            <Paragraph
+              className={badgeVariants[attentionReason.priority]}
+              innerText={badgeLabels[attentionReason.priority]}
+            />
+          )}
 
-            {attentionReason?.checkDue && (
-              <Paragraph
-                className={badgeVariants[attentionReason.checkDue.overdue]}
-                innerText={badgeLabels[attentionReason.checkDue.overdue]}
-              />
-            )}
+          {attentionReason?.checkDue && (
+            <Paragraph
+              className={badgeVariants[attentionReason.checkDue.overdue]}
+              innerText={badgeLabels[attentionReason.checkDue.overdue]}
+            />
+          )}
 
-            {attentionReason?.checkStale && (
-              <Paragraph
-                className={badgeVariants[attentionReason.checkStale.stale]}
-                innerText={badgeLabels[attentionReason.checkDue.stale]}
-              />
-            )}
-          </span>
-        </span>
+          {attentionReason?.checkStale && (
+            <Paragraph
+              className={badgeVariants[attentionReason.checkStale.stale]}
+              innerText={badgeLabels[attentionReason.checkStale.stale]}
+            />
+          )}
+        </div>
 
-        <h3 className=" mt-1.5 truncate text-sm font-semibold leading-5 text-primary transition-normal group-hover:text-brand">
-          {issue.title}
+        <h3 className="mt-2 truncate text-sm font-medium leading-5 text-primary transition-normal group-hover:text-brand">
+          {issue?.title}
         </h3>
 
-        <p className="mt-1.5 truncate text-xs text-secondary">
+        <p className="mt-1 truncate text-xs text-secondary">
           {issue?.project?.team?.name}
-          <span className="mx-2 text-border">•</span>
+
+          <span className="mx-1.5 text-border">•</span>
+
           {issue?.project?.name}
-          <span className="mx-2 text-border">•</span>
-          {getSupportingText()}
+
+          {getSupportingText() && (
+            <>
+              <span className="mx-1.5 text-border">•</span>
+              {getSupportingText()}
+            </>
+          )}
         </p>
       </div>
 
-      <div className="flex items-center gap-1 text-xs text-secondary opacity-0 transition-normal group-hover:translate-x-1 group-hover:opacity-100 group-hover:text-brand">
+      <div
+        className="
+          flex
+          shrink-0
+          items-center
+          gap-1
+          text-xs
+          font-medium
+          text-secondary
+          opacity-0
+          transition-normal
+          group-hover:translate-x-0.5
+          group-hover:opacity-100
+          group-hover:text-brand
+        "
+      >
         <span>Open</span>
-        <ChevronRight size={16} />
+
+        <ArrowUpRight size={14} />
       </div>
     </Link>
   );

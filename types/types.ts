@@ -160,3 +160,26 @@ export type TeamItemProps = {
   };
   isAdmin?: boolean;
 };
+
+export type MemberIssue = {
+  id: string;
+  title: string;
+  priority?: string;
+  status?: {
+    id: string;
+    name: string;
+    isCompleted?: boolean;
+    isInProgress?: boolean;
+    isInReview?: boolean;
+    isCancelled?: boolean;
+  } | null;
+  project?: {
+    id: string;
+    name: string;
+    team?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
+  targetDate?: string | null;
+};
