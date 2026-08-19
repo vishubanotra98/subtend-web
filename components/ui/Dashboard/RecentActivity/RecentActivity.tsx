@@ -17,22 +17,27 @@ export default function RecentActivity({ workspaceActivities }: any) {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-default bg-card shadow-card">
-        {activities.length === 0 ? (
-          <div className="flex h-56 items-center justify-center">
+      <div className="overflow-hidden rounded-card border border-default bg-card shadow-card">
+        {activities?.length === 0 ? (
+          <div className="flex min-h-[240px] items-center justify-center px-6">
             <div className="text-center">
-              <h3 className="text-sm font-medium text-primary">
+              <div className="mx-auto flex size-9 items-center justify-center rounded-lg bg-secondary">
+                <span className="text-sm text-secondary">•</span>
+              </div>
+
+              <h3 className="mt-3 text-sm font-medium text-primary">
                 No recent activity
               </h3>
 
-              <p className="mt-1.5 text-xs text-secondary">
-                Workspace activity will appear here as your team collaborates.
+              <p className="mt-1.5 max-w-sm text-xs leading-5 text-secondary">
+                Activity from your workspace will appear here as your team works
+                on issues.
               </p>
             </div>
           </div>
         ) : (
-          <div className="max-h-[360px] overflow-y-auto">
-            {activities.map((activity: any, idx: number) => (
+          <div className="max-h-[420px] overflow-y-auto">
+            {activities?.map((activity: any, idx: number) => (
               <ActivityItem
                 key={activity.id}
                 activity={activity}

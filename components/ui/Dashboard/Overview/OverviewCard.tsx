@@ -1,68 +1,45 @@
 "use client";
 
-type OverviewCardProps = {
-  title: string;
-  value: number | string;
-};
-
-export default function OverviewCard({ title, value }: OverviewCardProps) {
+export default function OverviewCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+}: any) {
   return (
     <div
       className="
         group
-        relative
-        overflow-hidden
         rounded-card
-        border
-        border-default
+        border border-default
         bg-card
+        p-5
+        text-left
         shadow-card
-        px-6
-        py-6
-        min-h-[140px]
         transition-normal
-        hover-card
-        hover:border-brand
+        hover:border-brand/30
+        hover:shadow-md
       "
     >
-      <div
-        className="
-          absolute
-          left-0
-          top-0
-          h-px
-          w-0
-          bg-brand
-          transition-normal
-          group-hover:w-full
-        "
-      />
+      <div className="flex items-start justify-between">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-secondary">
+          <Icon
+            size={16}
+            strokeWidth={2}
+            className="text-secondary transition-normal group-hover:text-brand"
+          />
+        </div>
+      </div>
 
-      <p
-        className="
-          text-[11px]
-          font-semibold
-          uppercase
-          tracking-[0.18em]
-          text-secondary
-        "
-      >
-        {title}
-      </p>
+      <div className="mt-4">
+        <p className="text-2xl font-semibold tracking-tight text-primary">
+          {value}
+        </p>
 
-      <h3
-        className="
-          mt-4
-          text-4xl
-          font-semibold
-          tracking-tight
-          text-primary
-          transition-colors
-          duration-200
-        "
-      >
-        {value}
-      </h3>
+        <p className="mt-1 text-sm font-medium text-primary">{title}</p>
+
+        <p className="mt-0.5 text-xs text-secondary">{description}</p>
+      </div>
     </div>
   );
 }
