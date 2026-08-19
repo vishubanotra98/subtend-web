@@ -13,6 +13,8 @@ import { emailSchema, EmailType } from "@/lib/schema";
 import { commonSelectStyles2 } from "@/utils/styles";
 import { inviteMemberAction } from "@/Store/actions/user.action";
 import { useAppDispatch } from "@/Store/hooks";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 interface RoleInterface {
   label: string;
@@ -66,11 +68,15 @@ export const InviteMemberForm = ({
       ).unwrap();
 
       if (res.success) {
-        toast.success(res.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Success" description={res.message} />
+        ));
         setModal(false);
       }
     } catch (err: any) {
-      toast.error(err.message);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={err.message} />
+      ));
     } finally {
       setLoading(false);
     }

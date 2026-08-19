@@ -21,6 +21,10 @@
   --color-button-border: var(--border);
   --color-button-hover: var(--card);
   --color-button-text: var(--foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --color-info: var(--info);
 }
 
 :root {

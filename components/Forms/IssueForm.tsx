@@ -27,6 +27,8 @@ import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 interface IssueInterface {
   title: string | null;
@@ -98,7 +100,9 @@ export const IssueForm = ({ issueFormProp }: any) => {
   const submitHandler = async (e: any) => {
     e.preventDefault();
     if (!title || typeof title !== "string" || !title.trim()) {
-      toast.error("Title is required");
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={"Title is required"} />
+      ));
       return;
     }
     if (typeof workspaceId !== "string") {
@@ -130,11 +134,16 @@ export const IssueForm = ({ issueFormProp }: any) => {
       };
       await dispatch(fetchWorkspaceStatusAction(payload2));
       if (res?.success) {
-        toast.success(res?.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Success" description={res.message} />
+        ));
+
         handleClose();
       }
     } catch (err: any) {
-      toast.error(err?.message);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={err?.message} />
+      ));
     } finally {
       setLoading(false);
     }

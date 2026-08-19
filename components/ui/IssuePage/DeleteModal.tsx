@@ -18,6 +18,8 @@ import {
   deleteIssueAction,
   fetchWorkspaceStatusAction,
 } from "@/Store/actions/workspace.action";
+import { SuccessToast } from "../Toast/SuccessToast";
+import { ErrorToast } from "../Toast/ErrorToast";
 
 interface ModalTypes {
   open: boolean;
@@ -44,11 +46,15 @@ export function DeleteModal({ open, setOpen }: ModalTypes) {
     const payload2 = { projectId, workspaceId };
     await dispatch(fetchWorkspaceStatusAction(payload2));
     if (res?.success) {
-      toast.success(res?.message);
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={res.message} />
+      ));
       setOpen(false);
       router.push(`/${workspaceId}/team/${teamId}/project/${projectId}`);
     } else {
-      toast.error("Error deleting issue.");
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description="Error deleting issue." />
+      ));
     }
     setLoading(false);
   };

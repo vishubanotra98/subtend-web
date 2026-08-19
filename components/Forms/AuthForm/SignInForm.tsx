@@ -16,6 +16,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { ErrorToast } from "@/components/ui/Toast/ErrorToast";
 
 const getErrorMessage = (err: unknown) => {
   if (err instanceof Error) return err.message;
@@ -57,7 +58,10 @@ export function SignInForm() {
         router.push("/");
       }
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      const message = getErrorMessage(err);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={message} />
+      ));
     } finally {
       setLoading(false);
     }

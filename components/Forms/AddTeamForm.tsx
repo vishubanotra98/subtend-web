@@ -16,6 +16,8 @@ import {
   fetchTeamsDataAction,
 } from "@/Store/actions/workspace.action";
 import { useAppDispatch } from "@/Store/hooks";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 type AddTeamFormProps = {
   setModal: (value: boolean) => void;
@@ -45,7 +47,9 @@ export const AddTeamForm = ({ setModal }: AddTeamFormProps) => {
       const workspaceId = params.workspaceId as string;
 
       if (!workspaceId) {
-        toast.error("Workspace not found.");
+        toast.custom((t) => (
+          <ErrorToast t={t} title="Error" description="Workspace not found." />
+        ));
         return;
       }
 
@@ -59,11 +63,18 @@ export const AddTeamForm = ({ setModal }: AddTeamFormProps) => {
       if (res.success) {
         await dispatch(fetchTeamsDataAction(workspaceId)).unwrap();
 
-        toast.success(res.message);
+        // toast.custom(res.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Team Added" description={res?.message} />
+        ));
         setModal(false);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create team");
+      const message =
+        err instanceof Error ? err.message : "Failed to create team";
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={message} />
+      ));
     } finally {
       setLoading(false);
     }

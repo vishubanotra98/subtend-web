@@ -20,6 +20,8 @@ import toast from "react-hot-toast";
 import { Button } from "../button";
 import { NewDeleteModal } from "@/components/Common/DeleteModal";
 import { Spinner } from "../Spinner/spinner";
+import { SuccessToast } from "../Toast/SuccessToast";
+import { ErrorToast } from "../Toast/ErrorToast";
 
 const formatDeletedAt = (date: string) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -48,9 +50,17 @@ export default function TrashContentTab({
   const onPermanentDeleteTeam = async (teamId: string) => {
     const res = await dispatch(permanentDeleteTeamAction(teamId)).unwrap();
     if (res?.success) {
-      toast.success("Team deleted.");
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={"Team deleted."} />
+      ));
     } else {
-      toast.error("Failed to delete the team.");
+      toast.custom((t) => (
+        <ErrorToast
+          t={t}
+          title="Error"
+          description="Failed to delete the team."
+        />
+      ));
     }
   };
 
@@ -59,9 +69,17 @@ export default function TrashContentTab({
       permanentDeleteProjectAction(projectId),
     ).unwrap();
     if (res?.success) {
-      toast.success("Project deleted.");
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={"Project deleted."} />
+      ));
     } else {
-      toast.error("Failed to delete the project.");
+      toast.custom((t) => (
+        <ErrorToast
+          t={t}
+          description="Failed to delete the project."
+          title="Error"
+        />
+      ));
     }
   };
 
@@ -69,9 +87,17 @@ export default function TrashContentTab({
     setTeamSpin(true);
     const res = await dispatch(restoreTeamAction(teamId)).unwrap();
     if (res?.success) {
-      toast.success("Team restored.");
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={"Team restored."} />
+      ));
     } else {
-      toast.error("Failed to restore the team.");
+      toast.custom((t) => (
+        <ErrorToast
+          t={t}
+          description="Failed to restore the team."
+          title="Error"
+        />
+      ));
     }
     await fetchData();
     setTeamSpin(false);
@@ -81,9 +107,17 @@ export default function TrashContentTab({
     setProjectSpin(true);
     const res = await dispatch(restoreProjectAction(projectId)).unwrap();
     if (res?.success) {
-      toast.success("Project restored.");
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={"Project restored."} />
+      ));
     } else {
-      toast.error("Failed to restore the project.");
+      toast.custom((t) => (
+        <ErrorToast
+          t={t}
+          title="Error"
+          description="Failed to restore the project."
+        />
+      ));
     }
     await fetchData();
     setProjectSpin(false);

@@ -16,6 +16,8 @@ import {
 } from "@/Store/actions/user.action";
 import { useAppDispatch } from "@/Store/hooks";
 import { fetchWorkspaceMambersAction } from "@/Store/actions/workspace.action";
+import { SuccessToast } from "../Toast/SuccessToast";
+import { ErrorToast } from "../Toast/ErrorToast";
 
 const options = [
   {
@@ -44,11 +46,13 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
 
     if (res?.success) {
       await dispatch(fetchWorkspaceMambersAction(workspaceId));
-      toast.success(res?.message);
-    }
-
-    if (!res?.success) {
-      toast.error("Something went wrong.");
+      toast.custom((t) => (
+        <SuccessToast t={t} title="Success" description={res.message} />
+      ));
+    } else {
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Oops!" description="Something went wrong." />
+      ));
     }
   };
 
@@ -61,10 +65,14 @@ const MembersTabContent = ({ workspaceMembers, currentUser }: any) => {
       const res = await dispatch(removeUsersAction(payload)).unwrap();
       if (res?.success) {
         await dispatch(fetchWorkspaceMambersAction(workspaceId));
-        toast.success(res?.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Success" description={res.message} />
+        ));
       }
     } catch (err: any) {
-      toast.error(err?.message);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={err?.message} />
+      ));
     }
   };
 
