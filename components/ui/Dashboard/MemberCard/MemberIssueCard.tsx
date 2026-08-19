@@ -21,11 +21,6 @@ export function IssueStatCard({
       //   onClick={onClick}
       className="group relative overflow-hidden rounded-card border border-default bg-card p-5 text-left shadow-card transition-normal hover:border-brand/30 hover:shadow-md"
     >
-      <div
-        className="absolute left-0 top-0 h-px w-0 bg-brand transition-normal group-hover:w-full
-        "
-      />
-
       <div className="flex items-start justify-between">
         <div className="flex size-8 items-center justify-center rounded-lg bg-secondary">
           <Icon
