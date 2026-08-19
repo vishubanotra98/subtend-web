@@ -5,13 +5,20 @@ import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "../button";
+import { ErrorToast } from "../Toast/ErrorToast";
 
 export default function GoogleAuthButton() {
   const [loading, setLoading] = useState(false);
 
   const handleGoogleLogin = () => {
     if (!BASE_URL_API) {
-      toast.error("Google sign-in is not configured.");
+      toast.custom((t) => (
+        <ErrorToast
+          t={t}
+          title="Error"
+          description={"Google sign-in is not configured."}
+        />
+      ));
       return;
     }
 

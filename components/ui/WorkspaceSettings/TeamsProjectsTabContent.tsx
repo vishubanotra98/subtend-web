@@ -15,6 +15,8 @@ import {
 } from "@/Store/actions/workspace.action";
 import toast from "react-hot-toast";
 import { NewDeleteModal } from "@/components/Common/DeleteModal";
+import { SuccessToast } from "../Toast/SuccessToast";
+import { ErrorToast } from "../Toast/ErrorToast";
 
 const TeamsProjectsTabContent = ({ projects, teams, fetchData }: any) => {
   const dispatch = useAppDispatch();
@@ -44,14 +46,21 @@ const TeamsProjectsTabContent = ({ projects, teams, fetchData }: any) => {
         teamSoftDeleteAction(selectedTeam as string),
       ).unwrap();
       if (res?.success) {
-        toast.success("Team moved to trash.");
+        toast.custom((t) => (
+          <SuccessToast
+            t={t}
+            title="Success"
+            description={"Team moved to trash."}
+          />
+        ));
       }
-
       await dispatch(fetchTeamsDataAction(workspaceId));
       await dispatch(fetchActivitiesAction(workspaceId));
       await fetchData();
     } catch (err) {
-      toast.error("Error removing team.");
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={"Error removing team."} />
+      ));
     } finally {
       setDeleteSpin(false);
       setDeleteModal(false);
@@ -68,13 +77,21 @@ const TeamsProjectsTabContent = ({ projects, teams, fetchData }: any) => {
         projectSoftDeleteAction(selectedProject as string),
       ).unwrap();
       if (res?.success) {
-        toast.success("Project moved to trash.");
+        toast.custom((t) => (
+          <SuccessToast
+            t={t}
+            title="Success"
+            description={"Project moved to trash."}
+          />
+        ));
       }
       await dispatch(fetchTeamsDataAction(workspaceId));
       await dispatch(fetchActivitiesAction(workspaceId));
       await fetchData();
     } catch (err) {
-      toast.error("Error removing project.");
+      toast.custom((t) => (
+        <ErrorToast t={t} description="Error removing project." title="Error" />
+      ));
     } finally {
       setDeleteSpin(false);
       setProjectDeleteMoal(false);

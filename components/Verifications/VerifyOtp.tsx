@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
 import { useAppDispatch } from "@/Store/hooks";
 import { otpVerificationAction } from "@/Store/actions/auth.action";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 export function VerifyOtpForm() {
   const dispatch = useAppDispatch();
@@ -45,7 +46,9 @@ export function VerifyOtpForm() {
         router.push("/sign-in");
       }
     } catch (err: any) {
-      toast.error(err?.message);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={err?.message} />
+      ));
     } finally {
       setLoading(false);
     }

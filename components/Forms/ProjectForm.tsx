@@ -24,6 +24,8 @@ import {
   fetchTeamsDataAction,
 } from "@/Store/actions/workspace.action";
 import { projectNameSchema, ProjectNameType } from "@/lib/schema";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 export function CreateProjectModal({
   teamId,
@@ -68,13 +70,17 @@ export function CreateProjectModal({
           fetchTeamsDataAction(params.workspaceId as string),
         ).unwrap();
 
-        toast.success(res.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Success" description={res.message} />
+        ));
         setIsModalOpen(false);
       }
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to create project",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to create project";
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={message} />
+      ));
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { colors, icons } from "@/utils/constants";
+import { ErrorToast } from "../../Toast/ErrorToast";
 
 dayjs.extend(relativeTime);
 
@@ -218,7 +219,9 @@ export default function ActivityItem({
 
   const handleClick = () => {
     if (isDeleted) {
-      toast.error("Issue is deleted");
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description="Issue is deleted" />
+      ));
       return;
     }
 

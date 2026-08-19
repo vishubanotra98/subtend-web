@@ -43,7 +43,13 @@ export default function RootLayout({
             <AppProvider>{children}</AppProvider>
           </StoreProvider>
         </ThemeProvider>
-        <Toaster />
+        <Toaster
+          position="bottom-left"
+          gutter={10}
+          toastOptions={{
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   );

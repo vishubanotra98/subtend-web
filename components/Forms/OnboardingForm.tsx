@@ -14,6 +14,8 @@ import {
 } from "@/Store/actions/workspace.action";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 export function OnboardingForm() {
   const dispatch = useAppDispatch();
@@ -42,7 +44,13 @@ export function OnboardingForm() {
       const userId = userData.user?.id;
 
       if (!userId) {
-        toast.error("User not found. Please sign in again.");
+        toast.custom((t) => (
+          <ErrorToast
+            t={t}
+            title="Error"
+            description={"User not found. Please sign in again."}
+          />
+        ));
         return;
       }
 
@@ -56,7 +64,9 @@ export function OnboardingForm() {
       if (res?.success) {
         await dispatch(fetchWorkspaceAction()).unwrap();
 
-        toast.success(res.message);
+        toast.custom((t) => (
+          <SuccessToast t={t} title="Success" description={res.message} />
+        ));
 
         router.push(`/${res.data.workspace.id}/dashboard`);
       }
@@ -64,7 +74,9 @@ export function OnboardingForm() {
       const message =
         err instanceof Error ? err.message : "Failed to create workspace";
 
-      toast.error(message);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={message} />
+      ));
     } finally {
       setLoading(false);
     }

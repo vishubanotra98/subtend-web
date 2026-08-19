@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import { Spinner } from "../ui/Spinner/spinner";
 import { useAppDispatch } from "@/Store/hooks";
 import { verifyInviteMemberAction } from "@/Store/actions/user.action";
+import { SuccessToast } from "../ui/Toast/SuccessToast";
+import { ErrorToast } from "../ui/Toast/ErrorToast";
 
 const ClientVerification = () => {
   const searchParams = useSearchParams();
@@ -46,7 +48,13 @@ const ClientVerification = () => {
               router.push("/");
             } else {
               setMessage("Verified Successfully!");
-              toast.success("Verified!");
+              toast.custom((t) => (
+                <SuccessToast
+                  t={t}
+                  title="Verified"
+                  description={"Verified Successfully."}
+                />
+              ));
               router.push(
                 `/sign-up?email=${email}&utok=${token}&role=${role}&verified=true`,
               );
@@ -57,11 +65,15 @@ const ClientVerification = () => {
 
         setStatus("ERROR");
         setMessage(res?.message ?? "Verification failed");
-        toast.error("Verification failed");
+        toast.custom((t) => (
+          <ErrorToast t={t} title="Error" description="Verification failed" />
+        ));
       } catch {
         setStatus("ERROR");
         setMessage("Verification failed");
-        toast.error("Verification failed");
+        toast.custom((t) => (
+          <ErrorToast t={t} title="Error" description="Verification failed" />
+        ));
       }
     };
 

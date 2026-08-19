@@ -3,6 +3,8 @@
 import { Spinner } from "../../ui/Spinner/spinner";
 import { signUpAction } from "@/Store/actions/auth.action";
 import { useAppDispatch } from "@/Store/hooks";
+import { ErrorToast } from "@/components/ui/Toast/ErrorToast";
+import { SuccessToast } from "@/components/ui/Toast/SuccessToast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -79,15 +81,26 @@ export function SignupForm() {
         if (!email && !workspaceId) {
           router.push("/sign-in");
         } else if (workspaceId && token && isInvited) {
-          toast.success("Sign in to access the workspace!");
+          toast.custom((t) => (
+            <SuccessToast
+              t={t}
+              title="Success"
+              description={"Sign in to access the workspace!"}
+            />
+          ));
           router.push("/sign-in");
         } else {
-          toast.success(res.message);
+          toast.custom((t) => (
+            <SuccessToast t={t} title="Success" description={res.message} />
+          ));
           router.push(`/account-verification?email=${email}`);
         }
       }
     } catch (err) {
-      toast.error(getErrorMessage(err));
+      const message = getErrorMessage(err);
+      toast.custom((t) => (
+        <ErrorToast t={t} title="Error" description={message} />
+      ));
     } finally {
       setLoading(false);
     }
