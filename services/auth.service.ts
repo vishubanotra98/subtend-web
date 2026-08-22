@@ -42,3 +42,12 @@ export const logoutService = async () => {
     throw error;
   }
 };
+
+export const githubLoginService = async () => {
+  try {
+    const res = await axiosClient.post(`${"/auth/login/github"}`);
+    return res?.data;
+  } catch (error) {
+    throw error;
+  }
+};

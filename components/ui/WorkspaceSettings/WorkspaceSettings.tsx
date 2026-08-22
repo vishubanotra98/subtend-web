@@ -15,14 +15,17 @@ import TeamsProjectsTabContent from "./TeamsProjectsTabContent";
 import DangerContentTab from "./DangerContentTab";
 import SubtendLoader from "@/components/Loader/SubtendLoader";
 import TrashContentTab from "./TrashContent";
+import { IntegrationTab } from "./IntegrationsTab";
 
-type OptionTypes = "general" | "members" | "teamproject" | "trash" | "danger";
+type OptionTypes =
+  "general" | "members" | "teamproject" | "trash" | "danger" | "integration";
 
 const options: { label: string; value: OptionTypes }[] = [
   // { label: "General", value: "general" },
   { label: "Members", value: "members" },
   { label: "Teams & Projects", value: "teamproject" },
   { label: "Trash", value: "trash" },
+  { label: "Integration", value: "integration" },
   // { label: "Danger Zone", value: "danger" },
 ];
 
@@ -152,6 +155,7 @@ const WorkspaceSettings = () => {
               />
             )}
             {option === "danger" && <DangerContentTab />}
+            {option === "integration" && <IntegrationTab />}
           </div>
         </div>
       </main>

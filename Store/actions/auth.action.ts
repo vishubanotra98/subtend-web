@@ -58,3 +58,15 @@ export const logoutAction = createAsyncThunk(
     }
   },
 );
+
+// export const githubLoginAction = createAsyncThunk(
+//   "githubLogin",
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const res = await logoutService();
+//       return res;
+//     } catch (err: any) {
+//       return rejectWithValue(err?.response?.data);
+//     }
+//   },
+// );
