@@ -8,23 +8,28 @@ export default function AuthLayout({
       <aside className="auth-bg relative hidden w-[58%] overflow-hidden border-r border-default lg:flex">
         <div className="absolute inset-0 z-0 block dark:hidden select-none pointer-events-none">
           <Image
-            src="/assets/SubtendLight.png"
+            src="/assets/SubtendLight.avif"
             alt="Subtend Light Background"
             fill
             priority
             sizes="58vw"
-            className="object-cover object-right opacity-100"
+            className="object-cover object-right opacity-60"
+            quality={100}
+            fetchPriority="high"
+            unoptimized
           />
         </div>
 
         <div className="absolute inset-0 z-0 hidden dark:block select-none pointer-events-none">
           <Image
-            src="/assets/SubtendDark.png"
+            src="/assets/SubtendDark.avif"
             alt="Subtend Dark Background"
             fill
             priority
             sizes="58vw"
-            className="object-cover object-right opacity-100"
+            className="object-cover object-right opacity-60"
+            fetchPriority="high"
+            unoptimized
           />
         </div>
 
