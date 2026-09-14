@@ -8,7 +8,7 @@ import {
 } from "@/Store/actions/workspace.action";
 import { useAppDispatch, useAppSelector } from "@/Store/hooks";
 import { useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MembersTabContent from "./MemberSettings";
 import TeamsProjectsTabContent from "./TeamsProjectsTabContent";
@@ -16,9 +16,16 @@ import DangerContentTab from "./DangerContentTab";
 import SubtendLoader from "@/components/Loader/SubtendLoader";
 import TrashContentTab from "./TrashContent";
 import { IntegrationTab } from "./IntegrationsTab";
+import { AppearanceTab } from "./AppearanceTab";
 
 type OptionTypes =
-  "general" | "members" | "teamproject" | "trash" | "danger" | "integration";
+  | "general"
+  | "members"
+  | "teamproject"
+  | "trash"
+  | "danger"
+  | "integration"
+  | "appearance";
 
 const options: { label: string; value: OptionTypes }[] = [
   // { label: "General", value: "general" },
@@ -26,6 +33,7 @@ const options: { label: string; value: OptionTypes }[] = [
   { label: "Teams & Projects", value: "teamproject" },
   { label: "Trash", value: "trash" },
   { label: "Integration", value: "integration" },
+  { label: "Appearance", value: "appearance" },
   // { label: "Danger Zone", value: "danger" },
 ];
 
@@ -166,6 +174,7 @@ const WorkspaceSettings = () => {
             )}
             {option === "danger" && <DangerContentTab />}
             {option === "integration" && <IntegrationTab />}
+            {option === "appearance" && <AppearanceTab />}
           </div>
         </div>
       </main>
