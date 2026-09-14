@@ -559,6 +559,63 @@ select {
     subtend-loader-glow 1.5s ease-in-out infinite;
 }
 
+.onboarding-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--background);
+}
+
+.onboarding-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background-image: url("/assets/SubtendLight.avif");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  opacity: 0.8;
+}
+
+.onboarding-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background: radial-gradient(
+    circle at center,
+    transparent 10%,
+    rgba(20, 184, 166, 0.09) 28%,
+    rgba(20, 184, 166, 0.055) 52%,
+    transparent 80%
+  );
+}
+
+.onboarding-bg > * {
+  position: relative;
+  z-index: 2;
+}
+
+.dark .onboarding-bg::before {
+  background-image: url("/assets/SubtendDark.avif");
+}
+
+.dark .onboarding-bg::after {
+  background: radial-gradient(
+    circle at center,
+    transparent 10%,
+    rgba(20, 184, 166, 0.07) 28%,
+    rgba(20, 184, 166, 0.04) 52%,
+    transparent 80%
+  );
+}
+
 @keyframes subtend-loader-draw {
   0% {
     stroke-dashoffset: 430;

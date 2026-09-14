@@ -6,7 +6,7 @@ export default function UserInvite() {
   return (
     <Suspense
       fallback={
-        <div className="auth-bg flex min-h-screen items-center justify-center px-6">
+        <div className="onboarding-bg flex min-h-screen items-center justify-center px-6">
           <div className="w-full max-w-md rounded-card border border-default bg-card p-10 shadow-card animate-in fade-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent">

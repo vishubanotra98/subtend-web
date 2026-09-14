@@ -18,7 +18,7 @@ function VerificationLoading() {
 
 export default function AccountVerification() {
   return (
-    <main className="auth-bg flex min-h-screen w-full items-center justify-center px-6">
+    <main className="onboarding-bg flex min-h-screen w-full items-center justify-center px-6">
       <Suspense fallback={<VerificationLoading />}>
         <VerifyOtpForm />
       </Suspense>

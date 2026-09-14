@@ -4,27 +4,16 @@ import { OnboardingForm } from "@/components/Forms/OnboardingForm";
 
 export default function OnboardingPage() {
   return (
-    <div className="auth-bg flex min-h-screen items-center justify-center px-6 py-12">
+    <div className="onboarding-bg flex min-h-screen items-center justify-center px-6 py-12">
       <div className="relative z-10 w-full max-w-2xl">
         <div className="flex flex-col items-center">
           <div className="relative flex justify-center">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="h-40 w-40 rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(20,184,166,0.08) 0%, rgba(20,184,166,0.04) 35%, transparent 70%)",
-                  filter: "blur(28px)",
-                }}
-              />
-            </div>
-
             <Image
               src="/assets/svg/subtend.svg"
               alt="Subtend"
               width={180}
               height={60}
-              className="h-auto w-[160px] md:w-[180px] relative z-10"
+              className="relative z-10 h-auto w-[160px] md:w-[180px]"
               priority
             />
           </div>

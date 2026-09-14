@@ -81,7 +81,7 @@ const ClientVerification = () => {
   }, [email, role, router, token]);
 
   return (
-    <div className="auth-bg flex min-h-screen items-center justify-center px-6">
+    <div className="onboarding-bg flex min-h-screen items-center justify-center px-6">
       <div className="mx-auto w-full max-w-md">
         <div className="rounded-card border border-default bg-card p-10 shadow-card animate-in fade-in zoom-in-95 duration-300">
           {status === "VERIFYING" && (
