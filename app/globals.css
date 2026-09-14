@@ -205,61 +205,27 @@ select {
   .auth-bg {
     position: relative;
     overflow: hidden;
-
     background-color: var(--background);
-
-    background-image:
-      radial-gradient(
-        circle at center,
-        rgba(20, 184, 166, 0.045),
-        transparent 55%
-      ),
-      url("/assets/SubtendLight.png");
-
-    background-size: cover, cover;
-
-    background-position:
-      center,
-      center right;
-
-    background-repeat: no-repeat, no-repeat;
+    background-image: radial-gradient(
+      circle at center,
+      rgba(20, 184, 166, 0.045),
+      transparent 55%
+    );
   }
 
   .dark .auth-bg {
-    background-color: var(--background);
-    background-image:
-      radial-gradient(
-        circle at center,
-        rgba(20, 184, 166, 0.06),
-        transparent 55%
-      ),
-      url("/assets/SubtendDark.png");
-    background-size: cover, cover;
-    background-position:
-      center,
-      center right;
-
-    background-repeat: no-repeat, no-repeat;
-  }
-
-  /* bg image opacity */
-
-  .auth-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: url("/assets/SubtendLight.png");
-    background-size: cover;
-    background-position: center right;
-    background-repeat: no-repeat;
-    opacity: 0.18;
+    background-image: radial-gradient(
+      circle at center,
+      rgba(20, 184, 166, 0.06),
+      transparent 55%
+    );
   }
 
   .dark .auth-bg::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 2;
     pointer-events: none;
     background: linear-gradient(
       135deg,
@@ -268,26 +234,6 @@ select {
       transparent 70%
     );
     mix-blend-mode: color;
-  }
-
-  .auth-bg::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(
-      circle at center,
-      rgba(255, 255, 255, 0.7),
-      transparent 55%
-    );
-  }
-
-  .dark .auth-bg::after {
-    background: radial-gradient(
-      circle at center,
-      rgba(255, 255, 255, 0.035),
-      transparent 55%
-    );
   }
 
   /* PRIMARY BUTTON */
