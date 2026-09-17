@@ -1,83 +1,61 @@
 "use client";
 
-import React, {
+import { WebSocketContextType, WebSocketProviderProps } from "@/types/types";
+import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 
-type WebSocketMessage = {
-  type: string;
-  eventType?: string;
-  payload?: any;
-  [key: string]: any;
-};
-
-type WebSocketContextType = {
-  isConnected: boolean;
-  sendEvent: (eventType: string, payload: any) => void;
-  subscribe: (
-    eventType: string,
-    callback: (payload: any) => void,
-  ) => () => void;
-};
-
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
-interface WebSocketProviderProps {
-  children: React.ReactNode;
-  workspaceId: string;
-  userId: string;
-}
-
-export function WebSocketProvider({
+export const WebSocketProvider = ({
   children,
   workspaceId,
   userId,
-}: WebSocketProviderProps) {
-  const [isConnected, setIsConnected] = useState(false);
+}: WebSocketProviderProps) => {
+  const [wsConnected, setWsConnected] = useState<null | boolean>(null);
   const wsRef = useRef<WebSocket | null>(null);
-
   const listenersRef = useRef<Map<string, Set<(payload: any) => void>>>(
     new Map(),
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!workspaceId || !userId) return;
 
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL as string;
-    const ws = new WebSocket(wsUrl);
+    const wsUri = process.env.NEXT_PUBLIC_WS_URL as string;
+    const ws = new WebSocket(wsUri);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      setIsConnected(true);
-      ws.send(
-        JSON.stringify({
-          type: "SUBSCRIBE",
-          workspaceId,
-          userId,
-        }),
-      );
+      setWsConnected(true);
+      const initalPaylaod = JSON.stringify({
+        type: "SUBSCRIBE",
+        workspaceId,
+        userId,
+      });
+      ws.send(initalPaylaod);
     };
 
     ws.onmessage = (event) => {
       try {
-        const data: WebSocketMessage = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
         const { eventType, payload } = data;
 
-        if (eventType && listenersRef.current.has(eventType)) {
-          const callbacks = listenersRef.current.get(eventType)!;
-          callbacks.forEach((cb) => cb(payload));
+        if (eventType && listenersRef?.current.has(eventType)) {
+          const callBacks = listenersRef.current.get(eventType);
+          callBacks?.forEach((cb: any) => cb(payload));
         }
-      } catch (err) {
-        console.error("Failed to parse incoming WebSocket message:", err);
+      } catch (error) {
+        console.error("Failed to parse incoming WebSocket message:", error);
       }
     };
 
     ws.onclose = () => {
-      setIsConnected(false);
+      setWsConnected(false);
     };
 
     ws.onerror = (err) => {
@@ -90,43 +68,47 @@ export function WebSocketProvider({
     };
   }, [workspaceId, userId]);
 
-  const sendEvent = (eventType: string, payload: any) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(
-        JSON.stringify({
-          type: "WORKSPACE_EVENT",
-          eventType,
-          payload,
-        }),
-      );
-    } else {
-      console.warn("Cannot send event, WebSocket is not open");
+  const sendEvent = useCallback((eventType: string, payload: any) => {
+    if (
+      eventType &&
+      wsRef.current &&
+      wsRef.current.readyState === WebSocket.OPEN
+    ) {
+      const wsPayload = JSON.stringify({
+        type: "WORKSPACE_EVENT",
+        eventType,
+        payload,
+      });
+      wsRef.current?.send(wsPayload);
     }
-  };
+  }, []);
 
-  const subscribe = (eventType: string, callback: (payload: any) => void) => {
-    if (!listenersRef.current.has(eventType)) {
-      listenersRef.current.set(eventType, new Set());
-    }
-    listenersRef.current.get(eventType)!.add(callback);
-
-    return () => {
-      const callbacks = listenersRef.current.get(eventType);
-      if (callbacks) {
-        callbacks.delete(callback);
-        if (callbacks.size === 0) {
-          listenersRef.current.delete(eventType);
-        }
+  const subscribe = useCallback(
+    (eventType: string, callback: (payload: any) => void) => {
+      if (eventType && !listenersRef.current.has(eventType)) {
+        listenersRef.current.set(eventType, new Set());
       }
-    };
-  };
+      listenersRef.current.get(eventType)!.add(callback);
+
+      return () => {
+        const callbacks = listenersRef.current.get(eventType);
+        if (callbacks) {
+          callbacks.delete(callback);
+          if (callbacks.size === 0) {
+            listenersRef.current.delete(eventType);
+          }
+        }
+      };
+    },
+    [],
+  );
 
   return (
-    <WebSocketContext.Provider value={{ isConnected, sendEvent, subscribe }}>
+    <WebSocketContext.Provider value={{ wsConnected, subscribe, sendEvent }}>
       {children}
     </WebSocketContext.Provider>
   );
-}
+};
 
 export function useWebSocket() {
   const context = useContext(WebSocketContext);

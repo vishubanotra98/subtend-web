@@ -183,3 +183,18 @@ export type MemberIssue = {
   } | null;
   targetDate?: string | null;
 };
+
+export interface WebSocketProviderProps {
+  children: React.ReactNode;
+  workspaceId?: string;
+  userId?: string;
+}
+
+export type WebSocketContextType = {
+  wsConnected: boolean | null;
+  subscribe: (
+    eventType: string,
+    callback: (payload: any) => void,
+  ) => () => void;
+  sendEvent: (eventType: string, payload: any) => void;
+};
