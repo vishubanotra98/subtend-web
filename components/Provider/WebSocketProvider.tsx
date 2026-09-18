@@ -63,29 +63,20 @@ export const WebSocketProvider = ({
     };
 
     return () => {
-      ws.close();
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      } else if (ws.readyState === WebSocket.CONNECTING) {
+        ws.onopen = () => {
+          ws.close();
+        };
+      }
       wsRef.current = null;
     };
   }, [workspaceId, userId]);
 
-  const sendEvent = useCallback((eventType: string, payload: any) => {
-    if (
-      eventType &&
-      wsRef.current &&
-      wsRef.current.readyState === WebSocket.OPEN
-    ) {
-      const wsPayload = JSON.stringify({
-        type: "WORKSPACE_EVENT",
-        eventType,
-        payload,
-      });
-      wsRef.current?.send(wsPayload);
-    }
-  }, []);
-
   const subscribe = useCallback(
     (eventType: string, callback: (payload: any) => void) => {
-      if (eventType && !listenersRef.current.has(eventType)) {
+      if (!listenersRef.current.has(eventType)) {
         listenersRef.current.set(eventType, new Set());
       }
       listenersRef.current.get(eventType)!.add(callback);
@@ -104,7 +95,7 @@ export const WebSocketProvider = ({
   );
 
   return (
-    <WebSocketContext.Provider value={{ wsConnected, subscribe, sendEvent }}>
+    <WebSocketContext.Provider value={{ wsConnected, subscribe }}>
       {children}
     </WebSocketContext.Provider>
   );

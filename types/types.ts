@@ -196,5 +196,4 @@ export type WebSocketContextType = {
     eventType: string,
     callback: (payload: any) => void,
   ) => () => void;
-  sendEvent: (eventType: string, payload: any) => void;
 };
