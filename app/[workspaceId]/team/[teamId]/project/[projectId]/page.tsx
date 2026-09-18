@@ -2,6 +2,7 @@
 
 import { IssueFilters } from "@/components/Forms/IssueFilters";
 import SubtendLoader from "@/components/Loader/SubtendLoader";
+import { useWebSocket } from "@/components/Provider/WebSocketProvider";
 import { Button } from "@/components/ui/button";
 import KanbanClient from "@/components/ui/KanbanBoard/KanbanClient";
 import { SearchInput } from "@/components/ui/searchBar";
@@ -29,6 +30,7 @@ type IssueFiltersState = {
 export default function ProjectIssue() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { subscribe } = useWebSocket();
 
   const {
     workspaceData: { workspaceMembers, workspaceStatus, teamsData },
@@ -171,6 +173,18 @@ export default function ProjectIssue() {
       clearTimeout(timer);
     };
   }, [projectId, fetchIssues]);
+
+  useEffect(() => {
+    const unsubscribe = subscribe("ISSUE_MOVED", (data) => {
+      setIssues((prevIssues) =>
+        prevIssues.map((issue) =>
+          issue.id === data.id ? { ...issue, ...data } : issue,
+        ),
+      );
+    });
+
+    return () => unsubscribe();
+  }, [subscribe, projectId]);
 
   const handleApplyFilters = useCallback((newFilters: IssueFiltersState) => {
     setFilters(newFilters);
